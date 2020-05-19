@@ -55,9 +55,10 @@ void IO_Config()
 	// Включение тактирования портов
 	RCC_GPIO_Clk_EN(PORTA);
 	RCC_GPIO_Clk_EN(PORTB);
+	RCC_GPIO_Clk_EN(PORTC);
 
 	// Выходы
-	GPIO_Config(GPIOB, Pin_12, Output, PushPull, HighSpeed, NoPull);	// PB12(LED)
+	GPIO_Config(GPIOC, Pin_13, Output, PushPull, HighSpeed, NoPull);	// PC13(LED)
 
 	// Альтернативные функции портов
 	GPIO_Config(GPIOA, Pin_9, AltFn, PushPull, HighSpeed, NoPull);		// PA9(USART1 TX)
