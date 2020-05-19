@@ -75,5 +75,3 @@ void TIM3_IRQHandler()
 	}
 }
 //-----------------------------------------
-
-void Reset_Handler() {}
