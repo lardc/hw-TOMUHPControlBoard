@@ -59,6 +59,8 @@ void IO_Config()
 
 	// Выходы
 	GPIO_Config(GPIOC, Pin_13, Output, PushPull, HighSpeed, NoPull);	// PC13(LED)
+	GPIO_Bit_Rst(GPIOC, Pin_14);
+	GPIO_Config(GPIOC, Pin_14, Output, PushPull, HighSpeed, NoPull);	// PC14(Sync_GD)
 
 	// Альтернативные функции портов
 	GPIO_Config(GPIOA, Pin_9, AltFn, PushPull, HighSpeed, NoPull);		// PA9(USART1 TX)
