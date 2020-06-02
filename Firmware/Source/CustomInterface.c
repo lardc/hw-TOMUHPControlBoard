@@ -33,7 +33,7 @@ void CUSTINT_SendTOCU(float Current, bool Fan, bool Contactor, bool PSon)
 
 void CUSTINT_SendRaw(uint16_t Data)
 {
-	for (int cnt = 0; cnt < 16; cnt++)
+	/*for (int cnt = 0; cnt < 16; cnt++)
 	{
 		LL_TOCUSerialData((Data >> cnt) & 1);
 		DELAY_US(1);
@@ -46,7 +46,7 @@ void CUSTINT_SendRaw(uint16_t Data)
 	DELAY_US(1);
 	LL_TOCUSerialRCK(FALSE);
 	LL_TOCUSerialData(FALSE);
-	LL_TOCUSerialEnable(TRUE);
+	LL_TOCUSerialEnable(TRUE);*/
 }
 //------------------------------------------------------------------------------
 
@@ -74,7 +74,7 @@ uint16_t CUSTINT_PackData(float Current, bool Fan, bool Contactor, bool PSon)
 
 uint32_t CUSTINT_ReceiveDataSR(void)
 {
-	uint32_t Data = 0;
+	/*uint32_t Data = 0;
 
 	LL_ShiftRegLoad(FALSE);
 	DELAY_US(1);
@@ -92,7 +92,7 @@ uint32_t CUSTINT_ReceiveDataSR(void)
 	}
 	LL_ShiftRegCS(TRUE);
 
-	return Data;
+	return Data;*/
 }
 //------------------------------------------------------------------------------
 

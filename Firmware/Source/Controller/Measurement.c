@@ -1,7 +1,13 @@
 #include "Measurement.h"
 #include "DataTable.h"
 #include "ZwADC.h"
+#include "LowLevel.h"
+#include "Board.h"
 
+// Functions prototypes
+//
+void MEASURE_Set_Uref(uint16_t Data);
+//
 
 // Functions
 //
@@ -59,3 +65,31 @@ float MEASURE_DUTCurrent()
 	return (Result > 0) ? Result : 0;
 }
 //------------------------------------------------------------------------------
+
+void MEASURE_Set_Uref10(uint16_t Data)
+{
+	Data |= 0x8000;
+
+	MEASURE_Set_Uref(Data);
+}
+//---------------------
+
+void MEASURE_Set_Uref90(uint16_t Data)
+{
+	MEASURE_Set_Uref(Data);
+}
+//---------------------
+
+void MEASURE_Set_Uref(uint16_t Data)
+{
+	LL_DAC_CS_SYNC(TRUE);
+	LL_DAC_LDAC(TRUE);
+
+	LL_DAC_CS_SYNC(FALSE);
+	SPI_WriteByte(SPI2, Data);
+	LL_DAC_CS_SYNC(TRUE);
+
+	LL_DAC_LDAC(FALSE);
+	LL_DAC_LDAC(TRUE);
+}
+//---------------------

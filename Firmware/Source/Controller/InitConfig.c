@@ -31,47 +31,60 @@ void IO_Config()
 	// Включение тактирования портов
 	RCC_GPIO_Clk_EN(PORTA);
 	RCC_GPIO_Clk_EN(PORTB);
+	RCC_GPIO_Clk_EN(PORTC);
 
 	// Аналоговые входы
-	GPIO_Config (GPIOA, Pin_0, Analog, NoPull, HighSpeed, NoPull);				// PA0 - вход АЦП (напряжение батареи)
-	GPIO_Config (GPIOA, Pin_1, Analog, NoPull, HighSpeed, NoPull);				// PA1 - вход АЦП (ток DUT)
+	GPIO_Config (GPIOA, Pin_1, Analog, NoPull, HighSpeed, NoPull);				// PA1 - I_DUT
 
 	// Выходы
-	GPIO_Config (GPIOA, Pin_2,  Output, PushPull, HighSpeed, NoPull);			// PA2 - Mreset Сброс счетчиков
+	GPIO_Config (GPIOA, Pin_0,  Output, PushPull, HighSpeed, NoPull);			// PA0 - FAN
+	GPIO_Bit_Rst(GPIOA, Pin_0);
+	GPIO_Config (GPIOA, Pin_2,  Output, PushPull, HighSpeed, NoPull);			// PA2 - M_RESET
 	GPIO_Bit_Rst(GPIOA, Pin_2);
-	GPIO_Config (GPIOA, Pin_3,  Output, PushPull, HighSpeed, NoPull);			// PA3 - Загрузка сдвигового регистра
+	GPIO_Config (GPIOA, Pin_3,  Output, PushPull, HighSpeed, NoPull);			// PA3 - LOAD
 	GPIO_Bit_Rst(GPIOA, Pin_3);
-	GPIO_Config (GPIOA, Pin_4,  Output, PushPull, HighSpeed, NoPull);			// PA4 - Внешний индикатор
+	GPIO_Config (GPIOA, Pin_4,  Output, PushPull, HighSpeed, NoPull);			// PA4 - CS
 	GPIO_Bit_Rst(GPIOA, Pin_4);
-	GPIO_Config (GPIOA, Pin_5,  Output, PushPull, HighSpeed, NoPull);			// PA5 - Тактирование SPI сдвиговых регистров
-	GPIO_Bit_Rst(GPIOA, Pin_5);
-	GPIO_Config (GPIOA, Pin_7,  Output, PushPull, HighSpeed, NoPull);			// PA7 - Вентилятор
+	GPIO_Config (GPIOA, Pin_7,  Output, PushPull, HighSpeed, NoPull);			// PA7 - IND
 	GPIO_Bit_Rst(GPIOA, Pin_7);
-	GPIO_Config (GPIOA, Pin_8,  Output, PushPull, HighSpeed, NoPull);			// PA8 - Внешняя синхронизация
+	GPIO_Config (GPIOA, Pin_8,  Output, PushPull, HighSpeed, NoPull);			// PA8 - SYNC
 	GPIO_Bit_Rst(GPIOA, Pin_8);
-	GPIO_Config (GPIOB, Pin_0,  Output, PushPull, HighSpeed, NoPull);			// PB0 - CS SPI сдвиговых регистров
-	GPIO_Bit_Set(GPIOB, Pin_0);
-	GPIO_Config (GPIOB, Pin_2,  Output, OpenDrain, HighSpeed, NoPull);			// PB1 - Сброс защёлки Gate
+	GPIO_Config (GPIOA, Pin_15,  Output, PushPull, HighSpeed, NoPull);			// PA15 - SFTY_EN
+	GPIO_Bit_Rst(GPIOA, Pin_15);
+	GPIO_Config (GPIOB, Pin_0,  Output, PushPull, HighSpeed, NoPull);			// PB0 - RLC
+	GPIO_Bit_Rst(GPIOB, Pin_0);
+	GPIO_Config (GPIOB, Pin_1,  Output, PushPull, HighSpeed, NoPull);			// PB1 - RELAY
+	GPIO_Bit_Rst(GPIOB, Pin_1);
+	GPIO_Config (GPIOB, Pin_2,  Output, PushPull, HighSpeed, NoPull);			// PB2 - SNC_TOCU
 	GPIO_Bit_Rst(GPIOB, Pin_2);
-	GPIO_Config (GPIOB, Pin_5,  Output, PushPull, HighSpeed, NoPull);			// PB5 - Запуск gate
+	GPIO_Config (GPIOB, Pin_5,  Output, PushPull, HighSpeed, NoPull);			// PB5 - SREG_CS
 	GPIO_Bit_Rst(GPIOB, Pin_5);
-	GPIO_Config (GPIOB, Pin_6,  Output, PushPull, HighSpeed, NoPull);			// PB6 - Управление коммутацией
+	GPIO_Config (GPIOB, Pin_6,  Output, PushPull, HighSpeed, NoPull);			// PB6 - CS_GD2
 	GPIO_Bit_Rst(GPIOB, Pin_6);
-	GPIO_Config (GPIOB, Pin_10, Output, PushPull, HighSpeed, NoPull);			// PB10 - EN внешний последовательный интерфейс
-	GPIO_Bit_Rst(GPIOB, Pin_10);
-	GPIO_Config (GPIOB, Pin_12, Output, PushPull, HighSpeed, NoPull);			// PB12 - Индикатор на плате
+	GPIO_Config (GPIOB, Pin_7,  Output, OpenDrain, HighSpeed, NoPull);			// PB7 - TRIG_RST
+	GPIO_Bit_Set(GPIOB, Pin_7);
+	GPIO_Config (GPIOB, Pin_9,  Output, PushPull, HighSpeed, NoPull);			// PB9 - CS_DAC
+	GPIO_Bit_Rst(GPIOB, Pin_9);
+	GPIO_Config (GPIOB, Pin_11,  Output, PushPull, HighSpeed, NoPull);			// PB11 - SREG_OE
+	GPIO_Bit_Rst(GPIOB, Pin_11);
+	GPIO_Config (GPIOB, Pin_12,  Output, PushPull, HighSpeed, NoPull);			// PB12 - CS_GD1
 	GPIO_Bit_Rst(GPIOB, Pin_12);
-	GPIO_Config (GPIOB, Pin_13, Output, PushPull, HighSpeed, NoPull);			// PB13 - SRCK внешний последовательный интерфейс
-	GPIO_Bit_Rst(GPIOB, Pin_13);
-	GPIO_Config (GPIOB, Pin_14, Output, PushPull, HighSpeed, NoPull);			// PB14 - RCK внешний последовательный интерфейс
+	GPIO_Config (GPIOB, Pin_14,  Output, PushPull, HighSpeed, NoPull);			// PB14 - LDAC
 	GPIO_Bit_Rst(GPIOB, Pin_14);
-	GPIO_Config (GPIOB, Pin_15, Output, PushPull, HighSpeed, NoPull);			// PB15 - SEROUT внешний последовательный интерфейс
-	GPIO_Bit_Rst(GPIOB, Pin_15);
+	GPIO_Config (GPIOC, Pin_13,  Output, PushPull, HighSpeed, NoPull);			// PC13 - LED
+	GPIO_Bit_Rst(GPIOC, Pin_13);
+	GPIO_Config (GPIOC, Pin_14,  Output, PushPull, HighSpeed, NoPull);			// PC14 - Sync_GD
+	GPIO_Bit_Rst(GPIOC, Pin_14);
+	GPIO_Config (GPIOC, Pin_15,  Output, PushPull, HighSpeed, NoPull);			// PC15 - PS_EN
+	GPIO_Bit_Rst(GPIOC, Pin_15);
+
 
 	// Входы
-	GPIO_Config (GPIOA, Pin_6, Input, NoPull, HighSpeed, NoPull);				// PA6 - DATA SPI сдвиговых регистров
-	GPIO_Config (GPIOB, Pin_4, Input, NoPull, HighSpeed, NoPull);				// PB4 - Переполнение счетчика уровня 90%
-	GPIO_Config (GPIOB, Pin_8, Input, NoPull, HighSpeed, NoPull);				// PB8 - Переполнение счетчика уровня 10%
+	GPIO_Config (GPIOB, Pin_3, Input, NoPull, HighSpeed, NoPull);				// PB3 - SFTY
+	GPIO_Config (GPIOB, Pin_4, Input, NoPull, HighSpeed, NoPull);				// PB4 - Overflow90
+	GPIO_Config (GPIOB, Pin_8, Input, NoPull, HighSpeed, NoPull);				// PB8 - Overflow10
+	GPIO_Config (GPIOB, Pin_10, Input, NoPull, HighSpeed, NoPull);				// PB10 - Pressure
+
 
 	// Альтернативные функции
 	GPIO_Config (GPIOA, Pin_11, AltFn, PushPull, HighSpeed, NoPull);			// PA11 (CAN RX)
@@ -82,6 +95,14 @@ void IO_Config()
 	GPIO_AltFn  (GPIOA, Pin_9, AltFn_7);
 	GPIO_Config (GPIOA, Pin_10, AltFn, PushPull, HighSpeed, NoPull);			// PA10(USART1 RX)
 	GPIO_AltFn  (GPIOA, Pin_10, AltFn_7);
+	GPIO_Config (GPIOA, Pin_5, AltFn, PushPull, HighSpeed, NoPull);				// PA5(SPI1_CLK)
+	GPIO_AltFn  (GPIOA, Pin_5, AltFn_5);
+	GPIO_Config (GPIOA, Pin_6, AltFn, PushPull, HighSpeed, NoPull);				// PA6(SPI1_MISO)
+	GPIO_AltFn  (GPIOA, Pin_6, AltFn_5);
+	GPIO_Config (GPIOB, Pin_13, AltFn, PushPull, HighSpeed, NoPull);			// PB13(SPI2_CLK)
+	GPIO_AltFn  (GPIOB, Pin_13, AltFn_5);
+	GPIO_Config (GPIOB, Pin_15, AltFn, PushPull, HighSpeed, NoPull);			// PB15(SPI2_MOSI)
+	GPIO_AltFn  (GPIOB, Pin_15, AltFn_5);
 }
 //------------------------------------------------------------------------------
 
@@ -118,6 +139,13 @@ void Timer3_Config()
 	TIM_Config(TIM3, SYSCLK, TIMER3_uS);
 	TIM_Interupt(TIM3, 0, true);
 	TIM_Start(TIM3);
+}
+//------------------------------------------------------------------------------
+
+void SPI_Config()
+{
+	SPI_Init(SPI1, 5, false);
+	SPI_Init(SPI2, 5, false);
 }
 //------------------------------------------------------------------------------
 
