@@ -27,14 +27,17 @@ int main()
 	// Настройка UART
 	UART_Config();
 
-	// Настройка таймеров
+	// Настройка таймера
 	Timer3_Config();
+
+	// SPI config
+	SPI_Config();
 
 	// Настройка АЦП
 	ADC_Init();
 
 	// Настройка сторожевого таймера
-	WatchDog_Config();
+	//WatchDog_Config();
 
 	// Инициализация логики контроллера
 	InitializeController(false);

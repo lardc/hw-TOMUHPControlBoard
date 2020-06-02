@@ -10,16 +10,25 @@
 #define ACT_RESET_DEVICE				5	// Перезапуск процессора
 //
 // Команды отладки
-#define ACT_DBG_COMM					10	// Проверка выхода COMM
-#define ACT_DBG_LAMP					11	// Проверка выхода LAMP
-#define ACT_DBG_FAN						12	// Проверка выхода FAN
-#define ACT_DBG_GATE_CONTROL			13	// Проверка управления GATE
-#define ACT_DBG_SYNC					14	// Проверка выхода синхронизации
-#define ACT_DBG_VSO						15	// Измерение напряжения заряда в регистр REG_DBG_VSO_VALUE
-#define ACT_DBG_I_DUT					16	// Измерение тока DUT в регистр REG_DBG_I_DUT_VALUE
-#define ACT_DBG_VSO_RAW					17	// Измерение сырого напряжения заряда в регистр REG_DBG_ADC_RAW
-#define ACT_DBG_I_DUT_RAW				18	// Измерение сырого тока DUT в регистр REG_DBG_ADC_RAW
-#define	ACT_DBG_TOCU_CTRL				19	// Передача уставки в TOCU
+#define ACT_DBG_GD_I_SET				10	// Проверка установки амплитуды тока у TOMUHPGateDriver
+#define ACT_DBG_GD_TRIG_THRESHOLD		11	// Проверка установки порога срабатывания компаратора
+#define ACT_DBG_GD_I_RISE_RATE			12	// Проверка установки скорости нарастания тока у TOMUHPGateDriver
+#define ACT_DBG_GD_I_FALL_RATE			13	// Проверка установки скорости спада тока у TOMUHPGateDriver
+#define ACT_DBG_GD_SYNC					14	// Проверка выхода Sync_GD
+#define ACT_DBG_PS_EN					15	// Проверка выхода PS_EN
+#define ACT_DBG_FAN						16	// Проверка выхода FAN
+#define ACT_DBG_IND						17	// Проверка выхода IND
+#define ACT_DBG_RLC						18	// Проверка выхода RLC
+#define ACT_DBG_RELAY					19	// Проверка выхода RELAY
+#define ACT_DBG_SFTY_ACTIVATION			20	// Проверка выхода SFTY_EN
+#define ACT_DBG_READ_EXT_REG			21	// Проверка чтения внешнего регистра
+#define ACT_DBG_TOCU_SYNC				22	// Проверка выхода SNC_TOCU
+#define ACT_DBG_OUT_ISO					23	// Проверка изолированных выходов
+#define ACT_DBG_U_REF_U10				24	// Проверка установки опорного напряжения для компаратора U10
+#define ACT_DBG_U_REF_U90				25	// Проверка установки опорного напряжения для компаратора U90
+#define ACT_DBG_OSC_SYNC				26	// Проверка выхода SYNC
+#define ACT_DBG_TRIG_RST				27	// Проверка сброса триггера
+#define ACT_DBG_SREG_OE					28	// Проверка выхода SREG_OE
 //
 #define ACT_MEASURE_START				100	// Запуск измерения
 #define ACT_MEASURE_STOP				101	// Останов измерения
@@ -55,6 +64,8 @@
 #define REG_CURRENT_VALUE				128	// Значение задания тока [А]
 //
 #define REG_DBG_TOCU_DATA				150	// Сырое значение для отправки в TOCU
+//
+#define REG_DBG							190
 
 // Регистры только чтение
 #define REG_DEV_STATE					192	// Регистр состояния

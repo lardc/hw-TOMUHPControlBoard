@@ -10,19 +10,27 @@
 bool LL_IsBlinkLED();
 void LL_BlinkLED(bool State);
 void LL_ExternalLED(bool State);
-void LL_TimersReset(bool State);
 void LL_ExternalFan(bool State);
-void LL_ExternalSync(bool State);
-void LL_GateControl(bool State);
+void LL_GD_PsBoard(bool State);
+void LL_GD_Sync(bool State);
+void LL_GD_DAC_CS_SYNC1(bool State);
+void LL_GD_DAC_CS_SYNC2(bool State);
+void LL_SFTY_ActiveState(bool State);
+bool LL_IsSafety();
+void LL_HSTimers_Reset(bool State);
+void LL_HSTimers_Load(bool State);
+void LL_HSTimers_CS(bool State);
 void LL_RelayControl(bool State);
 void LL_GateLatch(bool State);
-bool LL_IsShiftRegData();
-void LL_ShiftRegLoad(bool State);
-void LL_ShiftRegClk(bool State);
-void LL_ShiftRegCS(bool State);
-void LL_TOCUSerialEnable(bool State);
-void LL_TOCUSerialSRCK(bool State);
-void LL_TOCUSerialRCK(bool State);
-void LL_TOCUSerialData(bool State);
+void LL_OscSync(bool State);
+void LL_TOCU_Sync(bool State);
+void LL_INT_Commutation(bool State);
+bool LL_IsOverflow90();
+bool LL_IsOverflow10();
+bool LL_IsPressure();
+void LL_OutReg_CS(bool State);
+void LL_OutReg_OE(bool State);
+void LL_DAC_CS_SYNC(bool State);
+void LL_DAC_LDAC(bool State);
 
 #endif //__LOWLEVEL_H

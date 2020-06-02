@@ -15,5 +15,6 @@
 #include "ZwSCI.h"
 #include "ZwIWDG.h"
 #include "ZwNFLASH.h"
+#include "ZwSPI.h"
 
 #endif // __BOARD_H

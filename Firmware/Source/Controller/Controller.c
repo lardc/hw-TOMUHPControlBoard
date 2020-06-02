@@ -12,6 +12,8 @@
 #include "DeviceProfile.h"
 #include "BCCITypes.h"
 #include "Board.h"
+#include "GateDriver.h"
+
 #include "Interrupts.h"
 #include "Global.h"
 #include "CustomInterface.h"
@@ -58,6 +60,9 @@ void Delay_mS(uint32_t Delay);
 void CONTROL_SwitchToFault(Int16U Reason);
 void CONTROL_ResetToDefaults();
 void CONTROL_WatchDogUpdate();
+uint16_t ReadExtReg();
+void OutPut_ISO(uint16_t Data);
+void Delay_us(uint32_t Time);
 
 
 // Functions
@@ -198,20 +203,46 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 
 		// Debug actions
 		//
-		case ACT_DBG_COMM:
+		case ACT_DBG_GD_I_SET:
 			{
-				LL_RelayControl(TRUE);
-				Delay_mS(1000);
-				LL_RelayControl(FALSE);
+				GateDriver_Set_Current(DataTable[REG_DBG]);
 			}
 			break;
-		case ACT_DBG_LAMP:
+
+		case ACT_DBG_GD_TRIG_THRESHOLD:
 			{
-				LL_ExternalLED(TRUE);
-				Delay_mS(1000);
-				LL_ExternalLED(FALSE);
+				GateDriver_Set_CompThreshold(DataTable[REG_DBG]);
 			}
 			break;
+
+		case ACT_DBG_GD_I_RISE_RATE:
+			{
+				GateDriver_Set_RiseRate(DataTable[REG_DBG]);
+			}
+			break;
+
+		case ACT_DBG_GD_I_FALL_RATE:
+			{
+				GateDriver_Set_FallRate(DataTable[REG_DBG]);
+			}
+			break;
+
+		case ACT_DBG_GD_SYNC:
+			{
+				LL_GD_Sync(TRUE);
+				Delay_us(100);
+				LL_GD_Sync(FALSE);
+			}
+			break;
+
+		case ACT_DBG_PS_EN:
+			{
+				LL_GD_PsBoard(TRUE);
+				Delay_mS(1000);
+				LL_GD_PsBoard(FALSE);
+			}
+			break;
+
 		case ACT_DBG_FAN:
 			{
 				LL_ExternalFan(TRUE);
@@ -219,38 +250,88 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 				LL_ExternalFan(FALSE);
 			}
 			break;
-		case ACT_DBG_GATE_CONTROL:
+
+		case ACT_DBG_IND:
 			{
-				LL_GateControl(TRUE);
+				LL_ExternalLED(TRUE);
 				Delay_mS(1000);
-				LL_GateControl(FALSE);
+				LL_ExternalLED(FALSE);
 			}
 			break;
-		case ACT_DBG_SYNC:
+
+		case ACT_DBG_RLC:
 			{
-				LL_ExternalSync(TRUE);
+				LL_INT_Commutation(TRUE);
 				Delay_mS(1000);
-				LL_ExternalSync(FALSE);
+				LL_INT_Commutation(FALSE);
 			}
 			break;
-		case ACT_DBG_TOCU_CTRL:
-			CUSTINT_SendRaw(DataTable[REG_DBG_TOCU_DATA]);
+
+		case ACT_DBG_RELAY:
+			{
+				LL_RelayControl(TRUE);
+				Delay_mS(1000);
+				LL_RelayControl(FALSE);
+			}
 			break;
 
-		case ACT_DBG_VSO:
-			DataTable[REG_DBG_VSO_VALUE] = MEASURE_BatteryVoltage();
+		case ACT_DBG_SFTY_ACTIVATION:
+			{
+				LL_SFTY_ActiveState(DataTable[REG_DBG]);
+			}
 			break;
 
-		case ACT_DBG_I_DUT:
-			DataTable[REG_DBG_I_DUT_VALUE] = MEASURE_DUTCurrent();
+		case ACT_DBG_READ_EXT_REG:
+			{
+				DataTable[REG_DBG] = ReadExtReg();
+			}
 			break;
 
-		case ACT_DBG_VSO_RAW:
-			DataTable[REG_DBG_ADC_RAW] = MEASURE_BatteryVoltageRaw();
+		case ACT_DBG_TOCU_SYNC:
+			{
+				LL_TOCU_Sync(TRUE);
+				Delay_mS(1000);
+				LL_TOCU_Sync(FALSE);
+			}
 			break;
 
-		case ACT_DBG_I_DUT_RAW:
-			DataTable[REG_DBG_ADC_RAW] = MEASURE_DUTCurrentRaw();
+		case ACT_DBG_OUT_ISO:
+			{
+				OutPut_ISO(DataTable[REG_DBG]);
+			}
+			break;
+
+		case ACT_DBG_U_REF_U10:
+			{
+				MEASURE_Set_Uref10(DataTable[REG_DBG]);
+			}
+			break;
+
+		case ACT_DBG_U_REF_U90:
+			{
+				MEASURE_Set_Uref90(DataTable[REG_DBG]);
+			}
+			break;
+
+		case ACT_DBG_OSC_SYNC:
+			{
+				LL_OscSync(TRUE);
+				Delay_mS(1000);
+				LL_OscSync(FALSE);
+			}
+			break;
+
+		case ACT_DBG_TRIG_RST:
+			{
+				LL_GateLatch(FALSE);
+				LL_GateLatch(TRUE);
+			}
+			break;
+
+		case ACT_DBG_SREG_OE:
+			{
+				LL_OutReg_OE(DataTable[REG_DBG]);
+			}
 			break;
 
 		default:
@@ -365,20 +446,20 @@ void CONTROL_Logic()
 			DELAY_US(10);
 
 			LL_GateLatch(TRUE);										// Включение защёлки сигнала управления
-			LL_TimersReset(FALSE);									// Активация счётчиков
+			//LL_TimersReset(FALSE);									// Активация счётчиков
 			Overflow90 = FALSE;
 			Overflow10 = FALSE;
 
-			LL_GateControl(TRUE);									// Запуск тока управления
-			LL_ExternalSync(TRUE);
+			//LL_GateControl(TRUE);									// Запуск тока управления
+			//LL_ExternalSync(TRUE);
 			DELAY_US(50);
 			CountersData = CUSTINT_ReceiveDataSR();					// Считывание сырых значений из системы счета времени
 			CurrentActual = MEASURE_DUTCurrent();					// Измерение тока через прибор
 			DELAY_US(10);
 
-			LL_GateControl(FALSE);									// Отключение тока управления
-			LL_TimersReset(TRUE);									// Сброс системы измерения времени
-			LL_ExternalSync(FALSE);
+			//LL_GateControl(FALSE);									// Отключение тока управления
+			//LL_TimersReset(TRUE);									// Сброс системы измерения времени
+			//LL_ExternalSync(FALSE);
 			LL_GateLatch(FALSE);									// Сброс защёлки
 			DELAY_US(10);
 			CUSTINT_SendTOCU(0, TRUE, FALSE, FALSE);				// Закрытие силовых мосфетов + размыкание контактора
@@ -474,6 +555,8 @@ void CONTROL_SetDeviceState(DeviceState NewState)
 
 void Delay_mS(uint32_t Delay)
 {
+	TIM_Reset(TIM3);
+
 	uint64_t Counter = (uint64_t)CONTROL_TimeCounter + Delay;
 	while (Counter > CONTROL_TimeCounter)
 		CONTROL_WatchDogUpdate();
@@ -486,3 +569,38 @@ void CONTROL_WatchDogUpdate()
 		IWDG_Refresh();
 }
 //-----------------------------------------------
+
+uint16_t ReadExtReg()
+{
+	uint16_t Data;
+
+	LL_HSTimers_Load(TRUE);
+	LL_HSTimers_CS(TRUE);
+
+	LL_HSTimers_CS(FALSE);
+	Data = SPI_ReadByte(SPI1);
+	LL_HSTimers_CS(TRUE);
+
+	return Data;
+}
+//---------------------------
+
+void OutPut_ISO(uint16_t Data)
+{
+	SPI_WriteByte(SPI2, Data);
+
+	LL_OutReg_CS(TRUE);
+	LL_OutReg_CS(FALSE);
+}
+//---------------------------
+
+void Delay_us(uint32_t Time)
+{
+	for(uint32_t i = 0; i < Time * 7; i++)
+	{
+		asm("nop");
+		asm("nop");
+		asm("nop");
+		asm("nop");
+	}
+}
