@@ -1,8 +1,4 @@
-#include <InitConfig.h>
-
-// Forward functions
-//
-void CONTROL_Init();
+#include "InitConfig.h"
 
 // Functions
 //
@@ -125,9 +121,3 @@ void WatchDog_Config()
 	IWDG_ConfigureFastUpdate();
 }
 //------------------------------------------------------------------------------
-
-void InitializeController(Boolean GoodClock)
-{
-	CONTROL_Init();
-}
-// -----------------------------------------------------------------------------

@@ -53,7 +53,6 @@ static Int64U CONTROL_TimeIdleSendTOCU = 0;
 //
 static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError);
 void CONTROL_SetDeviceState(DeviceState NewState);
-void CONTROL_Idle();
 void CONTROL_BatteryVoltageMonitor();
 void CONTROL_Logic();
 void Delay_mS(uint32_t Delay);

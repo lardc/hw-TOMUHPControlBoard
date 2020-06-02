@@ -1,4 +1,4 @@
-#include "Interrupts.h"
+#include "Controller.h"
 #include "InitConfig.h"
 #include "SysConfig.h"
 
@@ -37,10 +37,10 @@ int main()
 	ADC_Init();
 
 	// Настройка сторожевого таймера
-	//WatchDog_Config();
+	WatchDog_Config();
 
 	// Инициализация логики контроллера
-	InitializeController(false);
+	CONTROL_Init();
 
 	// Фоновый цикл
 	while (TRUE)

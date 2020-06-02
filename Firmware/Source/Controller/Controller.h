@@ -8,10 +8,11 @@
 // Include
 #include "stdinc.h"
 
-
 // Variables
-//
 extern volatile Int64U CONTROL_TimeCounter;
 
+// Functions
+void CONTROL_Init();
+void CONTROL_Idle();
 
 #endif // __CONTROLLER_H
