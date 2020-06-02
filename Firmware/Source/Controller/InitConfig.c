@@ -114,8 +114,8 @@ void Timer3_Config()
 
 void SPI_Config()
 {
-	SPI_Init(SPI1, 5, false);
-	SPI_Init(SPI2, 5, false);
+	SPI_Init(SPI1, SPI1_BAUDRATE_BITS, SPI1_LSB_FIRST);
+	SPI_Init(SPI2, SPI2_BAUDRATE_BITS, SPI2_LSB_FIRST);
 }
 //------------------------------------------------------------------------------
 

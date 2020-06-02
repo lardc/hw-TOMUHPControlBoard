@@ -1,6 +1,7 @@
 #ifndef __SYSCONFIG_H
 #define __SYSCONFIG_H
 
+#include "stdinc.h"
 
 // Flash loader options
 #define BOOT_LOADER_VARIABLE			(*((volatile uint32_t *)0x20000000))
@@ -20,6 +21,13 @@
 
 // Timers
 #define TIMER3_uS						1000		// Период работы таймера 3
+// ----------------------------------------------
+
+// SPI
+#define SPI1_BAUDRATE_BITS				0x5
+#define SPI1_LSB_FIRST					false
+#define SPI2_BAUDRATE_BITS				0x5
+#define SPI2_LSB_FIRST					false
 // ----------------------------------------------
 
 // CAN
