@@ -16,10 +16,10 @@
 
 #include "Interrupts.h"
 #include "Global.h"
-#include "CustomInterface.h"
 #include "LowLevel.h"
 #include "InitConfig.h"
 #include "Measurement.h"
+#include "Delay.h"
 
 
 // Types
@@ -89,7 +89,7 @@ void CONTROL_Init()
 	CONTROL_ResetToDefaults();
 	//
 	// Настройка TOCU
-	CUSTINT_SendTOCU(0, FALSE, FALSE, FALSE);
+	//CUSTINT_SendTOCU(0, FALSE, FALSE, FALSE);
 }
 //------------------------------------------------------------------------------
 
@@ -134,7 +134,7 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 					{
 						CONTROL_TimeFanLastTurnOn = CONTROL_TimeCounter;
 						LL_ExternalFan(TRUE);
-						CUSTINT_SendTOCU(0, TRUE, FALSE, TRUE);
+						//CUSTINT_SendTOCU(0, TRUE, FALSE, TRUE);
 						//
 						CONTROL_TimeCounterDelay = CONTROL_TimeCounter + T_CHARGE_DELAY;
 						CONTROL_SetDeviceState(DS_Charging);
@@ -150,7 +150,7 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 				if ((CONTROL_State == DS_None) || (CONTROL_State == DS_Charging) || (CONTROL_State == DS_Ready))
 				{
 					LL_ExternalFan(FALSE);
-					CUSTINT_SendTOCU(0, FALSE, FALSE, FALSE);
+					//CUSTINT_SendTOCU(0, FALSE, FALSE, FALSE);
 					//
 					CONTROL_SetDeviceState(DS_None);
 				}
@@ -368,10 +368,10 @@ void CONTROL_BatteryVoltageMonitor()
 	if ((CONTROL_State == DS_Ready) || (CONTROL_State == DS_Charging) || (CONTROL_State == DS_InProcess))
 	{
 		// Поддержание заряда батареи в режиме готовности
-		if (BatteryVoltage <= V_BAT_THRESHOLD_MIN)
-			CUSTINT_SendTOCU(0, FanEnable, (SUB_State == SS_WaitContactor) ? TRUE : FALSE, TRUE);
-		else if (BatteryVoltage > V_BAT_THRESHOLD_MAX)
-			CUSTINT_SendTOCU(0, FanEnable, (SUB_State == SS_WaitContactor) ? TRUE : FALSE, FALSE);
+		//if (BatteryVoltage <= V_BAT_THRESHOLD_MIN)
+			//CUSTINT_SendTOCU(0, FanEnable, (SUB_State == SS_WaitContactor) ? TRUE : FALSE, TRUE);
+		//else if (BatteryVoltage > V_BAT_THRESHOLD_MAX)
+			//CUSTINT_SendTOCU(0, FanEnable, (SUB_State == SS_WaitContactor) ? TRUE : FALSE, FALSE);
 
 		// Таймаут ожидания требуемого напряжения при заряде или старте измерений
 		if ((CONTROL_State == DS_Charging) || ((CONTROL_State == DS_InProcess) && (SUB_State == SS_WaitVoltage)))
@@ -379,7 +379,7 @@ void CONTROL_BatteryVoltageMonitor()
 			if (CONTROL_TimeCounter > CONTROL_TimeCounterDelay)
 			{
 				LL_ExternalFan(FALSE);
-				CUSTINT_SendTOCU(0, FALSE, FALSE, FALSE);
+				//CUSTINT_SendTOCU(0, FALSE, FALSE, FALSE);
 				CONTROL_SwitchToFault(DF_BATTERY);
 				return;
 			}
@@ -400,7 +400,7 @@ void CONTROL_BatteryVoltageMonitor()
 	if ((CONTROL_State == DS_None) && (CONTROL_TimeCounter > CONTROL_TimeIdleSendTOCU))
 	{
 		CONTROL_TimeIdleSendTOCU = CONTROL_TimeCounter + T_IDLE_SEND_TOCU;
-		CUSTINT_SendTOCU(0, FALSE, FALSE, FALSE);
+		//CUSTINT_SendTOCU(0, FALSE, FALSE, FALSE);
 	}
 }
 //-----------------------------------------------
@@ -408,14 +408,14 @@ void CONTROL_BatteryVoltageMonitor()
 void CONTROL_Logic()
 {
 	float CurrentSetpoint, CurrentPreActual, CurrentActual;
-	uint32_t CountersData, Counter10Percent, Counter90Percent;
+	uint32_t Counter10Percent, Counter90Percent;
 	uint16_t Problem = PROBLEM_NONE, Warning = WARNING_NONE;
 
 	if (CONTROL_State == DS_InProcess)
 	{
 		if (SUB_State == SS_StopProcess)
 		{
-			CUSTINT_SendTOCU(0, TRUE, FALSE, TRUE);
+			//CUSTINT_SendTOCU(0, TRUE, FALSE, TRUE);
 			LL_RelayControl(FALSE);
 			LL_ExternalFan(FALSE);
 			LL_ExternalLED(FALSE);
@@ -429,7 +429,7 @@ void CONTROL_Logic()
 		{
 			LL_GateLatch(FALSE);
 			LL_RelayControl(TRUE);									// Замыкание выходных реле
-			CUSTINT_SendTOCU(0, TRUE, TRUE, FALSE);					// Отключение PSBoard + замыкание контактора
+			//CUSTINT_SendTOCU(0, TRUE, TRUE, FALSE);					// Отключение PSBoard + замыкание контактора
 			CONTROL_TimeCounterDelay = CONTROL_TimeCounter + DELAY_CONTACTOR;
 
 			SUB_State = SS_WaitContactor;
@@ -440,7 +440,7 @@ void CONTROL_Logic()
 		{
 			CurrentSetpoint = DataTable[REG_CURRENT_VALUE];
 
-			CUSTINT_SendTOCU(CurrentSetpoint, TRUE, TRUE, FALSE);	// Отпирание нужных мосфетов
+			//CUSTINT_SendTOCU(CurrentSetpoint, TRUE, TRUE, FALSE);	// Отпирание нужных мосфетов
 			DELAY_US(50);
 			CurrentPreActual = MEASURE_DUTCurrent();				// Измерения тока до подачи сигнала управления для определения кз на выходе
 			DELAY_US(10);
@@ -453,7 +453,7 @@ void CONTROL_Logic()
 			//LL_GateControl(TRUE);									// Запуск тока управления
 			//LL_ExternalSync(TRUE);
 			DELAY_US(50);
-			CountersData = CUSTINT_ReceiveDataSR();					// Считывание сырых значений из системы счета времени
+			//CountersData = CUSTINT_ReceiveDataSR();					// Считывание сырых значений из системы счета времени
 			CurrentActual = MEASURE_DUTCurrent();					// Измерение тока через прибор
 			DELAY_US(10);
 
@@ -462,20 +462,21 @@ void CONTROL_Logic()
 			//LL_ExternalSync(FALSE);
 			LL_GateLatch(FALSE);									// Сброс защёлки
 			DELAY_US(10);
-			CUSTINT_SendTOCU(0, TRUE, FALSE, FALSE);				// Закрытие силовых мосфетов + размыкание контактора
+			//CUSTINT_SendTOCU(0, TRUE, FALSE, FALSE);				// Закрытие силовых мосфетов + размыкание контактора
 			LL_RelayControl(FALSE);									// Размыкание реле
 
 			// Получение времён из счётчиков
-			Counter10Percent = CUSTINT_UnpackData10SR(CountersData);
-			Counter90Percent = CUSTINT_UnpackData90SR(CountersData);
+			Counter10Percent = //CUSTINT_UnpackData10SR(CountersData);
+			Counter90Percent = //CUSTINT_UnpackData90SR(CountersData);
 
 			// Запись отладочных результатов по току
 			DataTable[REG_DBG_I_DUT_VALUE] = CurrentActual;
 			DataTable[REG_DBG_PRE_I_DUT_VALUE] = CurrentPreActual;
 
 			// Обработка внештатных ситуаций
-			if ((CUSTINT_UnpackData90SR(CountersData) == 0) &&
-				(CUSTINT_UnpackData10SR(CountersData) == 0) && (CurrentPreActual < CURRENT_MIN_THRESHOLD))
+			/*
+			if ((//CUSTINT_UnpackData90SR(CountersData) == 0) &&
+				(//CUSTINT_UnpackData10SR(CountersData) == 0) && (CurrentPreActual < CURRENT_MIN_THRESHOLD))
 			{
 				Problem = PROBLEM_NO_CTRL_NO_PWR;
 			}
@@ -499,6 +500,7 @@ void CONTROL_Logic()
 			{
 				Problem = PROBLEM_OVERFLOW10;
 			}
+			*/
 
 			// Запись результатов
 			DataTable[REG_MEAS_CURRENT_VALUE] = CurrentActual;
@@ -535,7 +537,7 @@ void CONTROL_Logic()
 
 void CONTROL_SwitchToFault(Int16U Reason)
 {
-	CUSTINT_SendTOCU(0, FALSE, FALSE, FALSE);
+	//CUSTINT_SendTOCU(0, FALSE, FALSE, FALSE);
 	LL_RelayControl(FALSE);
 	LL_ExternalFan(FALSE);
 	LL_ExternalLED(FALSE);
