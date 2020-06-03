@@ -358,16 +358,6 @@ void CONTROL_SetDeviceState(DeviceState NewState)
 }
 //-----------------------------------------------
 
-void Delay_mS(uint32_t Delay)
-{
-	TIM_Reset(TIM3);
-
-	uint64_t Counter = (uint64_t)CONTROL_TimeCounter + Delay;
-	while (Counter > CONTROL_TimeCounter)
-		CONTROL_WatchDogUpdate();
-}
-//-----------------------------------------------
-
 void CONTROL_WatchDogUpdate()
 {
 	if (BOOT_LOADER_VARIABLE != BOOT_LOADER_REQUEST)
