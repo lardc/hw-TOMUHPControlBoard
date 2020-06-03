@@ -341,69 +341,6 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 }
 //-----------------------------------------------
 
-void CONTROL_BatteryVoltageMonitor()
-{
-	float BatteryVoltage;
-	bool FanEnable = FALSE;
-
-	BatteryVoltage = MEASURE_BatteryVoltage();
-	DataTable[REG_DBG_VSO_VALUE] = BatteryVoltage;
-
-	// Логика работы вентиляторов
-	if ((CONTROL_State == DS_Charging) || (CONTROL_State == DS_InProcess))
-	{
-		FanEnable = TRUE;
-	}
-	else if (CONTROL_State == DS_Ready)
-	{
-		if (CONTROL_TimeCounter < (CONTROL_TimeFanLastTurnOn + FAN_ACTIVE_TIME))
-			FanEnable = TRUE;
-		else if (CONTROL_TimeCounter > (CONTROL_TimeFanLastTurnOn + FAN_SLEEP_TIME))
-			CONTROL_TimeFanLastTurnOn = CONTROL_TimeCounter;
-	}
-	LL_ExternalFan(FanEnable);
-
-	// Оцифровка напряжения
-	if ((CONTROL_State == DS_Ready) || (CONTROL_State == DS_Charging) || (CONTROL_State == DS_InProcess))
-	{
-		// Поддержание заряда батареи в режиме готовности
-		//if (BatteryVoltage <= V_BAT_THRESHOLD_MIN)
-			//CUSTINT_SendTOCU(0, FanEnable, (SUB_State == SS_WaitContactor) ? TRUE : FALSE, TRUE);
-		//else if (BatteryVoltage > V_BAT_THRESHOLD_MAX)
-			//CUSTINT_SendTOCU(0, FanEnable, (SUB_State == SS_WaitContactor) ? TRUE : FALSE, FALSE);
-
-		// Таймаут ожидания требуемого напряжения при заряде или старте измерений
-		if ((CONTROL_State == DS_Charging) || ((CONTROL_State == DS_InProcess) && (SUB_State == SS_WaitVoltage)))
-		{
-			if (CONTROL_TimeCounter > CONTROL_TimeCounterDelay)
-			{
-				LL_ExternalFan(FALSE);
-				//CUSTINT_SendTOCU(0, FALSE, FALSE, FALSE);
-				CONTROL_SwitchToFault(DF_BATTERY);
-				return;
-			}
-
-			if ((BatteryVoltage > V_BAT_THRESHOLD_MIN) && (BatteryVoltage < V_BAT_THRESHOLD_MAX))
-			{
-				// Смена состояния при завершении заряда
-				if (CONTROL_State == DS_Charging)
-					CONTROL_SetDeviceState(DS_Ready);
-				// Переход на следующий шаг измерения
-				else
-					SUB_State = SS_VoltageReady;
-			}
-		}
-	}
-
-	// Если блок простаивает
-	if ((CONTROL_State == DS_None) && (CONTROL_TimeCounter > CONTROL_TimeIdleSendTOCU))
-	{
-		CONTROL_TimeIdleSendTOCU = CONTROL_TimeCounter + T_IDLE_SEND_TOCU;
-		//CUSTINT_SendTOCU(0, FALSE, FALSE, FALSE);
-	}
-}
-//-----------------------------------------------
-
 void CONTROL_Logic()
 {
 	float CurrentSetpoint, CurrentPreActual, CurrentActual;
@@ -594,14 +531,3 @@ void OutPut_ISO(uint16_t Data)
 	LL_OutReg_CS(FALSE);
 }
 //---------------------------
-
-void Delay_us(uint32_t Time)
-{
-	for(uint32_t i = 0; i < Time * 7; i++)
-	{
-		asm("nop");
-		asm("nop");
-		asm("nop");
-		asm("nop");
-	}
-}
