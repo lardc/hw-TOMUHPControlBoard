@@ -36,24 +36,6 @@ void LL_PsBoard_PowerInput(bool State)
 }
 //-----------------------------
 
-void LL_GD_Sync(bool State)
-{
-	GPIO_SetState(GPIO_SYNC_GD, State);
-}
-//-----------------------------
-
-void LL_GD_DAC_CS_SYNC1(bool State)
-{
-	GPIO_SetState(GPIO_CS_GD1, State);
-}
-//-----------------------------
-
-void LL_GD_DAC_CS_SYNC2(bool State)
-{
-	GPIO_SetState(GPIO_CS_GD2, State);
-}
-//-----------------------------
-
 void LL_MonitorSafetyInput(bool State)
 {
 	GPIO_SetState(GPIO_SFTY_EN, State);

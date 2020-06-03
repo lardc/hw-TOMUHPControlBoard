@@ -1,17 +1,14 @@
-#ifndef GATEDRIVER_H_
-#define GATEDRIVER_H_
+#ifndef __GATEDRIVER_H
+#define __GATEDRIVER_H
 
 // Includes
-//
-#include "Board.h"
-//
+#include "stdinc.h"
 
 // Functions prototypes
-//
-void GateDriver_Set_Current(uint16_t Data);
-void GateDriver_Set_CompThreshold(uint16_t Data);
-void GateDriver_Set_FallRate(uint16_t Data);
-void GateDriver_Set_RiseRate(uint16_t Data);
-//
+void GateDriver_Sync(bool State);
+void GateDriver_SetCurrent(uint16_t Data);
+void GateDriver_SetCompThreshold(uint16_t Data);
+void GateDriver_SetFallRate(uint16_t Data);
+void GateDriver_SetRiseRate(uint16_t Data);
 
-#endif /* GATEDRIVER_H_ */
+#endif // __GATEDRIVER_H
