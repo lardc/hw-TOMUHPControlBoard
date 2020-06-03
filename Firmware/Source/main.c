@@ -43,7 +43,7 @@ int main()
 	CONTROL_Init();
 
 	// Фоновый цикл
-	while (TRUE)
+	while(TRUE)
 		CONTROL_Idle();
 
 	return 0;

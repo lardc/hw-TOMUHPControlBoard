@@ -1,106 +1,89 @@
 // Header
 #include "LowLevel.h"
 
+// Include
+#include "Board.h"
+
 // Functions
 //
-// LED on board
-bool LL_IsBlinkLED()
+void LL_ToggleLED()
 {
-	return GPIO_Read_Bit(GPIOC, Pin_13);
+	GPIO_Toggle(GPIO_LED);
 }
 //-----------------------------
 
-void LL_BlinkLED(bool State)
-{
-	State ? GPIO_Bit_Set(GPIOC, Pin_13) : GPIO_Bit_Rst(GPIOC, Pin_13);
-}
-//-----------------------------
-
-// External LED
 void LL_ExternalLED(bool State)
 {
-	State ? GPIO_Bit_Set(GPIOA, Pin_7) : GPIO_Bit_Rst(GPIOA, Pin_7);
+	GPIO_SetState(GPIO_IND, State);
 }
 //-----------------------------
 
-// Unit cooler
-void LL_ExternalFan(bool State)
+void LL_UnitFan(bool State)
 {
-	State ? GPIO_Bit_Set(GPIOA, Pin_0) : GPIO_Bit_Rst(GPIOA, Pin_0);
+	GPIO_SetState(GPIO_FAN, State);
 }
 //-----------------------------
 
-// GateDriver PsBoard control
-void LL_GD_PsBoard(bool State)
+void LL_PsBoard_PowerOutput(bool State)
 {
-	State ? GPIO_Bit_Set(GPIOC, Pin_15) : GPIO_Bit_Rst(GPIOC, Pin_15);
+	GPIO_SetState(GPIO_PS_EN, !State);
 }
 //-----------------------------
 
-// GateDriver sync line
+void LL_PsBoard_PowerInput(bool State)
+{
+	GPIO_SetState(GPIO_RELAY, State);
+}
+//-----------------------------
+
 void LL_GD_Sync(bool State)
 {
-	State ? GPIO_Bit_Set(GPIOC, Pin_14) : GPIO_Bit_Rst(GPIOC, Pin_14);
+	GPIO_SetState(GPIO_SYNC_GD, State);
 }
 //-----------------------------
 
-// GateDriver SYNC1 line
 void LL_GD_DAC_CS_SYNC1(bool State)
 {
-	State ? GPIO_Bit_Set(GPIOB, Pin_12) : GPIO_Bit_Rst(GPIOB, Pin_12);
+	GPIO_SetState(GPIO_CS_GD1, State);
 }
 //-----------------------------
 
-// GateDriver SYNC2 line
 void LL_GD_DAC_CS_SYNC2(bool State)
 {
-	State ? GPIO_Bit_Set(GPIOB, Pin_6) : GPIO_Bit_Rst(GPIOB, Pin_6);
+	GPIO_SetState(GPIO_CS_GD2, State);
 }
 //-----------------------------
 
-// Safety system control
-void LL_SFTY_ActiveState(bool State)
+void LL_MonitorSafetyInput(bool State)
 {
-	State ? GPIO_Bit_Set(GPIOA, Pin_15) : GPIO_Bit_Rst(GPIOA, Pin_15);
+	GPIO_SetState(GPIO_SFTY_EN, State);
 }
 //-----------------------------
 
-// Safety signal
-bool LL_IsSafety()
+bool LL_IsSafetyTrig()
 {
-	return GPIO_Read_Bit(GPIOB, Pin_3);
+	return GPIO_GetState(GPIO_SFTY);
 }
 //-----------------------------
 
-// M_RESET timers
 void LL_HSTimers_Reset(bool State)
 {
-	(!State) ? GPIO_Bit_Set(GPIOA, Pin_2) : GPIO_Bit_Rst(GPIOA, Pin_2);
+	GPIO_SetState(GPIO_M_RESET, !State);
 }
 //-----------------------------
 
-// LOAD timers
 void LL_HSTimers_Load(bool State)
 {
-	State ? GPIO_Bit_Set(GPIOA, Pin_3) : GPIO_Bit_Rst(GPIOA, Pin_3);
+	GPIO_SetState(GPIO_LOAD, State);
 }
 //-----------------------------
 
-// CS timers
 void LL_HSTimers_CS(bool State)
 {
-	State ? GPIO_Bit_Set(GPIOA, Pin_4) : GPIO_Bit_Rst(GPIOA, Pin_4);
+	GPIO_SetState(GPIO_CS, State);
 }
 //-----------------------------
 
-// Relay control
-void LL_RelayControl(bool State)
-{
-	State ? GPIO_Bit_Set(GPIOB, Pin_1) : GPIO_Bit_Rst(GPIOB, Pin_1);
-}
-//-----------------------------
-
-// Gate Comparator Latch Control
 void LL_GateLatch(bool State)
 {
 	State ? GPIO_Bit_Set(GPIOB, Pin_7) : GPIO_Bit_Rst(GPIOB, Pin_7);
