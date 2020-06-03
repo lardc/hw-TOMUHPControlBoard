@@ -54,17 +54,23 @@ void LL_HSTimers_Reset(bool State)
 }
 //-----------------------------
 
-void LL_HSTimers_Load(bool State)
+uint32_t LL_HSTimers_Read()
 {
-	GPIO_SetState(GPIO_LOAD, State);
-}
-//-----------------------------
+	uint32_t Data;
 
-void LL_HSTimers_CS(bool State)
-{
-	GPIO_SetState(GPIO_CS, State);
+	GPIO_SetState(GPIO_LOAD, false);
+	DELAY_US(1);
+	GPIO_SetState(GPIO_LOAD, true);
+
+	GPIO_SetState(GPIO_CS, false);
+	Data = SPI_ReadByte(SPI1);
+	Data |= (uint32_t)SPI_ReadByte(SPI1) << 8;
+	Data |= (uint32_t)SPI_ReadByte(SPI1) << 16;
+	GPIO_SetState(GPIO_CS, true);
+
+	return Data;
 }
-//-----------------------------
+//---------------------------
 
 void LL_GateLatch(bool State)
 {

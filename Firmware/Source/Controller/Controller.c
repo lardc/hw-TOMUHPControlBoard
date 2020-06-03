@@ -364,18 +364,3 @@ void CONTROL_WatchDogUpdate()
 		IWDG_Refresh();
 }
 //-----------------------------------------------
-
-uint16_t ReadExtReg()
-{
-	uint16_t Data;
-
-	LL_HSTimers_Load(TRUE);
-	LL_HSTimers_CS(TRUE);
-
-	LL_HSTimers_CS(FALSE);
-	Data = SPI_ReadByte(SPI1);
-	LL_HSTimers_CS(TRUE);
-
-	return Data;
-}
-//---------------------------
