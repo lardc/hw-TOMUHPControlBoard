@@ -86,47 +86,43 @@ void LL_TOCU_Sync(bool State)
 }
 //-----------------------------
 
-// Internal commutation
 void LL_INT_Commutation(bool State)
 {
 	State ? GPIO_Bit_Set(GPIOB, Pin_0) : GPIO_Bit_Rst(GPIOB, Pin_0);
 }
 //-----------------------------
 
-// Overflow90
 bool LL_IsOverflow90()
 {
-	return GPIO_Read_Bit(GPIOB, Pin_4);
+	return GPIO_GetState(GPIO_OVERFLOW90);
 }
 //-----------------------------
 
-// Overflow10
 bool LL_IsOverflow10()
 {
-	return GPIO_Read_Bit(GPIOB, Pin_8);
+	return GPIO_GetState(GPIO_OVERFLOW10);
 }
 //-----------------------------
 
-// Pressure
-bool LL_IsPressure()
+bool LL_IsPressureTrig()
 {
-	return GPIO_Read_Bit(GPIOB, Pin_10);
+	return GPIO_GetState(GPIO_PRESSURE);
 }
 //-----------------------------
 
-// Output reg CS
-void LL_OutReg_CS(bool State)
+void LL_OutputRegister_Enable(bool State)
 {
-	State ? GPIO_Bit_Set(GPIOB, Pin_5) : GPIO_Bit_Rst(GPIOB, Pin_5);
+	GPIO_SetState(GPIO_SREG_OE, State);
 }
 //-----------------------------
 
-// Output reg OE
-void LL_OutReg_OE(bool State)
+void LL_OutputRegister_Write(uint16_t Data)
 {
-	State ? GPIO_Bit_Set(GPIOB, Pin_11) : GPIO_Bit_Rst(GPIOB, Pin_11);
+	GPIO_SetState(GPIO_SREG_CS, false);
+	SPI_WriteByte(SPI2, Data);
+	GPIO_SetState(GPIO_SREG_CS, true);
 }
-//-----------------------------
+//---------------------
 
 void LL_WriteDACx(uint16_t Data, GPIO_PortPinSetting CS_SYNC)
 {

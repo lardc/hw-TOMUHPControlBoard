@@ -25,9 +25,9 @@ void LL_TOCU_Sync(bool State);
 void LL_INT_Commutation(bool State);
 bool LL_IsOverflow90();
 bool LL_IsOverflow10();
-bool LL_IsPressure();
-void LL_OutReg_CS(bool State);
-void LL_OutReg_OE(bool State);
+bool LL_IsPressureTrig();
+void LL_OutputRegister_Enable(bool State);
+void LL_OutputRegister_Write(uint16_t Data);
 void LL_WriteDACx(uint16_t Data, GPIO_PortPinSetting CS_SYNC);
 
 #endif //__LOWLEVEL_H

@@ -379,12 +379,3 @@ uint16_t ReadExtReg()
 	return Data;
 }
 //---------------------------
-
-void OutPut_ISO(uint16_t Data)
-{
-	SPI_WriteByte(SPI2, Data);
-
-	LL_OutReg_CS(TRUE);
-	LL_OutReg_CS(FALSE);
-}
-//---------------------------
