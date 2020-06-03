@@ -72,29 +72,27 @@ uint32_t LL_HSTimers_Read()
 }
 //---------------------------
 
-void LL_GateLatch(bool State)
+void LL_GateLatchReset(bool State)
 {
-	State ? GPIO_Bit_Set(GPIOB, Pin_7) : GPIO_Bit_Rst(GPIOB, Pin_7);
+	GPIO_SetState(GPIO_TRIG_RST, !State);
 }
 //-----------------------------
 
-// Osc SYNC
-void LL_OscSync(bool State)
+void LL_SyncOscilloscope(bool State)
 {
-	State ? GPIO_Bit_Set(GPIOA, Pin_8) : GPIO_Bit_Rst(GPIOA, Pin_8);
+	GPIO_SetState(GPIO_SYNC, State);
 }
 //-----------------------------
 
-// TOCU SYNC
-void LL_TOCU_Sync(bool State)
+void LL_SyncTOCU(bool State)
 {
-	State ? GPIO_Bit_Set(GPIOB, Pin_2) : GPIO_Bit_Rst(GPIOB, Pin_2);
+	GPIO_SetState(GPIO_SNC_TOCU, State);
 }
 //-----------------------------
 
-void LL_INT_Commutation(bool State)
+void LL_InternalCommutation(bool State)
 {
-	State ? GPIO_Bit_Set(GPIOB, Pin_0) : GPIO_Bit_Rst(GPIOB, Pin_0);
+	GPIO_SetState(GPIO_RLC, State);
 }
 //-----------------------------
 
