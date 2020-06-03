@@ -16,33 +16,33 @@ bool DIAG_HandleDiagnosticAction(uint16_t ActionID, uint16_t *pUserError)
 	{
 		case ACT_DBG_GD_I_SET:
 			{
-				GateDriver_Set_Current(DataTable[REG_DBG]);
+				GateDriver_SetCurrent(DataTable[REG_DBG]);
 			}
 			break;
 
 		case ACT_DBG_GD_TRIG_THRESHOLD:
 			{
-				GateDriver_Set_CompThreshold(DataTable[REG_DBG]);
+				GateDriver_SetCompThreshold(DataTable[REG_DBG]);
 			}
 			break;
 
 		case ACT_DBG_GD_I_RISE_RATE:
 			{
-				GateDriver_Set_RiseRate(DataTable[REG_DBG]);
+				GateDriver_SetRiseRate(DataTable[REG_DBG]);
 			}
 			break;
 
 		case ACT_DBG_GD_I_FALL_RATE:
 			{
-				GateDriver_Set_FallRate(DataTable[REG_DBG]);
+				GateDriver_SetFallRate(DataTable[REG_DBG]);
 			}
 			break;
 
 		case ACT_DBG_GD_SYNC:
 			{
-				LL_GD_Sync(true);
+				GateDriver_Sync(true);
 				DELAY_US(100);
-				LL_GD_Sync(false);
+				GateDriver_Sync(false);
 			}
 			break;
 

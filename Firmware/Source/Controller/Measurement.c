@@ -66,30 +66,16 @@ float MEASURE_DUTCurrent()
 }
 //------------------------------------------------------------------------------
 
-void MEASURE_Set_Uref10(uint16_t Data)
+void MEASURE_SetUref10(uint16_t Data)
 {
-	Data |= 0x8000;
-
-	MEASURE_Set_Uref(Data);
+	Data |= DAC_CHANNEL_B;
+	LL_WriteDACx(Data, GPIO_CS_DAC);
 }
 //---------------------
 
 void MEASURE_Set_Uref90(uint16_t Data)
 {
-	MEASURE_Set_Uref(Data);
-}
-//---------------------
-
-void MEASURE_Set_Uref(uint16_t Data)
-{
-	LL_DAC_CS_SYNC(TRUE);
-	LL_DAC_LDAC(TRUE);
-
-	LL_DAC_CS_SYNC(FALSE);
-	SPI_WriteByte(SPI2, Data);
-	LL_DAC_CS_SYNC(TRUE);
-
-	LL_DAC_LDAC(FALSE);
-	LL_DAC_LDAC(TRUE);
+	Data &= ~DAC_CHANNEL_B;
+	LL_WriteDACx(Data, GPIO_CS_DAC);
 }
 //---------------------

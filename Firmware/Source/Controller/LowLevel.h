@@ -3,6 +3,10 @@
 
 // Include
 #include "stdinc.h"
+#include "Board.h"
+
+// Defines
+#define DAC_CHANNEL_B		0x8000
 
 // Functions
 void LL_ToggleLED();
@@ -24,7 +28,6 @@ bool LL_IsOverflow10();
 bool LL_IsPressure();
 void LL_OutReg_CS(bool State);
 void LL_OutReg_OE(bool State);
-void LL_DAC_CS_SYNC(bool State);
-void LL_DAC_LDAC(bool State);
+void LL_WriteDACx(uint16_t Data, GPIO_PortPinSetting CS_SYNC);
 
 #endif //__LOWLEVEL_H

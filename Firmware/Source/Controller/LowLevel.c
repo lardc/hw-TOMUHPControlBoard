@@ -2,7 +2,7 @@
 #include "LowLevel.h"
 
 // Include
-#include "Board.h"
+#include "Delay.h"
 
 // Functions
 //
@@ -128,29 +128,16 @@ void LL_OutReg_OE(bool State)
 }
 //-----------------------------
 
-// DAC SYNC
-void LL_DAC_CS_SYNC(bool State)
+void LL_WriteDACx(uint16_t Data, GPIO_PortPinSetting CS_SYNC)
 {
-	State ? GPIO_Bit_Set(GPIOB, Pin_9) : GPIO_Bit_Rst(GPIOB, Pin_9);
+	GPIO_SetState(CS_SYNC, false);
+	SPI_WriteByte(SPI2, Data);
+	GPIO_SetState(CS_SYNC, true);
+	DELAY_US(1);
+
+	GPIO_SetState(GPIO_LDAC, false);
+	DELAY_US(1);
+	GPIO_SetState(GPIO_LDAC, true);
+	DELAY_US(1);
 }
-//-----------------------------
-
-// LDAC line
-void LL_DAC_LDAC(bool State)
-{
-	State ? GPIO_Bit_Set(GPIOB, Pin_14) : GPIO_Bit_Rst(GPIOB, Pin_14);
-}
-//-----------------------------
-
-
-
-
-
-
-
-
-
-
-
-
-
+//---------------------
