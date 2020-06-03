@@ -13,7 +13,7 @@
 #include "BCCITypes.h"
 #include "Board.h"
 #include "GateDriver.h"
-
+#include "Diagnostic.h"
 #include "Interrupts.h"
 #include "Global.h"
 #include "LowLevel.h"
@@ -200,141 +200,8 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 			DataTable[REG_WARNING] = 0;
 			break;
 
-		// Debug actions
-		//
-		case ACT_DBG_GD_I_SET:
-			{
-				GateDriver_Set_Current(DataTable[REG_DBG]);
-			}
-			break;
-
-		case ACT_DBG_GD_TRIG_THRESHOLD:
-			{
-				GateDriver_Set_CompThreshold(DataTable[REG_DBG]);
-			}
-			break;
-
-		case ACT_DBG_GD_I_RISE_RATE:
-			{
-				GateDriver_Set_RiseRate(DataTable[REG_DBG]);
-			}
-			break;
-
-		case ACT_DBG_GD_I_FALL_RATE:
-			{
-				GateDriver_Set_FallRate(DataTable[REG_DBG]);
-			}
-			break;
-
-		case ACT_DBG_GD_SYNC:
-			{
-				LL_GD_Sync(TRUE);
-				Delay_us(100);
-				LL_GD_Sync(FALSE);
-			}
-			break;
-
-		case ACT_DBG_PS_EN:
-			{
-				LL_GD_PsBoard(TRUE);
-				Delay_mS(1000);
-				LL_GD_PsBoard(FALSE);
-			}
-			break;
-
-		case ACT_DBG_FAN:
-			{
-				LL_ExternalFan(TRUE);
-				Delay_mS(1000);
-				LL_ExternalFan(FALSE);
-			}
-			break;
-
-		case ACT_DBG_IND:
-			{
-				LL_ExternalLED(TRUE);
-				Delay_mS(1000);
-				LL_ExternalLED(FALSE);
-			}
-			break;
-
-		case ACT_DBG_RLC:
-			{
-				LL_INT_Commutation(TRUE);
-				Delay_mS(1000);
-				LL_INT_Commutation(FALSE);
-			}
-			break;
-
-		case ACT_DBG_RELAY:
-			{
-				LL_RelayControl(TRUE);
-				Delay_mS(1000);
-				LL_RelayControl(FALSE);
-			}
-			break;
-
-		case ACT_DBG_SFTY_ACTIVATION:
-			{
-				LL_SFTY_ActiveState(DataTable[REG_DBG]);
-			}
-			break;
-
-		case ACT_DBG_READ_EXT_REG:
-			{
-				DataTable[REG_DBG] = ReadExtReg();
-			}
-			break;
-
-		case ACT_DBG_TOCU_SYNC:
-			{
-				LL_TOCU_Sync(TRUE);
-				Delay_mS(1000);
-				LL_TOCU_Sync(FALSE);
-			}
-			break;
-
-		case ACT_DBG_OUT_ISO:
-			{
-				OutPut_ISO(DataTable[REG_DBG]);
-			}
-			break;
-
-		case ACT_DBG_U_REF_U10:
-			{
-				MEASURE_Set_Uref10(DataTable[REG_DBG]);
-			}
-			break;
-
-		case ACT_DBG_U_REF_U90:
-			{
-				MEASURE_Set_Uref90(DataTable[REG_DBG]);
-			}
-			break;
-
-		case ACT_DBG_OSC_SYNC:
-			{
-				LL_OscSync(TRUE);
-				Delay_mS(1000);
-				LL_OscSync(FALSE);
-			}
-			break;
-
-		case ACT_DBG_TRIG_RST:
-			{
-				LL_GateLatch(FALSE);
-				LL_GateLatch(TRUE);
-			}
-			break;
-
-		case ACT_DBG_SREG_OE:
-			{
-				LL_OutReg_OE(DataTable[REG_DBG]);
-			}
-			break;
-
 		default:
-			return FALSE;
+			return DIAG_HandleDiagnosticAction(ActionID, pUserError);
 	}
 
 	return TRUE;
