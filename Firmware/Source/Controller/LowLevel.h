@@ -6,7 +6,7 @@
 #include "Board.h"
 
 // Defines
-#define DAC_CHANNEL_B		0x8000
+#define DAC_CHANNEL_B		BIT15
 
 // Functions
 void LL_ToggleLED();

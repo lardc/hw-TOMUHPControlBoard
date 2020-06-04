@@ -19,15 +19,6 @@
 // Types
 //
 typedef void (*FUNC_AsyncDelegate)();
-// Вспомогательные состояния
-typedef enum __SubState
-{
-	SS_None = 0,
-	SS_StopProcess = 1,
-	SS_WaitVoltage = 2,
-	SS_VoltageReady = 3,
-	SS_WaitContactor = 4
-} SubState;
 
 // Variables
 //
@@ -41,7 +32,7 @@ static Int64U CONTROL_TimeCounterDelay = 0;
 // Forward functions
 //
 static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError);
-void CONTROL_SetDeviceState(DeviceState NewState);
+void CONTROL_SetDeviceState(DeviceState NewState, SubState NewSubState);
 void CONTROL_Logic();
 void CONTROL_SwitchToFault(Int16U Reason);
 void CONTROL_WatchDogUpdate();
@@ -88,7 +79,7 @@ void CONTROL_ResetToDefaultState()
 	DEVPROFILE_ResetEPReadState();
 
 	CONTROL_ResetHardware();
-	CONTROL_SetDeviceState(DS_None);
+	CONTROL_SetDeviceState(DS_None, SS_None);
 }
 //-----------------------------------------------
 
@@ -117,7 +108,11 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 			{
 				if(CONTROL_State == DS_None)
 				{
-					// Включение
+					LL_PsBoard_PowerInput(true);
+					LL_PsBoard_PowerOutput(true);
+
+					CONTROL_TimeCounterDelay = CONTROL_TimeCounter + T_POWER_ON_PAUSE;
+					CONTROL_SetDeviceState(DS_InProcess, SS_PowerOn);
 				}
 				else if(CONTROL_State != DS_Ready)
 					*pUserError = ERR_OPERATION_BLOCKED;
@@ -175,6 +170,16 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 	}
 	
 	return TRUE;
+}
+//-----------------------------------------------
+
+void CONTROL_HandlePowerOn()
+{
+	if(CONTROL_State == DS_InProcess && SUB_State == SS_StopProcess)
+	{
+		if(CONTROL_TimeCounter > CONTROL_TimeCounterDelay)
+			CONTROL_SetDeviceState(DS_Ready, SS_None);
+	}
 }
 //-----------------------------------------------
 
@@ -315,16 +320,18 @@ void CONTROL_SwitchToFault(Int16U Reason)
 {
 	CONTROL_ResetHardware();
 	
-	SUB_State = SS_None;
-	CONTROL_SetDeviceState(DS_Fault);
+	CONTROL_SetDeviceState(DS_Fault, SS_None);
 	DataTable[REG_FAULT_REASON] = Reason;
 }
 //-----------------------------------------------
 
-void CONTROL_SetDeviceState(DeviceState NewState)
+void CONTROL_SetDeviceState(DeviceState NewState, SubState NewSubState)
 {
 	CONTROL_State = NewState;
 	DataTable[REG_DEV_STATE] = NewState;
+
+	SUB_State = NewSubState;
+	DataTable[REG_DEV_SUB_STATE] = NewSubState;
 }
 //-----------------------------------------------
 

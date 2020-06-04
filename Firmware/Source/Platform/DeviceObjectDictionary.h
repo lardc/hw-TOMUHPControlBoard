@@ -75,6 +75,7 @@
 #define REG_WARNING						195	// Регистр Warning
 #define REG_PROBLEM						196	// Регистр Problem
 #define REG_TEST_FINISHED				197
+#define REG_DEV_SUB_STATE				198
 //
 #define REG_DBG_VSO_VALUE				200	// Напряжение на батарее (в В)
 #define REG_DBG_I_DUT_VALUE				201	// Ток на DUT (в А)
@@ -86,6 +87,18 @@
 #define	REG_MEAS_TIME_ON				252	// Измеренное значение времени включения (нс)
 //
 // -----------------------------------------------
+
+// Несохраняемы регистры чтения-записи
+#define REG_TOCU_VOLTAGE_SETPOINT		128	// Значение задания напряжения (в В)
+#define REG_TOCU_GATE_REGISTER			129	// Значение-маска конфигурации затворов
+
+// Регистры блоков TOCU только чтение
+#define REG_TOCU_DEV_STATE				192	// Регистр состояния
+#define REG_TOCU_FAULT_REASON			193	// Регистр Fault
+#define REG_TOCU_DISABLE_REASON			194	// Регистр Disable
+#define REG_TOCU_WARNING				195	// Регистр Warning
+#define REG_TOCU_PROBLEM				196	// Регистр Problem
+#define REG_TOCU_OP_RESULT				197	// Регистр результата операции
 
 
 //  ENDPOINTS
