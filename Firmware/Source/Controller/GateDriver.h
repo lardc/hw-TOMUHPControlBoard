@@ -7,7 +7,7 @@
 // Functions prototypes
 void GateDriver_Sync(bool State);
 void GateDriver_SetCurrent(uint16_t Data);
-void GateDriver_SetCompThreshold(uint16_t Data);
+void GateDriver_SetCompThreshold(uint16_t Current);
 void GateDriver_SetFallRate(uint16_t Data);
 void GateDriver_SetRiseRate(uint16_t Data);
 
