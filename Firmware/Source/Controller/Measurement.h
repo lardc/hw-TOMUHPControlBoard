@@ -4,14 +4,7 @@
 #include "stdinc.h"
 
 // Functions
-//
-float MEASURE_BatteryVoltage();
-float MEASURE_DUTCurrent();
-void MEASURE_Set_Uref10(uint16_t Data);
-void MEASURE_Set_Uref90(uint16_t Data);
-//
-// Raw ADC values
-uint16_t MEASURE_BatteryVoltageRaw();
-uint16_t MEASURE_DUTCurrentRaw();
+void MEASURE_SetUref10(uint16_t Data);
+void MEASURE_SetUref90(uint16_t Data);
 
 #endif // __MEASUREMENT_H
