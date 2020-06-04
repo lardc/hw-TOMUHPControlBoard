@@ -43,7 +43,6 @@ void IO_Config()
 	GPIO_InitPushPullOutput(GPIO_SNC_TOCU);
 	GPIO_InitPushPullOutput(GPIO_SREG_CS);
 	GPIO_InitPushPullOutput(GPIO_CS_GD2);
-	GPIO_InitPushPullOutput(GPIO_TRIG_RST);
 	GPIO_InitPushPullOutput(GPIO_CS_DAC);
 	GPIO_InitPushPullOutput(GPIO_SREG_OE);
 	GPIO_InitPushPullOutput(GPIO_CS_GD1);
@@ -52,6 +51,15 @@ void IO_Config()
 	GPIO_InitPushPullOutput(GPIO_SYNC_GD);
 	GPIO_InitPushPullOutput(GPIO_PS_EN);
 	//
+	GPIO_SetState(GPIO_CS, true);
+	GPIO_SetState(GPIO_SREG_CS, true);
+	GPIO_SetState(GPIO_CS_GD1, true);
+	GPIO_SetState(GPIO_CS_GD2, true);
+	GPIO_SetState(GPIO_CS_DAC, true);
+	GPIO_SetState(GPIO_LDAC, true);
+
+	// Выход с открытым коллектором
+	GPIO_InitOpenDrainOutput(GPIO_TRIG_RST, NoPull);
 	GPIO_SetState(GPIO_TRIG_RST, true);
 	
 	// Входы
