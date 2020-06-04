@@ -127,21 +127,4 @@
 #define ERR_DEVICE_NOT_READY			3	//  Устройство не готово для смены состояния
 #define ERR_WRONG_PWD					4	//  Неправильный ключ
 
-//  Password to unlock non-volatile area for write
-// 
-#define ENABLE_LOCKING					FALSE
-
-
-typedef enum __DeviceState
-{
-	// Основные состояния
-	DS_None							= 0,	// Блок в неопределенном состоянии
-	DS_Fault						= 1,	// Блок в состоянии Fault
-	DS_Disabled						= 2,	// Блок в состоянии Disabled
-	DS_Charging						= 3,	// Блок в процессе заряда батареи
-	DS_Ready						= 4,	// Блок в состоянии готовности
-	DS_InProcess					= 5,	// Блок в процессе формирования импульса
-} DeviceState;
-
-
 #endif //  __DEV_OBJ_DIC_H
