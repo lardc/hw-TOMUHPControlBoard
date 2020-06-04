@@ -22,13 +22,14 @@
 #define ACT_DBG_RELAY					19	// Проверка выхода RELAY
 #define ACT_DBG_SFTY_ACTIVATION			20	// Проверка выхода SFTY_EN
 #define ACT_DBG_READ_EXT_REG			21	// Проверка чтения внешнего регистра
-#define ACT_DBG_TOCU_SYNC				22	// Проверка выхода SNC_TOCU
+#define ACT_DBG_SNC_TOCU				22	// Проверка выхода SNC_TOCU
 #define ACT_DBG_OUT_ISO					23	// Проверка изолированных выходов
 #define ACT_DBG_U_REF_U10				24	// Проверка установки опорного напряжения для компаратора U10
 #define ACT_DBG_U_REF_U90				25	// Проверка установки опорного напряжения для компаратора U90
 #define ACT_DBG_OSC_SYNC				26	// Проверка выхода SYNC
 #define ACT_DBG_TRIG_RST				27	// Проверка сброса триггера
 #define ACT_DBG_SREG_OE					28	// Проверка выхода SREG_OE
+#define ACT_DBG_M_RESET					29	// Проверка выхода M_RESET
 //
 #define ACT_MEASURE_START				100	// Запуск измерения
 #define ACT_MEASURE_STOP				101	// Останов измерения

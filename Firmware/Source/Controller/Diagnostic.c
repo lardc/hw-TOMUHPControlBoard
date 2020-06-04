@@ -72,9 +72,9 @@ bool DIAG_HandleDiagnosticAction(uint16_t ActionID, uint16_t *pUserError)
 
 		case ACT_DBG_RLC:
 			{
-				LL_INT_Commutation(true);
+				LL_InternalCommutation(true);
 				DELAY_US(1000000);
-				LL_INT_Commutation(false);
+				LL_InternalCommutation(false);
 			}
 			break;
 
@@ -94,54 +94,59 @@ bool DIAG_HandleDiagnosticAction(uint16_t ActionID, uint16_t *pUserError)
 
 		case ACT_DBG_READ_EXT_REG:
 			{
-				DataTable[REG_DBG] = ReadExtReg();
+				DataTable[REG_DBG] = LL_HSTimers_Read();
 			}
 			break;
 
-		case ACT_DBG_TOCU_SYNC:
+		case ACT_DBG_SNC_TOCU:
 			{
-				LL_TOCU_Sync(true);
+				LL_SyncTOCU(true);
 				DELAY_US(1000000);
-				LL_TOCU_Sync(false);
+				LL_SyncTOCU(false);
 			}
 			break;
 
 		case ACT_DBG_OUT_ISO:
 			{
-				OutPut_ISO(DataTable[REG_DBG]);
+				LL_OutputRegister_Write(DataTable[REG_DBG]);
 			}
 			break;
 
 		case ACT_DBG_U_REF_U10:
 			{
-				MEASURE_Set_Uref10(DataTable[REG_DBG]);
+				MEASURE_SetUref10(DataTable[REG_DBG]);
 			}
 			break;
 
 		case ACT_DBG_U_REF_U90:
 			{
-				MEASURE_Set_Uref90(DataTable[REG_DBG]);
+				MEASURE_SetUref90(DataTable[REG_DBG]);
 			}
 			break;
 
 		case ACT_DBG_OSC_SYNC:
 			{
-				LL_OscSync(true);
+				LL_SyncOscilloscope(true);
 				DELAY_US(1000000);
-				LL_OscSync(false);
+				LL_SyncOscilloscope(false);
 			}
 			break;
 
 		case ACT_DBG_TRIG_RST:
 			{
-				LL_GateLatch(false);
-				LL_GateLatch(true);
+				LL_GateLatchReset();
 			}
 			break;
 
 		case ACT_DBG_SREG_OE:
 			{
-				LL_OutReg_OE(DataTable[REG_DBG]);
+				LL_OutputRegister_Enable(DataTable[REG_DBG]);
+			}
+			break;
+
+		case ACT_DBG_M_RESET:
+			{
+				LL_HSTimers_Reset();
 			}
 			break;
 

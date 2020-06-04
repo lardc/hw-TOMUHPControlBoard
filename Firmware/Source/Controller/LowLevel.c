@@ -48,9 +48,11 @@ bool LL_IsSafetyTrig()
 }
 //-----------------------------
 
-void LL_HSTimers_Reset(bool State)
+void LL_HSTimers_Reset()
 {
-	GPIO_SetState(GPIO_M_RESET, !State);
+	GPIO_SetState(GPIO_M_RESET, false);
+	DELAY_US(1);
+	GPIO_SetState(GPIO_M_RESET, true);
 }
 //-----------------------------
 
@@ -72,9 +74,11 @@ uint32_t LL_HSTimers_Read()
 }
 //---------------------------
 
-void LL_GateLatchReset(bool State)
+void LL_GateLatchReset()
 {
-	GPIO_SetState(GPIO_TRIG_RST, !State);
+	GPIO_SetState(GPIO_TRIG_RST, false);
+	DELAY_US(1);
+	GPIO_SetState(GPIO_TRIG_RST, true);
 }
 //-----------------------------
 
