@@ -15,18 +15,13 @@ void LL_UnitFan(bool State);
 void LL_PsBoard_PowerOutput(bool State);
 void LL_PsBoard_PowerInput(bool State);
 void LL_MonitorSafetyInput(bool State);
-bool LL_IsSafetyTrig();
 void LL_HSTimers_Reset();
 uint32_t LL_HSTimers_Read();
 void LL_GateLatchReset();
 void LL_SyncOscilloscope(bool State);
 void LL_SyncTOCU(bool State);
-void LL_InternalCommutation(bool State);
 bool LL_IsOverflow90();
 bool LL_IsOverflow10();
-bool LL_IsPressureTrig();
-void LL_OutputRegister_Enable(bool State);
-void LL_OutputRegister_Write(uint16_t Data);
 void LL_WriteDACx(uint16_t Data, GPIO_PortPinSetting CS_SYNC);
 
 #endif //__LOWLEVEL_H

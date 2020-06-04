@@ -42,12 +42,6 @@ void LL_MonitorSafetyInput(bool State)
 }
 //-----------------------------
 
-bool LL_IsSafetyTrig()
-{
-	return GPIO_GetState(GPIO_SFTY);
-}
-//-----------------------------
-
 void LL_HSTimers_Reset()
 {
 	GPIO_SetState(GPIO_M_RESET, false);
@@ -94,12 +88,6 @@ void LL_SyncTOCU(bool State)
 }
 //-----------------------------
 
-void LL_InternalCommutation(bool State)
-{
-	GPIO_SetState(GPIO_RLC, State);
-}
-//-----------------------------
-
 bool LL_IsOverflow90()
 {
 	return GPIO_GetState(GPIO_OVERFLOW90);
@@ -111,26 +99,6 @@ bool LL_IsOverflow10()
 	return GPIO_GetState(GPIO_OVERFLOW10);
 }
 //-----------------------------
-
-bool LL_IsPressureTrig()
-{
-	return GPIO_GetState(GPIO_PRESSURE);
-}
-//-----------------------------
-
-void LL_OutputRegister_Enable(bool State)
-{
-	GPIO_SetState(GPIO_SREG_OE, State);
-}
-//-----------------------------
-
-void LL_OutputRegister_Write(uint16_t Data)
-{
-	GPIO_SetState(GPIO_SREG_CS, false);
-	SPI_WriteByte(SPI2, Data);
-	GPIO_SetState(GPIO_SREG_CS, true);
-}
-//---------------------
 
 void LL_WriteDACx(uint16_t Data, GPIO_PortPinSetting CS_SYNC)
 {

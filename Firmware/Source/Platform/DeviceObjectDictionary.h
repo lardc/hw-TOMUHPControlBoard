@@ -26,8 +26,7 @@
 #define ACT_DBG_U_REF_U90				25	// Проверка установки опорного напряжения для компаратора U90
 #define ACT_DBG_OSC_SYNC				26	// Проверка выхода SYNC
 #define ACT_DBG_TRIG_RST				27	// Проверка сброса триггера
-#define ACT_DBG_SREG_OE					28	// Проверка выхода SREG_OE
-#define ACT_DBG_M_RESET					29	// Проверка выхода M_RESET
+#define ACT_DBG_M_RESET					28	// Проверка выхода M_RESET
 
 #define ACT_MEASURE_START				100	// Запуск измерения
 #define ACT_MEASURE_STOP				101	// Останов измерения

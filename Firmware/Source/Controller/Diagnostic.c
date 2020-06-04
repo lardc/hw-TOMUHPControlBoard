@@ -8,6 +8,7 @@
 #include "GateDriver.h"
 #include "Delay.h"
 #include "Measurement.h"
+#include "Commutation.h"
 
 // Functions
 bool DIAG_HandleDiagnosticAction(uint16_t ActionID, uint16_t *pUserError)
@@ -72,9 +73,9 @@ bool DIAG_HandleDiagnosticAction(uint16_t ActionID, uint16_t *pUserError)
 
 		case ACT_DBG_RLC:
 			{
-				LL_InternalCommutation(true);
+				COMM_InternalCommutation(true);
 				DELAY_US(1000000);
-				LL_InternalCommutation(false);
+				COMM_InternalCommutation(false);
 			}
 			break;
 
@@ -108,7 +109,7 @@ bool DIAG_HandleDiagnosticAction(uint16_t ActionID, uint16_t *pUserError)
 
 		case ACT_DBG_OUT_ISO:
 			{
-				LL_OutputRegister_Write(DataTable[REG_DBG]);
+				COMM_TOSURaw(DataTable[REG_DBG]);
 			}
 			break;
 
@@ -135,12 +136,6 @@ bool DIAG_HandleDiagnosticAction(uint16_t ActionID, uint16_t *pUserError)
 		case ACT_DBG_TRIG_RST:
 			{
 				LL_GateLatchReset();
-			}
-			break;
-
-		case ACT_DBG_SREG_OE:
-			{
-				LL_OutputRegister_Enable(DataTable[REG_DBG]);
 			}
 			break;
 
