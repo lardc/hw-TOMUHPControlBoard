@@ -33,7 +33,9 @@ typedef enum __SubState
 	SS_None = 0,
 	SS_PowerOn = 1,
 	SS_WaitCharge = 2,
-
+	
+	SS_PowerOff = 3,
+	
 	SS_StopProcess,
 	SS_WaitVoltage,
 	SS_VoltageReady,
@@ -61,11 +63,13 @@ static Int64U CONTROL_TimeCounterDelay = 0;
 //
 static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError);
 void CONTROL_SetDeviceState(DeviceState NewState, SubState NewSubState);
-void CONTROL_Logic();
 void CONTROL_SwitchToFault(Int16U Reason);
 void CONTROL_WatchDogUpdate();
 void CONTROL_ResetToDefaultState();
 void CONTROL_ResetHardware();
+void CONTROL_HandleSlavesStateUpdate();
+void CONTROL_HandlePowerOn();
+void CONTROL_HandlePowerOff();
 
 // Functions
 //
@@ -86,7 +90,7 @@ void CONTROL_Init()
 	DEVPROFILE_InitEPService(EPIndexes, EPSized, EPCounters, EPDatas);
 	// —брос значений
 	DEVPROFILE_ResetControlSection();
-
+	
 	CONTROL_ResetToDefaultState();
 }
 //-----------------------------------------------
@@ -98,16 +102,16 @@ void CONTROL_ResetToDefaultState()
 	DataTable[REG_WARNING] = WARNING_NONE;
 	DataTable[REG_PROBLEM] = PROBLEM_NONE;
 	DataTable[REG_TEST_FINISHED] = OPRESULT_NONE;
-
+	
 	DataTable[REG_MEAS_CURRENT_VALUE] = 0;
 	DataTable[REG_MEAS_TIME_DELAY] = 0;
 	DataTable[REG_MEAS_TIME_ON] = 0;
 	
 	DEVPROFILE_ResetScopes(0);
 	DEVPROFILE_ResetEPReadState();
-
+	
 	BHL_ResetError();
-
+	
 	CONTROL_ResetHardware();
 	CONTROL_SetDeviceState(DS_None, SS_None);
 }
@@ -115,7 +119,13 @@ void CONTROL_ResetToDefaultState()
 
 void CONTROL_ResetHardware()
 {
-
+	LL_ExternalLED(false);
+	LL_UnitFan(false);
+	LL_PsBoard_PowerOutput(false);
+	LL_PsBoard_PowerInput(false);
+	LL_MonitorSafetyInput(false);
+	LL_SyncOscilloscope(false);
+	LL_SyncTOCU(false);
 }
 //-----------------------------------------------
 
@@ -123,7 +133,10 @@ void CONTROL_Idle()
 {
 	DEVPROFILE_ProcessRequests();
 	
-	CONTROL_Logic();
+	CONTROL_HandleSlavesStateUpdate();
+	CONTROL_HandlePowerOn();
+	CONTROL_HandlePowerOff();
+	
 	CONTROL_WatchDogUpdate();
 }
 //-----------------------------------------------
@@ -181,9 +194,7 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 		case ACT_FAULT_CLEAR:
 			{
 				if(CONTROL_State == DS_Fault)
-				{
 					CONTROL_ResetToDefaultState();
-				}
 			}
 			break;
 			
@@ -203,14 +214,14 @@ void CONTROL_HandlePowerOn()
 {
 	if(CONTROL_State == DS_InProcess)
 	{
-		switch(SUB_State)
+		switch (SUB_State)
 		{
 			case SS_PowerOn:
 				{
 					LL_PsBoard_PowerInput(true);
 					LL_PsBoard_PowerOutput(true);
-
-					if (LOGIC_CallCommandForSlaves(ACT_TOCU_ENABLE_POWER))
+					
+					if(LOGIC_CallCommandForSlaves(ACT_TOCU_ENABLE_POWER))
 					{
 						CONTROL_TimeCounterDelay = CONTROL_TimeCounter + DataTable[REG_TOCU_CHARGE_TIMEOUT];
 						CONTROL_SetDeviceState(DS_InProcess, SS_WaitCharge);
@@ -219,14 +230,14 @@ void CONTROL_HandlePowerOn()
 						CONTROL_SwitchToFault(DF_INTERFACE);
 				}
 				break;
-
+				
 			case SS_WaitCharge:
 				{
 					if(LOGIC_AreSlavesInStateX(TOCUDS_Ready))
 					{
 						CONTROL_SetDeviceState(DS_Ready, SS_None);
 					}
-					else if (LOGIC_IsSlaveInFaultOrDisabled(TOCUDS_Fault, TOCUDS_Disabled))
+					else if(LOGIC_IsSlaveInFaultOrDisabled(TOCUDS_Fault, TOCUDS_Disabled))
 					{
 						CONTROL_SwitchToFault(DF_TOCU_WRONG_STATE);
 					}
@@ -234,7 +245,7 @@ void CONTROL_HandlePowerOn()
 						CONTROL_SwitchToFault(DF_TOCU_CHARGE_TIMEOUT);
 				}
 				break;
-
+				
 			default:
 				break;
 		}
@@ -242,15 +253,34 @@ void CONTROL_HandlePowerOn()
 }
 //-----------------------------------------------
 
+void CONTROL_HandlePowerOff()
+{
+	if(CONTROL_State == DS_None && SUB_State == SS_PowerOff)
+	{
+		CONTROL_ResetHardware();
+		
+		if(LOGIC_CallCommandForSlaves(ACT_TOCU_DISABLE_POWER))
+		{
+			CONTROL_SetDeviceState(DS_None, SS_None);
+		}
+		else
+			CONTROL_SwitchToFault(DF_INTERFACE);
+	}
+}
+//-----------------------------------------------
+
 void CONTROL_HandleSlavesStateUpdate()
 {
 	static uint64_t NextUpdate = 0;
-
-	if(CONTROL_State == DS_InProcess && CONTROL_TimeCounter > NextUpdate)
+	
+	if(SUB_State != SS_None)
 	{
-		NextUpdate = CONTROL_TimeCounter + T_SLAVE_UPDATE_PERIOD;
-		if(!LOGIC_ReadSlavesState())
-			CONTROL_SwitchToFault(DF_INTERFACE);
+		if(CONTROL_TimeCounter > NextUpdate)
+		{
+			NextUpdate = CONTROL_TimeCounter + T_SLAVE_UPDATE_PERIOD;
+			if(!LOGIC_ReadSlavesState())
+				CONTROL_SwitchToFault(DF_INTERFACE);
+		}
 	}
 }
 //-----------------------------------------------
@@ -398,7 +428,7 @@ void CONTROL_SwitchToFault(Int16U Reason)
 		DataTable[REG_BHL_FUNCTION] = Error.Func;
 		DataTable[REG_BHL_EXT_DATA] = Error.ExtData;
 	}
-
+	
 	CONTROL_ResetHardware();
 	
 	CONTROL_SetDeviceState(DS_Fault, SS_None);
@@ -410,7 +440,7 @@ void CONTROL_SetDeviceState(DeviceState NewState, SubState NewSubState)
 {
 	CONTROL_State = NewState;
 	DataTable[REG_DEV_STATE] = NewState;
-
+	
 	SUB_State = NewSubState;
 	DataTable[REG_DEV_SUB_STATE] = NewSubState;
 }
