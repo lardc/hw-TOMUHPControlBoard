@@ -36,10 +36,7 @@ typedef enum __SubState
 	
 	SS_PowerOff = 3,
 	
-	SS_StopProcess,
-	SS_WaitVoltage,
-	SS_VoltageReady,
-	SS_WaitContactor
+	SS_ConfigRequest = 4
 } SubState;
 typedef enum __TOCUDeviceState
 {
@@ -163,6 +160,7 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 				if(CONTROL_State == DS_Ready)
 				{
 					CONTROL_ResetToDefaultState();
+					CONTROL_SetDeviceState(DS_None, SS_PowerOff);
 				}
 				else if(CONTROL_State != DS_None)
 					*pUserError = ERR_OPERATION_BLOCKED;
@@ -173,7 +171,7 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 			{
 				if(CONTROL_State == DS_Ready)
 				{
-					// Запуск измерения
+					CONTROL_SetDeviceState(DS_InProcess, SS_ConfigRequest);
 				}
 				else
 					*pUserError = ERR_DEVICE_NOT_READY;
@@ -184,7 +182,7 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 			{
 				if(CONTROL_State == DS_InProcess)
 				{
-					SUB_State = SS_StopProcess;
+					// Остановка процесса
 				}
 				else
 					*pUserError = ERR_OPERATION_BLOCKED;
@@ -265,6 +263,25 @@ void CONTROL_HandlePowerOff()
 		}
 		else
 			CONTROL_SwitchToFault(DF_INTERFACE);
+	}
+}
+//-----------------------------------------------
+
+void CONTROL_HandlePulseConfig()
+{
+	if(CONTROL_State == DS_InProcess)
+	{
+		switch (SUB_State)
+		{
+			case SS_ConfigRequest:
+				{
+					//
+				}
+				break;
+
+			default:
+				break;
+		}
 	}
 }
 //-----------------------------------------------
