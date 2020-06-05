@@ -23,7 +23,7 @@
 // -----------------------------------------------
 
 // Временные параметры
-#define T_POWER_ON_PAUSE		1000
+#define T_SLAVE_UPDATE_PERIOD	100
 
 #define LED_BLINK_TIME			500				// Период моргания светодиода на плате [ms]
 #define DELAY_CONTACTOR			500				// Задержка включения контактора [мс]

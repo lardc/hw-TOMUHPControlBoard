@@ -46,7 +46,8 @@
 #define REG_P0_I_DUT					3	// Коэффициент P0 измеренного значения тока (в А)
 #define REG_P1_I_DUT					4	// Коэффициент P1 измеренного значения тока (х1000)
 #define REG_P2_I_DUT					5	// Коэффициент P2 измеренного значения тока (x1e6)
-// 6 - 9
+#define REG_TOCU_CHARGE_TIMEOUT			6
+// 7 - 9
 #define REG_VCOMP10_500					10	// Напряжение на компараторе канала напряжения уровня 10% для 500В (в мв)
 #define REG_VCOMP90_500					11	// Напряжение на компараторе канала напряжения уровня 90% для 500В (в мв)
 #define REG_VCOMP10_1000				12	// Напряжение на компараторе канала напряжения уровня 10% для 1000В (в мв)
@@ -82,11 +83,22 @@
 #define REG_DBG_PRE_I_DUT_VALUE			202	// Предварительный ток на DUT (в А)
 #define REG_DBG_ADC_RAW					203	// Измеренные сырые значения по каналу напряжения и каналу тока (в тиках)
 //
+#define REG_BHL_ERROR_CODE				210
+#define REG_BHL_DEVICE					211
+#define REG_BHL_FUNCTION				212
+#define REG_BHL_EXT_DATA				213
+//
 #define REG_MEAS_CURRENT_VALUE			250	// Измеренное значение тока (А)
 #define	REG_MEAS_TIME_DELAY				251	// Измеренное значение задержки включения (нс)
 #define	REG_MEAS_TIME_ON				252	// Измеренное значение времени включения (нс)
 //
 // -----------------------------------------------
+
+
+#define ACT_TOCU_ENABLE_POWER			1	// Переход в состояние ожидания
+#define ACT_TOCU_DISABLE_POWER			2	// Отключение блока
+#define ACT_TOCU_FAULT_CLEAR			3	// Очистка fault
+#define ACT_TOCU_WARNING_CLEAR			4	// Очистка warning
 
 // Несохраняемы регистры чтения-записи
 #define REG_TOCU_VOLTAGE_SETPOINT		128	// Значение задания напряжения (в В)
@@ -115,7 +127,9 @@
 //  Fault and disable codes
 // 
 #define DF_NONE							0
-#define DF_BATTERY						1	// Проблема заряда батареи
+#define DF_INTERFACE					1
+#define DF_TOCU_WRONG_STATE				2
+#define DF_TOCU_CHARGE_TIMEOUT			3
 
 // Problem
 //

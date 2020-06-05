@@ -2,8 +2,13 @@
 #define __LOGIC_H
 
 #include "stdinc.h"
+#include "BCCIMHighLevel.h"
 
 // Functions
-
+bool LOGIC_ReadSlavesState();
+bool LOGIC_WriteSlavesConfig();
+bool LOGIC_CallCommandForSlaves(uint16_t Command);
+bool LOGIC_AreSlavesInStateX(uint16_t State);
+bool LOGIC_IsSlaveInFaultOrDisabled(uint16_t Fault, uint16_t Disabled);
 
 #endif // __LOGIC_H

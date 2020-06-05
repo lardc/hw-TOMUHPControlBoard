@@ -15,10 +15,38 @@
 #include "InitConfig.h"
 #include "Measurement.h"
 #include "Delay.h"
+#include "Logic.h"
 
 // Types
 //
 typedef void (*FUNC_AsyncDelegate)();
+typedef enum __DeviceState
+{
+	DS_None = 0,
+	DS_Fault = 1,
+	DS_Disabled = 2,
+	DS_Ready = 3,
+	DS_InProcess = 4
+} DeviceState;
+typedef enum __SubState
+{
+	SS_None = 0,
+	SS_PowerOn = 1,
+	SS_WaitCharge = 2,
+
+	SS_StopProcess,
+	SS_WaitVoltage,
+	SS_VoltageReady,
+	SS_WaitContactor
+} SubState;
+typedef enum __TOCUDeviceState
+{
+	TOCUDS_None = 0,
+	TOCUDS_Fault = 1,
+	TOCUDS_Disabled = 2,
+	TOCUDS_Ready = 3,
+	TOCUDS_InProcess = 4
+} TOCUDeviceState;
 
 // Variables
 //
@@ -78,6 +106,8 @@ void CONTROL_ResetToDefaultState()
 	DEVPROFILE_ResetScopes(0);
 	DEVPROFILE_ResetEPReadState();
 
+	BHL_ResetError();
+
 	CONTROL_ResetHardware();
 	CONTROL_SetDeviceState(DS_None, SS_None);
 }
@@ -108,10 +138,6 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 			{
 				if(CONTROL_State == DS_None)
 				{
-					LL_PsBoard_PowerInput(true);
-					LL_PsBoard_PowerOutput(true);
-
-					CONTROL_TimeCounterDelay = CONTROL_TimeCounter + T_POWER_ON_PAUSE;
 					CONTROL_SetDeviceState(DS_InProcess, SS_PowerOn);
 				}
 				else if(CONTROL_State != DS_Ready)
@@ -175,10 +201,56 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 
 void CONTROL_HandlePowerOn()
 {
-	if(CONTROL_State == DS_InProcess && SUB_State == SS_StopProcess)
+	if(CONTROL_State == DS_InProcess)
 	{
-		if(CONTROL_TimeCounter > CONTROL_TimeCounterDelay)
-			CONTROL_SetDeviceState(DS_Ready, SS_None);
+		switch(SUB_State)
+		{
+			case SS_PowerOn:
+				{
+					LL_PsBoard_PowerInput(true);
+					LL_PsBoard_PowerOutput(true);
+
+					if (LOGIC_CallCommandForSlaves(ACT_TOCU_ENABLE_POWER))
+					{
+						CONTROL_TimeCounterDelay = CONTROL_TimeCounter + DataTable[REG_TOCU_CHARGE_TIMEOUT];
+						CONTROL_SetDeviceState(DS_InProcess, SS_WaitCharge);
+					}
+					else
+						CONTROL_SwitchToFault(DF_INTERFACE);
+				}
+				break;
+
+			case SS_WaitCharge:
+				{
+					if(LOGIC_AreSlavesInStateX(TOCUDS_Ready))
+					{
+						CONTROL_SetDeviceState(DS_Ready, SS_None);
+					}
+					else if (LOGIC_IsSlaveInFaultOrDisabled(TOCUDS_Fault, TOCUDS_Disabled))
+					{
+						CONTROL_SwitchToFault(DF_TOCU_WRONG_STATE);
+					}
+					else if(CONTROL_TimeCounter > CONTROL_TimeCounterDelay)
+						CONTROL_SwitchToFault(DF_TOCU_CHARGE_TIMEOUT);
+				}
+				break;
+
+			default:
+				break;
+		}
+	}
+}
+//-----------------------------------------------
+
+void CONTROL_HandleSlavesStateUpdate()
+{
+	static uint64_t NextUpdate = 0;
+
+	if(CONTROL_State == DS_InProcess && CONTROL_TimeCounter > NextUpdate)
+	{
+		NextUpdate = CONTROL_TimeCounter + T_SLAVE_UPDATE_PERIOD;
+		if(!LOGIC_ReadSlavesState())
+			CONTROL_SwitchToFault(DF_INTERFACE);
 	}
 }
 //-----------------------------------------------
@@ -318,6 +390,15 @@ void CONTROL_Logic()
 
 void CONTROL_SwitchToFault(Int16U Reason)
 {
+	if(Reason == DF_INTERFACE)
+	{
+		BHLError Error = BHL_GetError();
+		DataTable[REG_BHL_ERROR_CODE] = Error.ErrorCode;
+		DataTable[REG_BHL_DEVICE] = Error.Device;
+		DataTable[REG_BHL_FUNCTION] = Error.Func;
+		DataTable[REG_BHL_EXT_DATA] = Error.ExtData;
+	}
+
 	CONTROL_ResetHardware();
 	
 	CONTROL_SetDeviceState(DS_Fault, SS_None);

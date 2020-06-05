@@ -2,7 +2,6 @@
 #include "Logic.h"
 // Includes
 #include "Controller.h"
-#include "BCCIMHighLevel.h"
 #include "DeviceObjectDictionary.h"
 
 // Definitions
@@ -25,7 +24,7 @@ typedef struct __NodeState
 	uint16_t Voltage;
 } NodeState;
 
-// Varables
+// Variables
 //
 const NodeBitmask NodeBitmaskArray[] = {{TOCU1_CAN_NID, TOCU1_BIT_MASK}};
 #define NODE_ARRAY_SIZE		(sizeof NodeBitmaskArray / sizeof NodeBitmaskArray[0])
@@ -36,7 +35,7 @@ NodeState NodeArray[NODE_ARRAY_SIZE] = {0};
 
 // Functions
 //
-bool LOGIC_ReadCellsState()
+bool LOGIC_ReadSlavesState()
 {
 	uint16_t State, OpResult;
 	bool result;
@@ -61,7 +60,7 @@ bool LOGIC_ReadCellsState()
 }
 //-----------------------------------------------
 
-bool LOGIC_WriteCellsConfig()
+bool LOGIC_WriteSlavesConfig()
 {
 	bool result;
 	
@@ -81,7 +80,7 @@ bool LOGIC_WriteCellsConfig()
 }
 //-----------------------------------------------
 
-bool LOGIC_CallCommandForCells(uint16_t Command)
+bool LOGIC_CallCommandForSlaves(uint16_t Command)
 {
 	for(uint16_t i = 0; i < NODE_ARRAY_SIZE; ++i)
 	{
@@ -90,5 +89,27 @@ bool LOGIC_CallCommandForCells(uint16_t Command)
 	}
 	
 	return true;
+}
+//-----------------------------------------------
+
+bool LOGIC_AreSlavesInStateX(uint16_t State)
+{
+	bool result = true;
+
+	for(uint16_t i = 0; i < NODE_ARRAY_SIZE; ++i)
+		if(NodeArray[i].State != State)
+			result = false;
+
+	return result;
+}
+//-----------------------------------------------
+
+bool LOGIC_IsSlaveInFaultOrDisabled(uint16_t Fault, uint16_t Disabled)
+{
+	for(uint16_t i = 0; i < NODE_ARRAY_SIZE; ++i)
+		if(NodeArray[i].State == Fault || NodeArray[i].State == Disabled)
+			return true;
+
+	return false;
 }
 //-----------------------------------------------
