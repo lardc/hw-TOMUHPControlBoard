@@ -89,7 +89,7 @@ bool DIAG_HandleDiagnosticAction(uint16_t ActionID, uint16_t *pUserError)
 
 		case ACT_DBG_SFTY_ACTIVATION:
 			{
-				LL_MonitorSafetyInput(DataTable[REG_DBG]);
+				COMM_EnableSafetyInput(DataTable[REG_DBG] ? true : false);
 			}
 			break;
 

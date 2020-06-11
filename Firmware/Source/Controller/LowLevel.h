@@ -14,7 +14,6 @@ void LL_ExternalLED(bool State);
 void LL_UnitFan(bool State);
 void LL_PsBoard_PowerOutput(bool State);
 void LL_PsBoard_PowerInput(bool State);
-void LL_MonitorSafetyInput(bool State);
 void LL_HSTimers_Reset();
 uint32_t LL_HSTimers_Read();
 void LL_GateLatchReset();

@@ -36,12 +36,6 @@ void LL_PsBoard_PowerInput(bool State)
 }
 //-----------------------------
 
-void LL_MonitorSafetyInput(bool State)
-{
-	GPIO_SetState(GPIO_SFTY_EN, State);
-}
-//-----------------------------
-
 void LL_HSTimers_Reset()
 {
 	GPIO_SetState(GPIO_M_RESET, false);

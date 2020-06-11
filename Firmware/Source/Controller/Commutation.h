@@ -9,6 +9,7 @@ void COMM_InternalCommutation(bool State);
 
 bool COMM_IsPressureTrig();
 bool COMM_IsSafetyTrig();
+void COMM_EnableSafetyInput(bool State);
 
 void COMM_TOSURaw(uint16_t Data);
 void COMM_TOSU(AnodeVoltage Voltage);

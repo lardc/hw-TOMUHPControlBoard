@@ -48,7 +48,8 @@
 #define REG_P2_I_DUT					5	// Коэффициент P2 измеренного значения тока (x1e6)
 #define REG_TOCU_CHARGE_TIMEOUT			6
 #define REG_TOCU_RES_PER_BIT			7
-// 8 - 9
+#define REG_MUTE_SAFETY_SYSTEM			8
+// 9
 #define REG_VCOMP10_500					10	// Напряжение на компараторе канала напряжения уровня 10% для 500В (в мв)
 #define REG_VCOMP90_500					11	// Напряжение на компараторе канала напряжения уровня 90% для 500В (в мв)
 #define REG_VCOMP10_1000				12	// Напряжение на компараторе канала напряжения уровня 10% для 1000В (в мв)
@@ -64,8 +65,10 @@
 // 32 - 127
 
 // Несохраняемы регистры чтения-записи
-#define REG_CURRENT_VALUE				128	// Значение задания тока (А)
-#define REG_VOLTAGE_VALUE				129
+#define REG_ANODE_VOLTAGE				128
+#define REG_ANODE_CURRENT				129
+#define REG_GATE_CURRENT				130
+#define REG_GATE_CURRENT_RATE			131
 
 #define REG_DBG_TOCU_DATA				150	// Сырое значение для отправки в TOCU
 
@@ -79,6 +82,7 @@
 #define REG_PROBLEM						196	// Регистр Problem
 #define REG_TEST_FINISHED				197
 #define REG_DEV_SUB_STATE				198
+#define REG_SAFETY_STATE				199
 //
 #define REG_DBG_VSO_VALUE				200	// Напряжение на батарее (в В)
 #define REG_DBG_I_DUT_VALUE				201	// Ток на DUT (в А)
@@ -142,6 +146,7 @@
 #define PROBLEM_NO_POT_SIGNAL			4	// Нет сигнала с потенциальной линии
 #define PROBLEM_OVERFLOW90				5	// Переполнение счётчика уровня 90%
 #define PROBLEM_OVERFLOW10				6	// Переполнение счётчика уровня 10%
+#define PROBLEM_SAFETY_VIOLATION		7
 
 //  Warning
 // 

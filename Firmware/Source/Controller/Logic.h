@@ -12,5 +12,7 @@ bool LOGIC_CallCommandForSlaves(uint16_t Command);
 bool LOGIC_AreSlavesInStateX(uint16_t State);
 bool LOGIC_IsSlaveInFaultOrDisabled(uint16_t Fault, uint16_t Disabled);
 void LOGIC_AssignVoltageAndCurrentToSlaves(AnodeVoltage Voltage, uint16_t Current);
+bool LOGIC_IsAnodeVRegCorrect();
+bool LOGIC_GetSafetyState();
 
 #endif // __LOGIC_H

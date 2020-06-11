@@ -4,6 +4,8 @@
 #include "LowLevel.h"
 #include "Board.h"
 #include "Global.h"
+#include "DataTable.h"
+#include "DeviceObjectDictionary.h"
 
 // Definitions
 #define COMM_TOSU_MASK_500		0x0
@@ -30,6 +32,12 @@ bool COMM_IsPressureTrig()
 bool COMM_IsSafetyTrig()
 {
 	return GPIO_GetState(GPIO_SFTY);
+}
+//-----------------------------
+
+void COMM_EnableSafetyInput(bool State)
+{
+	GPIO_SetState(GPIO_SFTY_EN, State);
 }
 //-----------------------------
 

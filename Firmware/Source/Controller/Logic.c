@@ -3,6 +3,7 @@
 // Includes
 #include "DataTable.h"
 #include "DeviceObjectDictionary.h"
+#include "Commutation.h"
 
 // Definitions
 //
@@ -95,11 +96,11 @@ bool LOGIC_CallCommandForSlaves(uint16_t Command)
 bool LOGIC_AreSlavesInStateX(uint16_t State)
 {
 	bool result = true;
-
+	
 	for(uint16_t i = 0; i < NODE_ARRAY_SIZE; ++i)
 		if(NodeArray[i].State != State)
 			result = false;
-
+	
 	return result;
 }
 //-----------------------------------------------
@@ -109,7 +110,7 @@ bool LOGIC_IsSlaveInFaultOrDisabled(uint16_t Fault, uint16_t Disabled)
 	for(uint16_t i = 0; i < NODE_ARRAY_SIZE; ++i)
 		if(NodeArray[i].State == Fault || NodeArray[i].State == Disabled)
 			return true;
-
+	
 	return false;
 }
 //-----------------------------------------------
@@ -118,24 +119,43 @@ void LOGIC_AssignVoltageAndCurrentToSlaves(AnodeVoltage Voltage, uint16_t Curren
 {
 	float CurrentPerBit;
 	uint16_t ActualBitmask = 0, MaximumBitmask = 0;
-
+	
 	// ќпределение максимально допустимой битовой маски
 	for(uint16_t i = 0; i < NODE_ARRAY_SIZE; ++i)
 		MaximumBitmask |= NodeBitmaskArray[i].SupportedBits;
-
+	
 	// ќпределение величины тока на бит при заданном напр€жении
 	CurrentPerBit = (float)Voltage / DataTable[REG_TOCU_RES_PER_BIT];
-
+	
 	// ќпределение битовой маски дл€ выбранного значени€ тока
 	ActualBitmask = (uint16_t)(Current / CurrentPerBit);
-	if (ActualBitmask > MaximumBitmask)
+	if(ActualBitmask > MaximumBitmask)
 		ActualBitmask = MaximumBitmask;
-
+	
 	// ‘ормирование уставки дл€ блоков
 	for(uint16_t i = 0; i < NODE_ARRAY_SIZE; ++i)
 	{
 		NodeArray[i].Voltage = Voltage;
 		NodeArray[i].Mask = NodeBitmaskArray[i].SupportedBits & ActualBitmask;
 	}
+}
+//-----------------------------------------------
+
+bool LOGIC_IsAnodeVRegCorrect()
+{
+	uint16_t v = DataTable[REG_ANODE_VOLTAGE];
+	return (v == TOU_500V) || (v == TOU_1000V) || (v == TOU_1500V);
+}
+//-----------------------------------------------
+
+bool LOGIC_GetSafetyState()
+{
+	bool SafetyInput = COMM_IsSafetyTrig();
+	DataTable[REG_SAFETY_STATE] = SafetyInput ? 1 : 0;
+	
+	if(DataTable[REG_MUTE_SAFETY_SYSTEM])
+		return true;
+	else
+		return SafetyInput;
 }
 //-----------------------------------------------

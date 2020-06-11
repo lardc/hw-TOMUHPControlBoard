@@ -16,6 +16,7 @@
 #include "Measurement.h"
 #include "Delay.h"
 #include "Logic.h"
+#include "Commutation.h"
 
 // Types
 //
@@ -55,7 +56,6 @@ static Boolean CycleActive = FALSE;
 //
 volatile Int64U CONTROL_TimeCounter = 0;
 Int64U CONTROL_TimeCounterDelay = 0;
-AnodeVoltage ActualAnodeVoltage = TOU_500V;
 
 // Forward functions
 //
@@ -64,10 +64,13 @@ void CONTROL_SetDeviceState(DeviceState NewState, SubState NewSubState);
 void CONTROL_SwitchToFault(Int16U Reason);
 void CONTROL_WatchDogUpdate();
 void CONTROL_ResetToDefaultState();
-void CONTROL_ResetHardware();
-void CONTROL_HandleSlavesStateUpdate();
+void CONTROL_ResetHardware(bool KeepPower);
+void CONTROL_ResetData();
+void CONTROL_SlavesStateUpdate();
+void CONTROL_HandleSafety();
 void CONTROL_HandlePowerOn();
 void CONTROL_HandlePowerOff();
+void CONTROL_HandlePulseConfig();
 
 // Functions
 //
@@ -95,6 +98,16 @@ void CONTROL_Init()
 
 void CONTROL_ResetToDefaultState()
 {
+	CONTROL_ResetData();
+	BHL_ResetError();
+	
+	CONTROL_ResetHardware(false);
+	CONTROL_SetDeviceState(DS_None, SS_None);
+}
+//-----------------------------------------------
+
+void CONTROL_ResetData()
+{
 	DataTable[REG_FAULT_REASON] = DF_NONE;
 	DataTable[REG_DISABLE_REASON] = DF_NONE;
 	DataTable[REG_WARNING] = WARNING_NONE;
@@ -107,33 +120,38 @@ void CONTROL_ResetToDefaultState()
 	
 	DEVPROFILE_ResetScopes(0);
 	DEVPROFILE_ResetEPReadState();
-	
-	BHL_ResetError();
-	
-	CONTROL_ResetHardware();
-	CONTROL_SetDeviceState(DS_None, SS_None);
 }
 //-----------------------------------------------
 
-void CONTROL_ResetHardware()
+void CONTROL_ResetHardware(bool KeepPower)
 {
 	LL_ExternalLED(false);
 	LL_UnitFan(false);
 	LL_PsBoard_PowerOutput(false);
-	LL_PsBoard_PowerInput(false);
-	LL_MonitorSafetyInput(false);
+	if(!KeepPower)
+		LL_PsBoard_PowerInput(false);
 	LL_SyncOscilloscope(false);
 	LL_SyncTOCU(false);
+	
+	COMM_EnableSafetyInput(false);
 }
 //-----------------------------------------------
 
 void CONTROL_Idle()
 {
+	// Обработка мастер-запросов по интерфейсу
 	DEVPROFILE_ProcessRequests();
 	
-	CONTROL_HandleSlavesStateUpdate();
+	// Считывание состояний блоков-рабов
+	CONTROL_SlavesStateUpdate();
+	
+	// Мониторинг системы безопасности
+	CONTROL_HandleSafety();
+	
+	// Обработка логики мастер-команд
 	CONTROL_HandlePowerOn();
 	CONTROL_HandlePowerOff();
+	CONTROL_HandlePulseConfig();
 	
 	CONTROL_WatchDogUpdate();
 }
@@ -148,9 +166,7 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 		case ACT_ENABLE_POWER:
 			{
 				if(CONTROL_State == DS_None)
-				{
 					CONTROL_SetDeviceState(DS_InProcess, SS_PowerOn);
-				}
 				else if(CONTROL_State != DS_Ready)
 					*pUserError = ERR_OPERATION_BLOCKED;
 			}
@@ -170,15 +186,13 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 			
 		case ACT_MEASURE_START:
 			{
-				if (DataTable[REG_VOLTAGE_VALUE] == TOU_500V ||
-					DataTable[REG_VOLTAGE_VALUE] == TOU_1000V ||
-					DataTable[REG_VOLTAGE_VALUE] == TOU_1500V)
+				if(LOGIC_IsAnodeVRegCorrect())
 				{
-					ActualAnodeVoltage = DataTable[REG_VOLTAGE_VALUE];
-
 					if(CONTROL_State == DS_Ready)
 					{
-						LOGIC_AssignVoltageAndCurrentToSlaves(ActualAnodeVoltage, DataTable[REG_CURRENT_VALUE]);
+						CONTROL_ResetData();
+						
+						COMM_EnableSafetyInput(DataTable[REG_MUTE_SAFETY_SYSTEM] ? false : true);
 						CONTROL_SetDeviceState(DS_InProcess, SS_ConfigRequest);
 					}
 					else
@@ -216,6 +230,23 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 	}
 	
 	return TRUE;
+}
+//-----------------------------------------------
+
+void CONTROL_HandleSafety()
+{
+	bool SystemIsSafe = LOGIC_GetSafetyState();
+	
+	if(CONTROL_State == DS_InProcess && SUB_State == SS_ConfigRequest)
+	{
+		if(!SystemIsSafe)
+		{
+			CONTROL_ResetHardware(true);
+			CONTROL_SetDeviceState(DS_Ready, SS_None);
+			
+			DataTable[REG_PROBLEM] = PROBLEM_SAFETY_VIOLATION;
+		}
+	}
 }
 //-----------------------------------------------
 
@@ -266,12 +297,10 @@ void CONTROL_HandlePowerOff()
 {
 	if(CONTROL_State == DS_None && SUB_State == SS_PowerOff)
 	{
-		CONTROL_ResetHardware();
+		CONTROL_ResetHardware(false);
 		
 		if(LOGIC_CallCommandForSlaves(ACT_TOCU_DISABLE_POWER))
-		{
 			CONTROL_SetDeviceState(DS_None, SS_None);
-		}
 		else
 			CONTROL_SwitchToFault(DF_INTERFACE);
 	}
@@ -289,7 +318,7 @@ void CONTROL_HandlePulseConfig()
 					//
 				}
 				break;
-
+				
 			default:
 				break;
 		}
@@ -297,7 +326,7 @@ void CONTROL_HandlePulseConfig()
 }
 //-----------------------------------------------
 
-void CONTROL_HandleSlavesStateUpdate()
+void CONTROL_SlavesStateUpdate()
 {
 	static uint64_t NextUpdate = 0;
 	
@@ -457,7 +486,7 @@ void CONTROL_SwitchToFault(Int16U Reason)
 		DataTable[REG_BHL_EXT_DATA] = Error.ExtData;
 	}
 	
-	CONTROL_ResetHardware();
+	CONTROL_ResetHardware(false);
 	
 	CONTROL_SetDeviceState(DS_Fault, SS_None);
 	DataTable[REG_FAULT_REASON] = Reason;
