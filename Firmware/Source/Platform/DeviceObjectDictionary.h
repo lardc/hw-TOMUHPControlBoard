@@ -65,6 +65,7 @@
 
 // Несохраняемы регистры чтения-записи
 #define REG_CURRENT_VALUE				128	// Значение задания тока (А)
+#define REG_VOLTAGE_VALUE				129
 
 #define REG_DBG_TOCU_DATA				150	// Сырое значение для отправки в TOCU
 

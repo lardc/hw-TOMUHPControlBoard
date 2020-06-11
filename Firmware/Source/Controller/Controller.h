@@ -4,6 +4,14 @@
 // Include
 #include "stdinc.h"
 
+// Types
+typedef enum __AnodeVoltage
+{
+	TOU_500V = 500,
+	TOU_1000V = 1000,
+	TOU_1500V = 1500
+} AnodeVoltage;
+
 // Variables
 extern volatile Int64U CONTROL_TimeCounter;
 

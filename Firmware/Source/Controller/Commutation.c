@@ -40,28 +40,32 @@ void COMM_OutputRegister_Write(uint16_t Data)
 	GPIO_SetState(GPIO_SREG_CS, true);
 	GPIO_SetState(GPIO_SREG_OE, false);
 }
-//---------------------
+//-----------------------------
 
 void COMM_TOSURaw(uint16_t Data)
 {
 	COMM_OutputRegister_Write(Data);
 }
-//---------------------
-
-void COMM_TOSU500()
-{
-	COMM_OutputRegister_Write(COMM_TOSU_MASK_500);
-}
 //-----------------------------
 
-void COMM_TOSU1000()
+void COMM_TOSU(AnodeVoltage Voltage)
 {
-	COMM_OutputRegister_Write(COMM_TOSU_MASK_1000);
-}
-//-----------------------------
+	switch (Voltage)
+	{
+		case TOU_500V:
+			COMM_OutputRegister_Write(COMM_TOSU_MASK_500);
+			break;
 
-void COMM_TOSU1500()
-{
-	COMM_OutputRegister_Write(COMM_TOSU_MASK_1500);
+		case TOU_1000V:
+			COMM_OutputRegister_Write(COMM_TOSU_MASK_1000);
+			break;
+
+		case TOU_1500V:
+			COMM_OutputRegister_Write(COMM_TOSU_MASK_1500);
+			break;
+
+		default:
+			break;
+	}
 }
 //-----------------------------

@@ -54,7 +54,8 @@ volatile SubState SUB_State = SS_None;
 static Boolean CycleActive = FALSE;
 //
 volatile Int64U CONTROL_TimeCounter = 0;
-static Int64U CONTROL_TimeCounterDelay = 0;
+Int64U CONTROL_TimeCounterDelay = 0;
+AnodeVoltage ActualAnodeVoltage = TOU_500V;
 
 // Forward functions
 //
@@ -169,12 +170,22 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 			
 		case ACT_MEASURE_START:
 			{
-				if(CONTROL_State == DS_Ready)
+				if (DataTable[REG_VOLTAGE_VALUE] == TOU_500V ||
+					DataTable[REG_VOLTAGE_VALUE] == TOU_1000V ||
+					DataTable[REG_VOLTAGE_VALUE] == TOU_1500V)
 				{
-					CONTROL_SetDeviceState(DS_InProcess, SS_ConfigRequest);
+					ActualAnodeVoltage = DataTable[REG_VOLTAGE_VALUE];
+
+					if(CONTROL_State == DS_Ready)
+					{
+						LOGIC_AssignVoltageAndCurrentToSlaves(ActualAnodeVoltage, DataTable[REG_CURRENT_VALUE]);
+						CONTROL_SetDeviceState(DS_InProcess, SS_ConfigRequest);
+					}
+					else
+						*pUserError = ERR_DEVICE_NOT_READY;
 				}
 				else
-					*pUserError = ERR_DEVICE_NOT_READY;
+					*pUserError = ERR_OPERATION_BLOCKED;
 			}
 			break;
 			

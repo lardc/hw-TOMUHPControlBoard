@@ -114,7 +114,7 @@ bool LOGIC_IsSlaveInFaultOrDisabled(uint16_t Fault, uint16_t Disabled)
 }
 //-----------------------------------------------
 
-void LOGIC_AssignVoltageAndCurrentToSlaves(uint16_t Voltage, uint16_t Current)
+void LOGIC_AssignVoltageAndCurrentToSlaves(AnodeVoltage Voltage, uint16_t Current)
 {
 	float CurrentPerBit;
 	uint16_t ActualBitmask = 0, MaximumBitmask = 0;
