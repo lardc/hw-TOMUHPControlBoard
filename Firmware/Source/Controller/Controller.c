@@ -37,7 +37,9 @@ typedef enum __SubState
 	
 	SS_PowerOff = 3,
 	
-	SS_ConfigRequest = 4
+	SS_ConfigSlaves = 4,
+	SS_ConfigSlavesApply = 5,
+	SS_ConfigHardware = 6
 } SubState;
 typedef enum __TOCUDeviceState
 {
@@ -56,6 +58,7 @@ static Boolean CycleActive = FALSE;
 //
 volatile Int64U CONTROL_TimeCounter = 0;
 Int64U CONTROL_TimeCounterDelay = 0;
+AnodeVoltage CachedAnodeVoltage = TOU_500V;
 
 // Forward functions
 //
@@ -188,12 +191,13 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 			{
 				if(LOGIC_IsAnodeVRegCorrect())
 				{
+					CachedAnodeVoltage = DataTable[REG_ANODE_VOLTAGE];
 					if(CONTROL_State == DS_Ready)
 					{
 						CONTROL_ResetData();
 						
 						COMM_EnableSafetyInput(DataTable[REG_MUTE_SAFETY_SYSTEM] ? false : true);
-						CONTROL_SetDeviceState(DS_InProcess, SS_ConfigRequest);
+						CONTROL_SetDeviceState(DS_InProcess, SS_ConfigSlaves);
 					}
 					else
 						*pUserError = ERR_DEVICE_NOT_READY;
@@ -237,7 +241,7 @@ void CONTROL_HandleSafety()
 {
 	bool SystemIsSafe = LOGIC_GetSafetyState();
 	
-	if(CONTROL_State == DS_InProcess && SUB_State == SS_ConfigRequest)
+	if(CONTROL_State == DS_InProcess && SUB_State == SS_ConfigSlaves)
 	{
 		if(!SystemIsSafe)
 		{
@@ -313,12 +317,34 @@ void CONTROL_HandlePulseConfig()
 	{
 		switch (SUB_State)
 		{
-			case SS_ConfigRequest:
+			case SS_ConfigSlaves:
 				{
-					//
+					LOGIC_AssignVItoSlaves(CachedAnodeVoltage, DataTable[REG_ANODE_CURRENT]);
+					if(LOGIC_WriteSlavesConfig())
+						CONTROL_SetDeviceState(DS_InProcess, SS_ConfigSlavesApply);
+					else
+						CONTROL_SwitchToFault(DF_INTERFACE);
+				}
+				break;
+
+			case SS_ConfigSlavesApply:
+				{
+					if(LOGIC_CallCommandForSlaves(ACT_TOCU_PULSE_CONFIG))
+						CONTROL_SetDeviceState(DS_InProcess, SS_ConfigHardware);
+					else
+						CONTROL_SwitchToFault(DF_INTERFACE);
 				}
 				break;
 				
+			case SS_ConfigHardware:
+				{
+					LOGIC_ConfigVoltageComparators(CachedAnodeVoltage);
+
+					COMM_TOSU(CachedAnodeVoltage);
+					COMM_InternalCommutation(true);
+				}
+				break;
+
 			default:
 				break;
 		}

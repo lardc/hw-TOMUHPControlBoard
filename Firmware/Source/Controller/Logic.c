@@ -4,6 +4,7 @@
 #include "DataTable.h"
 #include "DeviceObjectDictionary.h"
 #include "Commutation.h"
+#include "Measurement.h"
 
 // Definitions
 //
@@ -115,7 +116,7 @@ bool LOGIC_IsSlaveInFaultOrDisabled(uint16_t Fault, uint16_t Disabled)
 }
 //-----------------------------------------------
 
-void LOGIC_AssignVoltageAndCurrentToSlaves(AnodeVoltage Voltage, uint16_t Current)
+void LOGIC_AssignVItoSlaves(AnodeVoltage Voltage, uint16_t Current)
 {
 	float CurrentPerBit;
 	uint16_t ActualBitmask = 0, MaximumBitmask = 0;
@@ -157,5 +158,30 @@ bool LOGIC_GetSafetyState()
 		return true;
 	else
 		return SafetyInput;
+}
+//-----------------------------------------------
+
+void LOGIC_ConfigVoltageComparators(AnodeVoltage Voltage)
+{
+	switch(Voltage)
+	{
+		case TOU_500V:
+			MEASURE_SetUref10(DataTable[REG_VCOMP10_500]);
+			MEASURE_SetUref90(DataTable[REG_VCOMP90_500]);
+			break;
+
+		case TOU_1000V:
+			MEASURE_SetUref10(DataTable[REG_VCOMP10_1000]);
+			MEASURE_SetUref90(DataTable[REG_VCOMP90_1000]);
+			break;
+
+		case TOU_1500V:
+			MEASURE_SetUref10(DataTable[REG_VCOMP10_1500]);
+			MEASURE_SetUref90(DataTable[REG_VCOMP90_1500]);
+			break;
+
+		default:
+			break;
+	}
 }
 //-----------------------------------------------

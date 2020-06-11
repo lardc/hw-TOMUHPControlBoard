@@ -106,6 +106,8 @@
 #define ACT_TOCU_FAULT_CLEAR			3	// Очистка fault
 #define ACT_TOCU_WARNING_CLEAR			4	// Очистка warning
 
+#define ACT_TOCU_PULSE_CONFIG			100	// Конфигурация напряжения и настройка затворов транзисторов
+
 // Несохраняемы регистры чтения-записи
 #define REG_TOCU_VOLTAGE_SETPOINT		128	// Значение задания напряжения (в В)
 #define REG_TOCU_GATE_REGISTER			129	// Значение-маска конфигурации затворов
