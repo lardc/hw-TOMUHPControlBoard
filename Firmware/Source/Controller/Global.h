@@ -25,6 +25,8 @@
 // Временные параметры
 #define T_SLAVE_UPDATE_PERIOD	100
 
+#define T_PRESSURE_FAULT_DELAY	100
+
 #define LED_BLINK_TIME			500				// Период моргания светодиода на плате [ms]
 #define DELAY_CONTACTOR			500				// Задержка включения контактора [мс]
 #define	T_CHARGE_DELAY			60000			// Время ожидания заряда [мс]

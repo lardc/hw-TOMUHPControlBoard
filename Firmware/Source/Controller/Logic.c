@@ -154,32 +154,44 @@ bool LOGIC_GetSafetyState()
 	bool SafetyInput = COMM_IsSafetyTrig();
 	DataTable[REG_SAFETY_STATE] = SafetyInput ? 1 : 0;
 	
-	if(DataTable[REG_MUTE_SAFETY_SYSTEM])
+	if(DataTable[REG_MUTE_SAFETY_MONITOR])
 		return true;
 	else
 		return SafetyInput;
 }
 //-----------------------------------------------
 
+bool LOGIC_GetPressureState()
+{
+	bool PressureInput = COMM_IsPressureTrig();
+	DataTable[REG_PRESSURE_STATE] = PressureInput ? 1 : 0;
+	
+	if(DataTable[REG_MUTE_PRESSURE_MONITOR])
+		return true;
+	else
+		return PressureInput;
+}
+//-----------------------------------------------
+
 void LOGIC_ConfigVoltageComparators(AnodeVoltageEnum AnodeVoltage)
 {
-	switch(AnodeVoltage)
+	switch (AnodeVoltage)
 	{
 		case TOU_500V:
 			MEASURE_SetUref10(DataTable[REG_VCOMP10_500]);
 			MEASURE_SetUref90(DataTable[REG_VCOMP90_500]);
 			break;
-
+			
 		case TOU_1000V:
 			MEASURE_SetUref10(DataTable[REG_VCOMP10_1000]);
 			MEASURE_SetUref90(DataTable[REG_VCOMP90_1000]);
 			break;
-
+			
 		case TOU_1500V:
 			MEASURE_SetUref10(DataTable[REG_VCOMP10_1500]);
 			MEASURE_SetUref90(DataTable[REG_VCOMP90_1500]);
 			break;
-
+			
 		default:
 			break;
 	}
@@ -189,13 +201,13 @@ void LOGIC_ConfigVoltageComparators(AnodeVoltageEnum AnodeVoltage)
 MeasurementSettings LOGIC_CacheMeasurementSettings()
 {
 	MeasurementSettings result;
-
+	
 	result.AnodeVoltage = DataTable[REG_ANODE_VOLTAGE];
 	result.AnodeCurrent = (float)DataTable[REG_ANODE_CURRENT];
 	result.GateCurrent = (float)DataTable[REG_GATE_CURRENT] / 10;
 	result.GateCurrentRiseRate = (float)DataTable[REG_GATE_CURRENT_RISE_RATE] / 10;
 	result.GateCurrentFallRate = (float)DataTable[REG_GD_CURRENT_FALL_RATE] / 10;
-
+	
 	return result;
 }
 //-----------------------------------------------

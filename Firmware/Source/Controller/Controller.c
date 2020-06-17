@@ -70,7 +70,8 @@ void CONTROL_ResetToDefaultState();
 void CONTROL_ResetHardware(bool KeepPower);
 void CONTROL_ResetData();
 void CONTROL_SlavesStateUpdate();
-void CONTROL_HandleSafety();
+void CONTROL_MonitorSafety();
+void CONTROL_MonitorPressure();
 void CONTROL_HandlePowerOn();
 void CONTROL_HandlePowerOff();
 void CONTROL_HandlePulseConfig();
@@ -148,8 +149,8 @@ void CONTROL_Idle()
 	// Считывание состояний блоков-рабов
 	CONTROL_SlavesStateUpdate();
 	
-	// Мониторинг системы безопасности
-	CONTROL_HandleSafety();
+	CONTROL_MonitorSafety();
+	CONTROL_MonitorPressure();
 	
 	// Обработка логики мастер-команд
 	CONTROL_HandlePowerOn();
@@ -196,7 +197,7 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 					{
 						CONTROL_ResetData();
 						
-						COMM_EnableSafetyInput(DataTable[REG_MUTE_SAFETY_SYSTEM] ? false : true);
+						COMM_EnableSafetyInput(DataTable[REG_MUTE_SAFETY_MONITOR] ? false : true);
 						LL_ExternalLED(true);
 
 						CONTROL_SetDeviceState(DS_InProcess, SS_ConfigSlaves);
@@ -239,7 +240,7 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 }
 //-----------------------------------------------
 
-void CONTROL_HandleSafety()
+void CONTROL_MonitorSafety()
 {
 	bool SystemIsSafe = LOGIC_GetSafetyState();
 	
@@ -252,6 +253,22 @@ void CONTROL_HandleSafety()
 			
 			DataTable[REG_PROBLEM] = PROBLEM_SAFETY_VIOLATION;
 		}
+	}
+}
+//-----------------------------------------------
+
+void CONTROL_MonitorPressure()
+{
+	static uint64_t LastSuccessfulScan = 0;
+	bool PressureOK = LOGIC_GetPressureState();
+
+	if(PressureOK)
+		LastSuccessfulScan = CONTROL_TimeCounter;
+
+	if(CONTROL_State == DS_InProcess || CONTROL_State == DS_Ready)
+	{
+		if((CONTROL_TimeCounter - LastSuccessfulScan) > T_PRESSURE_FAULT_DELAY)
+			CONTROL_SwitchToFault(DF_PRESSURE);
 	}
 }
 //-----------------------------------------------

@@ -23,7 +23,7 @@ uint16_t GateDriver_ItoDAC(float GateCurrent)
 {
 	float K = (float)DataTable[REG_GD_I_SET_K] / 1000;
 	float Offset = (float)((int16_t)DataTable[REG_GD_I_SET_OFFSET]);
-
+	
 	uint32_t result = GateCurrent * K + Offset;
 	return (result > DAC_RESOLUTION) ? DAC_RESOLUTION : result;
 }
@@ -31,7 +31,8 @@ uint16_t GateDriver_ItoDAC(float GateCurrent)
 
 uint16_t GateDriver_IrefToDAC(float GateCurrentThreshold)
 {
-	uint32_t result = (uint32_t)GateCurrentThreshold * DataTable[REG_GD_CURRENT_SHUNT] * DAC_RESOLUTION / DAC_REF_MV / 1000;
+	uint32_t result = (uint32_t)GateCurrentThreshold * DataTable[REG_GD_CURRENT_SHUNT] * DAC_RESOLUTION / DAC_REF_MV
+			/ 1000;
 	return (result > DAC_RESOLUTION) ? DAC_RESOLUTION : result;
 }
 //---------------------
@@ -39,7 +40,7 @@ uint16_t GateDriver_IrefToDAC(float GateCurrentThreshold)
 uint16_t GateDriver_IrateToDAC(float CurrentRate, uint16_t KRegister)
 {
 	float K = (float)DataTable[KRegister] / 1000;
-
+	
 	uint32_t result = CurrentRate * K;
 	return (result > DAC_RESOLUTION) ? DAC_RESOLUTION : result;
 }

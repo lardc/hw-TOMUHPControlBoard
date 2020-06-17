@@ -48,8 +48,8 @@
 #define REG_P2_I_DUT					5	// Коэффициент P2 измеренного значения тока (x1e6)
 #define REG_TOCU_CHARGE_TIMEOUT			6
 #define REG_TOCU_RES_PER_BIT			7
-#define REG_MUTE_SAFETY_SYSTEM			8
-// 9
+#define REG_MUTE_SAFETY_MONITOR			8
+#define REG_MUTE_PRESSURE_MONITOR		9
 #define REG_VCOMP10_500					10	// Напряжение на компараторе канала напряжения уровня 10% для 500В (в мв)
 #define REG_VCOMP90_500					11	// Напряжение на компараторе канала напряжения уровня 90% для 500В (в мв)
 #define REG_VCOMP10_1000				12	// Напряжение на компараторе канала напряжения уровня 10% для 1000В (в мв)
@@ -83,12 +83,9 @@
 #define REG_PROBLEM						196	// Регистр Problem
 #define REG_TEST_FINISHED				197
 #define REG_DEV_SUB_STATE				198
-#define REG_SAFETY_STATE				199
 //
-#define REG_DBG_VSO_VALUE				200	// Напряжение на батарее (в В)
-#define REG_DBG_I_DUT_VALUE				201	// Ток на DUT (в А)
-#define REG_DBG_PRE_I_DUT_VALUE			202	// Предварительный ток на DUT (в А)
-#define REG_DBG_ADC_RAW					203	// Измеренные сырые значения по каналу напряжения и каналу тока (в тиках)
+#define REG_SAFETY_STATE				200
+#define REG_PRESSURE_STATE				201
 //
 #define REG_BHL_ERROR_CODE				210
 #define REG_BHL_DEVICE					211
@@ -137,8 +134,9 @@
 // 
 #define DF_NONE							0
 #define DF_INTERFACE					1
-#define DF_TOCU_WRONG_STATE				2
-#define DF_TOCU_CHARGE_TIMEOUT			3
+#define DF_PRESSURE						2
+#define DF_TOCU_WRONG_STATE				3
+#define DF_TOCU_CHARGE_TIMEOUT			4
 
 // Problem
 //
