@@ -340,13 +340,18 @@ void CONTROL_HandlePulseConfig()
 				
 			case SS_ConfigHardware:
 				{
-					LOGIC_ConfigVoltageComparators(CachedMeasurementSettings.AnodeVoltage);
-
+					// Настройка системы коммутации
 					COMM_TOSU(CachedMeasurementSettings.AnodeVoltage);
 					COMM_InternalCommutation(true);
 
+					// Настройка компараторов напряжения
+					LOGIC_ConfigVoltageComparators(CachedMeasurementSettings.AnodeVoltage);
+
+					// Настройка параметров цепи управления
 					GateDriver_SetCurrent(CachedMeasurementSettings.GateCurrent);
 					GateDriver_SetCompThreshold(CachedMeasurementSettings.GateCurrent * GATE_CURRENT_THRESHOLD);
+					GateDriver_SetFallRate(CachedMeasurementSettings.GateCurrentFallRate);
+					GateDriver_SetRiseRate(CachedMeasurementSettings.GateCurrentRiseRate);
 				}
 				break;
 

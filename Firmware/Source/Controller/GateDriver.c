@@ -8,8 +8,9 @@
 #include "DeviceObjectDictionary.h"
 
 // Forward functions
-uint16_t MEASURE_ItoDAC(float GateCurrent);
-uint16_t MEASURE_IrefToDAC(float GateCurrent);
+uint16_t GateDriver_ItoDAC(float GateCurrent);
+uint16_t GateDriver_IrefToDAC(float GateCurrent);
+uint16_t GateDriver_IrateToDAC(float CurrentRate, uint16_t KRegister);
 
 // Functions
 void GateDriver_Sync(bool State)
@@ -18,7 +19,7 @@ void GateDriver_Sync(bool State)
 }
 //---------------------
 
-uint16_t MEASURE_ItoDAC(float GateCurrent)
+uint16_t GateDriver_ItoDAC(float GateCurrent)
 {
 	float K = (float)DataTable[REG_GD_I_SET_K] / 1000;
 	float Offset = (float)((int16_t)DataTable[REG_GD_I_SET_OFFSET]);
@@ -28,37 +29,46 @@ uint16_t MEASURE_ItoDAC(float GateCurrent)
 }
 //---------------------
 
-void GateDriver_SetCurrent(float GateCurrent)
-{
-	uint16_t Data = MEASURE_ItoDAC(GateCurrent) & ~DAC_CHANNEL_B;
-	LL_WriteDACx(Data, GPIO_CS_GD2);
-}
-//---------------------
-
-uint16_t MEASURE_IrefToDAC(float GateCurrentThreshold)
+uint16_t GateDriver_IrefToDAC(float GateCurrentThreshold)
 {
 	uint32_t result = (uint32_t)GateCurrentThreshold * DataTable[REG_GD_CURRENT_SHUNT] * DAC_RESOLUTION / DAC_REF_MV / 1000;
 	return (result > DAC_RESOLUTION) ? DAC_RESOLUTION : result;
 }
 //---------------------
 
-void GateDriver_SetCompThreshold(float GateCurrentThreshold)
+uint16_t GateDriver_IrateToDAC(float CurrentRate, uint16_t KRegister)
 {
-	uint16_t Data = MEASURE_IrefToDAC(GateCurrentThreshold) | DAC_CHANNEL_B;
+	float K = (float)DataTable[KRegister] / 1000;
+
+	uint32_t result = CurrentRate * K;
+	return (result > DAC_RESOLUTION) ? DAC_RESOLUTION : result;
+}
+//---------------------
+
+void GateDriver_SetCurrent(float GateCurrent)
+{
+	uint16_t Data = GateDriver_ItoDAC(GateCurrent) & ~DAC_CHANNEL_B;
 	LL_WriteDACx(Data, GPIO_CS_GD2);
 }
 //---------------------
 
-void GateDriver_SetFallRate(uint16_t Data)
+void GateDriver_SetCompThreshold(float GateCurrentThreshold)
 {
-	Data &= ~DAC_CHANNEL_B;
+	uint16_t Data = GateDriver_IrefToDAC(GateCurrentThreshold) | DAC_CHANNEL_B;
+	LL_WriteDACx(Data, GPIO_CS_GD2);
+}
+//---------------------
+
+void GateDriver_SetFallRate(float GateCurrentFallRate)
+{
+	uint16_t Data = GateDriver_IrateToDAC(GateCurrentFallRate, REG_GD_FALL_RATE_TO_DAC) & ~DAC_CHANNEL_B;
 	LL_WriteDACx(Data, GPIO_CS_GD1);
 }
 //---------------------
 
-void GateDriver_SetRiseRate(uint16_t Data)
+void GateDriver_SetRiseRate(float GateCurrentRiseRate)
 {
-	Data |= DAC_CHANNEL_B;
+	uint16_t Data = GateDriver_IrateToDAC(GateCurrentRiseRate, REG_GD_RISE_RATE_TO_DAC) | DAC_CHANNEL_B;
 	LL_WriteDACx(Data, GPIO_CS_GD1);
 }
 //---------------------

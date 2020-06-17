@@ -58,9 +58,11 @@
 #define REG_VCOMP90_1500				15	// Напряжение на компараторе канала напряжения уровня 90% для 1500В (в мв)
 // 16 - 19
 #define REG_GD_CURRENT_SHUNT			20	// Сопротивление шунта в цепи упрвления (в мОм)
-#define REG_GD_CURRENT_FALL_RATE		21
-#define REG_GD_I_SET_K					22
-#define REG_GD_I_SET_OFFSET				23
+#define REG_GD_I_SET_K					21
+#define REG_GD_I_SET_OFFSET				22
+#define REG_GD_CURRENT_FALL_RATE		23
+#define REG_GD_FALL_RATE_TO_DAC			24
+#define REG_GD_RISE_RATE_TO_DAC			25
 // - 127
 
 // Несохраняемы регистры чтения-записи
