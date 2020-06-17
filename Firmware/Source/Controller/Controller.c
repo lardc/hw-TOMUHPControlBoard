@@ -116,7 +116,7 @@ void CONTROL_ResetData()
 	DataTable[REG_DISABLE_REASON] = DF_NONE;
 	DataTable[REG_WARNING] = WARNING_NONE;
 	DataTable[REG_PROBLEM] = PROBLEM_NONE;
-	DataTable[REG_TEST_FINISHED] = OPRESULT_NONE;
+	DataTable[REG_OP_RESULT] = OPRESULT_NONE;
 	
 	DataTable[REG_MEAS_CURRENT_VALUE] = 0;
 	DataTable[REG_MEAS_TIME_DELAY] = 0;
@@ -267,7 +267,7 @@ void CONTROL_MonitorPressure()
 
 	if(CONTROL_State == DS_InProcess || CONTROL_State == DS_Ready)
 	{
-		if((CONTROL_TimeCounter - LastSuccessfulScan) > T_PRESSURE_FAULT_DELAY)
+		if((CONTROL_TimeCounter - LastSuccessfulScan) > PRESSURE_FAULT_DELAY)
 			CONTROL_SwitchToFault(DF_PRESSURE);
 	}
 }
@@ -305,7 +305,7 @@ void CONTROL_HandlePowerOn()
 						CONTROL_SwitchToFault(DF_TOCU_WRONG_STATE);
 					}
 					else if(CONTROL_TimeCounter > CONTROL_TimeCounterDelay)
-						CONTROL_SwitchToFault(DF_TOCU_CHARGE_TIMEOUT);
+						CONTROL_SwitchToFault(DF_TOCU_STATE_TIMEOUT);
 				}
 				break;
 				
@@ -387,7 +387,7 @@ void CONTROL_SlavesStateUpdate()
 	{
 		if(CONTROL_TimeCounter > NextUpdate)
 		{
-			NextUpdate = CONTROL_TimeCounter + T_SLAVE_UPDATE_PERIOD;
+			NextUpdate = CONTROL_TimeCounter + SLAVE_UPDATE_PERIOD;
 			if(!LOGIC_ReadSlavesState())
 				CONTROL_SwitchToFault(DF_INTERFACE);
 		}

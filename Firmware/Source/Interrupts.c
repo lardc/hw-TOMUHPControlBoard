@@ -61,7 +61,7 @@ void TIM3_IRQHandler()
 	{
 		CONTROL_TimeCounter++;
 
-		if (CONTROL_TimeCounter > (LED_BlinkTimeCounter + LED_BLINK_TIME))
+		if (CONTROL_TimeCounter > (LED_BlinkTimeCounter + LED_BLINK_PERIOD))
 		{
 			LL_ToggleLED();
 			LED_BlinkTimeCounter = CONTROL_TimeCounter;

@@ -31,8 +31,8 @@ uint16_t GateDriver_ItoDAC(float GateCurrent)
 
 uint16_t GateDriver_IrefToDAC(float GateCurrentThreshold)
 {
-	uint32_t result = (uint32_t)GateCurrentThreshold * DataTable[REG_GD_CURRENT_SHUNT] * DAC_RESOLUTION / DAC_REF_MV
-			/ 1000;
+	float ShuntRes = (float)DataTable[REG_GD_CURRENT_SHUNT] / (1000 * 10);
+	uint32_t result = (uint32_t)GateCurrentThreshold * ShuntRes * DAC_RESOLUTION / DAC_REF_MV;
 	return (result > DAC_RESOLUTION) ? DAC_RESOLUTION : result;
 }
 //---------------------
