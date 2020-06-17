@@ -116,7 +116,7 @@ bool LOGIC_IsSlaveInFaultOrDisabled(uint16_t Fault, uint16_t Disabled)
 }
 //-----------------------------------------------
 
-void LOGIC_AssignVItoSlaves(AnodeVoltage Voltage, uint16_t Current)
+void LOGIC_AssignVItoSlaves(AnodeVoltageEnum AnodeVoltage, float AnodeCurrent)
 {
 	float CurrentPerBit;
 	uint16_t ActualBitmask = 0, MaximumBitmask = 0;
@@ -126,17 +126,17 @@ void LOGIC_AssignVItoSlaves(AnodeVoltage Voltage, uint16_t Current)
 		MaximumBitmask |= NodeBitmaskArray[i].SupportedBits;
 	
 	// ќпределение величины тока на бит при заданном напр€жении
-	CurrentPerBit = (float)Voltage / DataTable[REG_TOCU_RES_PER_BIT];
+	CurrentPerBit = (float)AnodeVoltage / DataTable[REG_TOCU_RES_PER_BIT];
 	
 	// ќпределение битовой маски дл€ выбранного значени€ тока
-	ActualBitmask = (uint16_t)(Current / CurrentPerBit);
+	ActualBitmask = (uint16_t)(AnodeCurrent / CurrentPerBit);
 	if(ActualBitmask > MaximumBitmask)
 		ActualBitmask = MaximumBitmask;
 	
 	// ‘ормирование уставки дл€ блоков
 	for(uint16_t i = 0; i < NODE_ARRAY_SIZE; ++i)
 	{
-		NodeArray[i].Voltage = Voltage;
+		NodeArray[i].Voltage = AnodeVoltage;
 		NodeArray[i].Mask = NodeBitmaskArray[i].SupportedBits & ActualBitmask;
 	}
 }
@@ -161,9 +161,9 @@ bool LOGIC_GetSafetyState()
 }
 //-----------------------------------------------
 
-void LOGIC_ConfigVoltageComparators(AnodeVoltage Voltage)
+void LOGIC_ConfigVoltageComparators(AnodeVoltageEnum AnodeVoltage)
 {
-	switch(Voltage)
+	switch(AnodeVoltage)
 	{
 		case TOU_500V:
 			MEASURE_SetUref10(DataTable[REG_VCOMP10_500]);
@@ -183,5 +183,19 @@ void LOGIC_ConfigVoltageComparators(AnodeVoltage Voltage)
 		default:
 			break;
 	}
+}
+//-----------------------------------------------
+
+MeasurementSettings LOGIC_CacheMeasurementSettings()
+{
+	MeasurementSettings result;
+
+	result.AnodeVoltage = DataTable[REG_ANODE_VOLTAGE];
+	result.AnodeCurrent = (float)DataTable[REG_ANODE_CURRENT];
+	result.GateCurrent = (float)DataTable[REG_GATE_CURRENT] / 10;
+	result.GateCurrentRiseRate = (float)DataTable[REG_GATE_CURRENT_RISE_RATE] / 10;
+	result.GateCurrentFallRate = (float)DataTable[REG_GD_CURRENT_FALL_RATE] / 10;
+
+	return result;
 }
 //-----------------------------------------------

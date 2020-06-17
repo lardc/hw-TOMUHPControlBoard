@@ -56,9 +56,9 @@ void COMM_TOSURaw(uint16_t Data)
 }
 //-----------------------------
 
-void COMM_TOSU(AnodeVoltage Voltage)
+void COMM_TOSU(AnodeVoltageEnum AnodeVoltage)
 {
-	switch (Voltage)
+	switch (AnodeVoltage)
 	{
 		case TOU_500V:
 			COMM_OutputRegister_Write(COMM_TOSU_MASK_500);

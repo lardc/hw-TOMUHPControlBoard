@@ -58,17 +58,16 @@
 #define REG_VCOMP90_1500				15	// Напряжение на компараторе канала напряжения уровня 90% для 1500В (в мв)
 // 16 - 19
 #define REG_GD_CURRENT_SHUNT			20	// Сопротивление шунта в цепи упрвления (в мОм)
-
-// 16 - 29
-#define REG_VSO_MEAS_OFFSET				30	// Офсет на входе АЦП при измерении Vso (bit)
-#define REG_I_MEAS_OFFSET				31	// Офсет на входе АЦП при измерении I (bit)
-// 32 - 127
+#define REG_GD_CURRENT_FALL_RATE		21
+#define REG_GD_I_SET_K					22
+#define REG_GD_I_SET_OFFSET				23
+// - 127
 
 // Несохраняемы регистры чтения-записи
 #define REG_ANODE_VOLTAGE				128
 #define REG_ANODE_CURRENT				129
 #define REG_GATE_CURRENT				130
-#define REG_GATE_CURRENT_RATE			131
+#define REG_GATE_CURRENT_RISE_RATE		131
 
 #define REG_DBG_TOCU_DATA				150	// Сырое значение для отправки в TOCU
 

@@ -48,6 +48,10 @@
 //
 #define CURRENT_MAX_DISTORTION	(0.1f)			// Максимальное отклонение тока от уставки +-10%
 
+
+#define GATE_CURRENT_THRESHOLD	0.1f
+
+
 // Параметры оцифровки
 #define ADC_RESOLUTION			4095
 #define ADC_REF_MV				3000			// Опорное напряжение АЦП, мВ

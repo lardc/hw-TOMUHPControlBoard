@@ -58,7 +58,7 @@ static Boolean CycleActive = FALSE;
 //
 volatile Int64U CONTROL_TimeCounter = 0;
 Int64U CONTROL_TimeCounterDelay = 0;
-AnodeVoltage CachedAnodeVoltage = TOU_500V;
+MeasurementSettings CachedMeasurementSettings;
 
 // Forward functions
 //
@@ -191,12 +191,14 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 			{
 				if(LOGIC_IsAnodeVRegCorrect())
 				{
-					CachedAnodeVoltage = DataTable[REG_ANODE_VOLTAGE];
+					CachedMeasurementSettings = LOGIC_CacheMeasurementSettings();
 					if(CONTROL_State == DS_Ready)
 					{
 						CONTROL_ResetData();
 						
 						COMM_EnableSafetyInput(DataTable[REG_MUTE_SAFETY_SYSTEM] ? false : true);
+						LL_ExternalLED(true);
+
 						CONTROL_SetDeviceState(DS_InProcess, SS_ConfigSlaves);
 					}
 					else
@@ -319,7 +321,7 @@ void CONTROL_HandlePulseConfig()
 		{
 			case SS_ConfigSlaves:
 				{
-					LOGIC_AssignVItoSlaves(CachedAnodeVoltage, DataTable[REG_ANODE_CURRENT]);
+					LOGIC_AssignVItoSlaves(CachedMeasurementSettings.AnodeVoltage, CachedMeasurementSettings.AnodeCurrent);
 					if(LOGIC_WriteSlavesConfig())
 						CONTROL_SetDeviceState(DS_InProcess, SS_ConfigSlavesApply);
 					else
@@ -338,10 +340,13 @@ void CONTROL_HandlePulseConfig()
 				
 			case SS_ConfigHardware:
 				{
-					LOGIC_ConfigVoltageComparators(CachedAnodeVoltage);
+					LOGIC_ConfigVoltageComparators(CachedMeasurementSettings.AnodeVoltage);
 
-					COMM_TOSU(CachedAnodeVoltage);
+					COMM_TOSU(CachedMeasurementSettings.AnodeVoltage);
 					COMM_InternalCommutation(true);
+
+					GateDriver_SetCurrent(CachedMeasurementSettings.GateCurrent);
+					GateDriver_SetCompThreshold(CachedMeasurementSettings.GateCurrent * GATE_CURRENT_THRESHOLD);
 				}
 				break;
 

@@ -11,9 +11,10 @@ bool LOGIC_WriteSlavesConfig();
 bool LOGIC_CallCommandForSlaves(uint16_t Command);
 bool LOGIC_AreSlavesInStateX(uint16_t State);
 bool LOGIC_IsSlaveInFaultOrDisabled(uint16_t Fault, uint16_t Disabled);
-void LOGIC_AssignVItoSlaves(AnodeVoltage Voltage, uint16_t Current);
+void LOGIC_AssignVItoSlaves(AnodeVoltageEnum AnodeVoltage, float AnodeCurrent);
 bool LOGIC_IsAnodeVRegCorrect();
 bool LOGIC_GetSafetyState();
-void LOGIC_ConfigVoltageComparators(AnodeVoltage Voltage);
+void LOGIC_ConfigVoltageComparators(AnodeVoltageEnum AnodeVoltage);
+MeasurementSettings LOGIC_CacheMeasurementSettings();
 
 #endif // __LOGIC_H
