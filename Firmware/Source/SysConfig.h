@@ -33,7 +33,7 @@
 
 // ADC
 #define DMA_ADC_DUT_I_CHANNEL			DMA1_Channel1	// Канал DMA для АЦП тока
-#define ADC1_CURRENT_CHANNEL			1			// АЦП1 номер канала тока
+#define ADC1_CURRENT_CHANNEL			2			// АЦП1 номер канала тока
 // ----------------------------------------------
 
 // CAN
