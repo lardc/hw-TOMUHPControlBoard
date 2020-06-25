@@ -3,18 +3,11 @@
 // Includes
 #include "SysConfig.h"
 #include "DataTable.h"
-#include "SCCISlave.h"
 #include "DeviceProfile.h"
-#include "BCCITypes.h"
-#include "Board.h"
 #include "GateDriver.h"
 #include "Diagnostic.h"
-#include "Interrupts.h"
-#include "Global.h"
 #include "LowLevel.h"
-#include "InitConfig.h"
 #include "Measurement.h"
-#include "Delay.h"
 #include "Logic.h"
 #include "Commutation.h"
 
@@ -39,7 +32,9 @@ typedef enum __SubState
 	
 	SS_ConfigSlaves = 4,
 	SS_ConfigSlavesApply = 5,
-	SS_ConfigHardware = 6
+	SS_ConfigHardware = 6,
+	SS_CommPause = 7,
+	SS_StartPulse = 8
 } SubState;
 typedef enum __TOCUDeviceState
 {
@@ -371,6 +366,22 @@ void CONTROL_HandlePulseConfig()
 					GateDriver_SetCompThreshold(CachedMeasurementSettings.GateCurrent * GATE_CURRENT_THRESHOLD);
 					GateDriver_SetFallRate(CachedMeasurementSettings.GateCurrentFallRate);
 					GateDriver_SetRiseRate(CachedMeasurementSettings.GateCurrentRiseRate);
+					
+					CONTROL_TimeCounterDelay = CONTROL_TimeCounter + COMMUTATION_PAUSE;
+					CONTROL_SetDeviceState(DS_InProcess, SS_CommPause);
+				}
+				break;
+				
+			case SS_CommPause:
+				{
+					if(CONTROL_TimeCounter > CONTROL_TimeCounterDelay)
+						CONTROL_SetDeviceState(DS_InProcess, SS_StartPulse);
+				}
+				break;
+				
+			case SS_StartPulse:
+				{
+					LOGIC_Pulse();
 				}
 				break;
 				
@@ -394,139 +405,6 @@ void CONTROL_SlavesStateUpdate()
 				CONTROL_SwitchToFault(DF_INTERFACE);
 		}
 	}
-}
-//-----------------------------------------------
-
-void CONTROL_Logic()
-{
-	/*
-	 float CurrentSetpoint, CurrentPreActual, CurrentActual;
-	 uint32_t Counter10Percent, Counter90Percent;
-	 uint16_t Problem = PROBLEM_NONE, Warning = WARNING_NONE;
-	 
-	 if(CONTROL_State == DS_InProcess)
-	 {
-	 if(SUB_State == SS_StopProcess)
-	 {
-	 //CUSTINT_SendTOCU(0, TRUE, FALSE, TRUE);
-	 LL_RelayControl(FALSE);
-	 LL_ExternalFan(FALSE);
-	 LL_ExternalLED(FALSE);
-	 
-	 SUB_State = SS_None;
-	 CONTROL_SetDeviceState(DS_Ready);
-	 }
-	 
-	 // Выполнение необходимой коммутации
-	 if(SUB_State == SS_VoltageReady)
-	 {
-	 LL_GateLatch(FALSE);
-	 LL_RelayControl(TRUE);									// Замыкание выходных реле
-	 //CUSTINT_SendTOCU(0, TRUE, TRUE, FALSE);					// Отключение PSBoard + замыкание контактора
-	 CONTROL_TimeCounterDelay = CONTROL_TimeCounter + DELAY_CONTACTOR;
-	 
-	 SUB_State = SS_WaitContactor;
-	 }
-	 
-	 // Непосредственный запуск измерения
-	 if((SUB_State == SS_WaitContactor) && (CONTROL_TimeCounter > CONTROL_TimeCounterDelay))
-	 {
-	 CurrentSetpoint = DataTable[REG_CURRENT_VALUE];
-	 
-	 //CUSTINT_SendTOCU(CurrentSetpoint, TRUE, TRUE, FALSE);	// Отпирание нужных мосфетов
-	 DELAY_US(50);
-	 CurrentPreActual = MEASURE_DUTCurrent();// Измерения тока до подачи сигнала управления для определения кз на выходе
-	 DELAY_US(10);
-	 
-	 LL_GateLatch(TRUE);										// Включение защёлки сигнала управления
-	 //LL_TimersReset(FALSE);									// Активация счётчиков
-	 Overflow90 = FALSE;
-	 Overflow10 = FALSE;
-	 
-	 //LL_GateControl(TRUE);									// Запуск тока управления
-	 //LL_ExternalSync(TRUE);
-	 DELAY_US(50);
-	 //CountersData = CUSTINT_ReceiveDataSR();					// Считывание сырых значений из системы счета времени
-	 CurrentActual = MEASURE_DUTCurrent();					// Измерение тока через прибор
-	 DELAY_US(10);
-	 
-	 //LL_GateControl(FALSE);									// Отключение тока управления
-	 //LL_TimersReset(TRUE);									// Сброс системы измерения времени
-	 //LL_ExternalSync(FALSE);
-	 LL_GateLatch(FALSE);									// Сброс защёлки
-	 DELAY_US(10);
-	 //CUSTINT_SendTOCU(0, TRUE, FALSE, FALSE);				// Закрытие силовых мосфетов + размыкание контактора
-	 LL_RelayControl(FALSE);									// Размыкание реле
-	 
-
-	 // Получение времён из счётчиков
-	 Counter10Percent = //CUSTINT_UnpackData10SR(CountersData);
-	 Counter90Percent = //CUSTINT_UnpackData90SR(CountersData);
-	 
-	 // Запись отладочных результатов по току
-	 DataTable[REG_DBG_I_DUT_VALUE] = CurrentActual;
-	 DataTable[REG_DBG_PRE_I_DUT_VALUE] = CurrentPreActual;
-	 
-	 // Обработка внештатных ситуаций
-
-	 if ((//CUSTINT_UnpackData90SR(CountersData) == 0) &&
-	 (//CUSTINT_UnpackData10SR(CountersData) == 0) && (CurrentPreActual < CURRENT_MIN_THRESHOLD))
-	 {
-	 Problem = PROBLEM_NO_CTRL_NO_PWR;
-	 }
-	 else if (Overflow90 && Overflow10)
-	 {
-	 Problem = PROBLEM_NO_PWR;
-	 }
-	 else if (CurrentPreActual > CURRENT_MIN_THRESHOLD)
-	 {
-	 Problem = PROBLEM_SHORT;
-	 }
-	 else if ((Counter90Percent + T_TIMES_DELTA) > Counter10Percent)
-	 {
-	 Problem = PROBLEM_NO_POT_SIGNAL;
-	 }
-	 else if (Overflow90)
-	 {
-	 Problem = PROBLEM_OVERFLOW90;
-	 }
-	 else if (Overflow10)
-	 {
-	 Problem = PROBLEM_OVERFLOW10;
-	 }
-
-
-	 // Запись результатов
-	 DataTable[REG_MEAS_CURRENT_VALUE] = CurrentActual;
-	 if((CurrentActual < (1.0f - CURRENT_MAX_DISTORTION) * CurrentSetpoint)
-	 || (CurrentActual > (1.0f + CURRENT_MAX_DISTORTION) * CurrentSetpoint))
-	 {
-	 Warning = WARNING_I_OUT_OF_RANGE;
-	 }
-	 
-	 DataTable[REG_MEAS_TIME_DELAY] = Counter90Percent;
-	 DataTable[REG_MEAS_TIME_ON] = Counter10Percent;
-	 
-	 if(Problem == PROBLEM_NONE)
-	 DataTable[REG_TEST_FINISHED] = OPRESULT_OK;
-	 else
-	 {
-	 DataTable[REG_TEST_FINISHED] = OPRESULT_FAIL;
-	 
-	 DataTable[REG_MEAS_TIME_DELAY] = 0;
-	 DataTable[REG_MEAS_TIME_ON] = 0;
-	 }
-	 
-	 // Запись ошибок
-	 DataTable[REG_WARNING] = Warning;
-	 DataTable[REG_PROBLEM] = Problem;
-	 
-	 LL_ExternalLED(FALSE);
-	 SUB_State = SS_None;
-	 CONTROL_SetDeviceState(DS_Ready);
-	 }
-	 }
-	 */
 }
 //-----------------------------------------------
 

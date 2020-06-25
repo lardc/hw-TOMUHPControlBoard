@@ -5,6 +5,10 @@
 #include "DeviceObjectDictionary.h"
 #include "Commutation.h"
 #include "Measurement.h"
+#include "LowLevel.h"
+#include "Delay.h"
+#include "Interrupts.h"
+#include "GateDriver.h"
 
 // Definitions
 //
@@ -31,9 +35,6 @@ typedef struct __NodeState
 const NodeBitmask NodeBitmaskArray[] = {{TOCU1_CAN_NID, TOCU1_BIT_MASK}};
 #define NODE_ARRAY_SIZE		(sizeof NodeBitmaskArray / sizeof NodeBitmaskArray[0])
 NodeState NodeArray[NODE_ARRAY_SIZE] = {0};
-
-// Forward functions
-//
 
 // Functions
 //
@@ -195,6 +196,48 @@ void LOGIC_ConfigVoltageComparators(AnodeVoltageEnum AnodeVoltage)
 		default:
 			break;
 	}
+}
+//-----------------------------------------------
+
+uint16_t LOGIC_Pulse()
+{
+	// Включение подачи напряжения
+	LL_SyncTOCU(true);
+	DELAY_US(10);
+	
+	// Проверка уровня тока до отпирания прибора
+	if(MEASURE_ReadCurrent() > DataTable[MAX_ANODE_CURRENT])
+		return PROBLEM_SHORT;
+	
+	// Сброс системы счёта
+	LL_HSTimers_Reset();
+	LL_GateLatchReset();
+	Overflow90 = false;
+	Overflow10 = false;
+	
+	// Запуск оцифровки
+	DMA_ChannelReload(DMA_ADC_DUT_I_CHANNEL, PULSE_ARR_MAX_LENGTH);
+	DMA_ChannelEnable(DMA_ADC_DUT_I_CHANNEL, true);
+	DMAOperation = true;
+	TIM_Start(TIM6);
+	
+	// Запуск тока управления
+	LL_SyncOscilloscope(true);
+	GateDriver_Sync(true);
+	DELAY_US(100);
+	
+	// Считывание данных счётчиков
+	
+	// Отключение синхронизация
+	LL_SyncOscilloscope(false);
+	GateDriver_Sync(false);
+	LL_SyncTOCU(false);
+	
+	// Сброс системы счёта
+	LL_HSTimers_Reset();
+	LL_GateLatchReset();
+	
+	return PROBLEM_NONE;
 }
 //-----------------------------------------------
 

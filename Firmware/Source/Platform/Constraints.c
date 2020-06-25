@@ -25,7 +25,7 @@ const TableItemConstraint NVConstraint[DATA_TABLE_NV_SIZE] =
 	{DAC_VOLTAGE_MIN, DAC_VOLTAGE_MAX, DAC_VOLTAGE_DEF},						// 13
 	{DAC_VOLTAGE_MIN, DAC_VOLTAGE_MAX, DAC_VOLTAGE_DEF},						// 14
 	{DAC_VOLTAGE_MIN, DAC_VOLTAGE_MAX, DAC_VOLTAGE_DEF},						// 15
-	{0, 0, 0},																	// 16
+	{DUT_CURRENT_MIN, DUT_CURRENT_MAX, 0},										// 16
 	{0, 0, 0},																	// 17
 	{0, 0, 0},																	// 18
 	{0, 0, 0},																	// 19

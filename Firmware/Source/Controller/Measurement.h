@@ -4,7 +4,7 @@
 #include "stdinc.h"
 
 // Definitions
-#define PULSE_ARR_MAX_LENGTH	1000
+#define PULSE_ARR_MAX_LENGTH	300
 
 // Variables
 extern volatile uint16_t LOGIC_OutputPulseRaw[];
