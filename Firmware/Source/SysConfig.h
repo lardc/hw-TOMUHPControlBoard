@@ -20,7 +20,8 @@
 // ----------------------------------------------
 
 // Timers
-#define TIMER3_uS						1000		// Период работы таймера 3
+#define TIMER3_uS						1000		// Период работы таймера общего назначения
+#define TIMER6_uS						0.5f		// Период работы таймера тактирования АЦП
 // ----------------------------------------------
 
 // SPI
@@ -28,6 +29,11 @@
 #define SPI1_LSB_FIRST					false
 #define SPI2_BAUDRATE_BITS				0x5
 #define SPI2_LSB_FIRST					false
+// ----------------------------------------------
+
+// ADC
+#define DMA_ADC_DUT_I_CHANNEL			DMA1_Channel1	// Канал DMA для АЦП тока
+#define ADC1_CURRENT_CHANNEL			1			// АЦП1 номер канала тока
 // ----------------------------------------------
 
 // CAN

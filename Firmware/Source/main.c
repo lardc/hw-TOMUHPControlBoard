@@ -27,14 +27,18 @@ int main()
 	// Настройка UART
 	UART_Config();
 
-	// Настройка таймера
+	// Настройка таймеров
 	Timer3_Config();
+	Timer6_Config();
 
 	// SPI config
 	SPI_Config();
 
 	// Настройка АЦП
-	ADC_Init();
+	ADC_Config();
+
+	// Настройка DMA
+	DMA_Config();
 
 	// Настройка сторожевого таймера
 	WatchDog_Config();

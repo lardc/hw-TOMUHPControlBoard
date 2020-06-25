@@ -10,8 +10,12 @@ void EI_Config();
 void IO_Config();
 void CAN_Config();
 void UART_Config();
-void ADC_Init();
+void ADC_Config();
+void ADC_SwitchToSingleMeasurement();
+void ADC_SwitchToDMA();
+void DMA_Config();
 void Timer3_Config();
+void Timer6_Config();
 void WatchDog_Config();
 void SPI_Config();
 

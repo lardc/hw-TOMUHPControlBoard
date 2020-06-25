@@ -5,6 +5,9 @@
 #include "Board.h"
 #include "Global.h"
 
+// Variables
+volatile uint16_t LOGIC_OutputPulseRaw[PULSE_ARR_MAX_LENGTH];
+
 // Forward functions
 uint16_t MEASURE_UrefToDAC(uint16_t Voltage);
 

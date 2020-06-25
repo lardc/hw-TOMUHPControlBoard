@@ -1,4 +1,7 @@
 #include "InitConfig.h"
+//
+#include "SysConfig.h"
+#include "Measurement.h"
 
 // Functions
 //
@@ -97,14 +100,50 @@ void UART_Config()
 }
 //------------------------------------------------------------------------------
 
-void ADC_Init()
+void ADC_Config()
 {
 	RCC_ADC_Clk_EN(ADC_12_ClkEN);
+
 	ADC_Calibration(ADC1);
-	ADC_SoftTrigConfig(ADC1);
-	ADC_ChannelSet_SampleTime(ADC1, 1, ADC_SMPL_TIME_7_5);
-	ADC_ChannelSet_SampleTime(ADC1, 2, ADC_SMPL_TIME_7_5);
 	ADC_Enable(ADC1);
+	ADC_SoftTrigConfig(ADC1);
+
+	// Конфигурация и отключение DMA
+	ADC_DMAConfig(ADC1);
+	ADC_DMAConfig(ADC2);
+	ADC_DMAEnable(ADC1, false);
+	ADC_DMAEnable(ADC2, false);
+}
+//------------------------------------------------------------------------------
+
+void ADC_SwitchToSingleMeasurement()
+{
+	ADC_SoftTrigConfig(ADC1);
+	ADC_DMAEnable(ADC1, false);
+}
+//------------------------------------------------------------------------------
+
+void ADC_SwitchToDMA()
+{
+	ADC_TrigConfig(ADC1, ADC12_TIM6_TRGO, RISE);
+
+	ADC_ChannelSeqReset(ADC1);
+	ADC_ChannelSet_Sequence(ADC1, ADC1_CURRENT_CHANNEL, 1);
+	ADC_ChannelSeqLen(ADC1, 1);
+
+	ADC_DMAEnable(ADC1, true);
+}
+//------------------------------------------------------------------------------
+
+void DMA_Config()
+{
+	DMA_Clk_Enable(DMA1_ClkEN);
+
+	// DMA для АЦП тока на DUT
+	DMA_Reset(DMA_ADC_DUT_I_CHANNEL);
+	DMAChannelX_DataConfig(DMA_ADC_DUT_I_CHANNEL, (uint32_t)LOGIC_OutputPulseRaw, (uint32_t)(&ADC1->DR), PULSE_ARR_MAX_LENGTH);
+	DMAChannelX_Config(DMA_ADC_DUT_I_CHANNEL, DMA_MEM2MEM_DIS, DMA_LvlPriority_LOW, DMA_MSIZE_16BIT, DMA_PSIZE_16BIT,
+						DMA_MINC_EN, DMA_PINC_DIS, DMA_CIRCMODE_DIS, DMA_READ_FROM_PERIPH, 0);
 }
 //------------------------------------------------------------------------------
 
@@ -114,6 +153,15 @@ void Timer3_Config()
 	TIM_Config(TIM3, SYSCLK, TIMER3_uS);
 	TIM_Interupt(TIM3, 0, true);
 	TIM_Start(TIM3);
+}
+//------------------------------------------------------------------------------
+
+void Timer6_Config()
+{
+	TIM_Clock_En(TIM_6);
+	TIM_Config(TIM6, SYSCLK, TIMER6_uS);
+	TIM_DMA(TIM6, DMAEN);
+	TIM_MasterMode(TIM6, MMS_UPDATE);
 }
 //------------------------------------------------------------------------------
 
