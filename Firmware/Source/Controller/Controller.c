@@ -54,11 +54,12 @@ typedef enum __TOCUDeviceState
 //
 volatile DeviceState CONTROL_State = DS_None;
 volatile SubState SUB_State = SS_None;
-static Boolean CycleActive = FALSE;
-//
 volatile Int64U CONTROL_TimeCounter = 0;
+static Boolean CycleActive = FALSE;
 Int64U CONTROL_TimeCounterDelay = 0;
 MeasurementSettings CachedMeasurementSettings;
+volatile Int16U CONTROL_Values_Current[PULSE_ARR_MAX_LENGTH] = {0};
+volatile Int16U CONTROL_Values_Counter = 0;
 
 // Forward functions
 //
@@ -81,10 +82,10 @@ void CONTROL_HandlePulseConfig();
 void CONTROL_Init()
 {
 	// Переменные для конфигурации EndPoint
-	Int16U EPIndexes[EP_COUNT];
-	Int16U EPSized[EP_COUNT];
-	pInt16U EPCounters[EP_COUNT];
-	pInt16U EPDatas[EP_COUNT];
+	Int16U EPIndexes[EP_COUNT] = {EP_CURRENT};
+	Int16U EPSized[EP_COUNT] = {PULSE_ARR_MAX_LENGTH};
+	pInt16U EPCounters[EP_COUNT] = {(pInt16U)&CONTROL_Values_Counter};
+	pInt16U EPDatas[EP_COUNT] = {(pInt16U)CONTROL_Values_Current};
 	
 	// Конфигурация сервиса работы Data-table и EPROM
 	EPROMServiceConfig EPROMService = {(FUNC_EPROM_WriteValues)&NFLASH_WriteDT, (FUNC_EPROM_ReadValues)&NFLASH_ReadDT};
@@ -199,7 +200,7 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 						
 						COMM_EnableSafetyInput(DataTable[REG_MUTE_SAFETY_MONITOR] ? false : true);
 						LL_ExternalLED(true);
-
+						
 						CONTROL_SetDeviceState(DS_InProcess, SS_ConfigSlaves);
 					}
 					else
@@ -261,10 +262,10 @@ void CONTROL_MonitorPressure()
 {
 	static uint64_t LastSuccessfulScan = 0;
 	bool PressureOK = LOGIC_GetPressureState();
-
+	
 	if(PressureOK)
 		LastSuccessfulScan = CONTROL_TimeCounter;
-
+	
 	if(CONTROL_State == DS_InProcess || CONTROL_State == DS_Ready)
 	{
 		if((CONTROL_TimeCounter - LastSuccessfulScan) > PRESSURE_FAULT_DELAY)
@@ -338,14 +339,15 @@ void CONTROL_HandlePulseConfig()
 		{
 			case SS_ConfigSlaves:
 				{
-					LOGIC_AssignVItoSlaves(CachedMeasurementSettings.AnodeVoltage, CachedMeasurementSettings.AnodeCurrent);
+					LOGIC_AssignVItoSlaves(CachedMeasurementSettings.AnodeVoltage,
+							CachedMeasurementSettings.AnodeCurrent);
 					if(LOGIC_WriteSlavesConfig())
 						CONTROL_SetDeviceState(DS_InProcess, SS_ConfigSlavesApply);
 					else
 						CONTROL_SwitchToFault(DF_INTERFACE);
 				}
 				break;
-
+				
 			case SS_ConfigSlavesApply:
 				{
 					if(LOGIC_CallCommandForSlaves(ACT_TOCU_PULSE_CONFIG))
@@ -360,10 +362,10 @@ void CONTROL_HandlePulseConfig()
 					// Настройка системы коммутации
 					COMM_TOSU(CachedMeasurementSettings.AnodeVoltage);
 					COMM_InternalCommutation(true);
-
+					
 					// Настройка компараторов напряжения
 					LOGIC_ConfigVoltageComparators(CachedMeasurementSettings.AnodeVoltage);
-
+					
 					// Настройка параметров цепи управления
 					GateDriver_SetCurrent(CachedMeasurementSettings.GateCurrent);
 					GateDriver_SetCompThreshold(CachedMeasurementSettings.GateCurrent * GATE_CURRENT_THRESHOLD);
@@ -371,7 +373,7 @@ void CONTROL_HandlePulseConfig()
 					GateDriver_SetRiseRate(CachedMeasurementSettings.GateCurrentRiseRate);
 				}
 				break;
-
+				
 			default:
 				break;
 		}
