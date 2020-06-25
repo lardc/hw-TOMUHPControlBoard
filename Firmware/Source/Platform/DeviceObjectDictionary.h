@@ -6,7 +6,6 @@
 #define ACT_DISABLE_POWER				2	// Отключение блока
 #define ACT_FAULT_CLEAR					3	// Очистка fault
 #define ACT_WARNING_CLEAR				4	// Очистка warning
-#define ACT_RESET_DEVICE				5	// Перезапуск процессора
 
 #define ACT_DBG_GD_I_SET				10	// Проверка установки амплитуды тока у TOMUHPGateDriver
 #define ACT_DBG_GD_TRIG_THRESHOLD		11	// Проверка установки порога срабатывания компаратора
@@ -27,6 +26,11 @@
 #define ACT_DBG_OSC_SYNC				26	// Проверка выхода SYNC
 #define ACT_DBG_TRIG_RST				27	// Проверка сброса триггера
 #define ACT_DBG_M_RESET					28	// Проверка выхода M_RESET
+
+#define ACT_DBG_SLAVE_CALL				40	// Запуск команды на slave-узле
+#define ACT_DBG_SLAVE_READ_REG			41	// Чтение регистра из slave-узла
+#define ACT_DBG_SLAVE_WRITE_REG			42	// Запись регистра в slave-узел
+#define ACT_DBG_RESET_INT_ERROR			43	// Сброс ошибки master-интерфейса
 
 #define ACT_MEASURE_START				100	// Запуск измерения
 #define ACT_MEASURE_STOP				101	// Остановка измерения
@@ -70,6 +74,11 @@
 #define REG_ANODE_CURRENT				129	// Анодный ток (А)
 #define REG_GATE_CURRENT				130	// Ток цепи управления (А) (х10)
 #define REG_GATE_CURRENT_RISE_RATE		131	// Скорость нарастания тока цепи управления (А/мкс) (х10)
+
+#define REG_DBG_SLAVE_NID				180	// Node ID slave-узла
+#define REG_DBG_SLAVE_REG				181	// Номер регистра slave-узла
+#define REG_DBG_SLAVE_DATA				182	// Данные регистра (записываемые или вычитываемые) slave-узла
+#define REG_DBG_SLAVE_ACT				183	// Команда для slave-узла
 
 #define REG_DBG							190	// Отладочный регистр
 

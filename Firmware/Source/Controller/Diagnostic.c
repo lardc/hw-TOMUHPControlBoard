@@ -9,6 +9,7 @@
 #include "Delay.h"
 #include "Measurement.h"
 #include "Commutation.h"
+#include "BCCIMHighLevel.h"
 
 // Functions
 bool DIAG_HandleDiagnosticAction(uint16_t ActionID, uint16_t *pUserError)
@@ -142,6 +143,32 @@ bool DIAG_HandleDiagnosticAction(uint16_t ActionID, uint16_t *pUserError)
 		case ACT_DBG_M_RESET:
 			{
 				LL_HSTimers_Reset();
+			}
+			break;
+
+		case ACT_DBG_SLAVE_CALL:
+			{
+				BHL_Call(DataTable[REG_DBG_SLAVE_NID], DataTable[REG_DBG_SLAVE_ACT]);
+			}
+			break;
+
+		case ACT_DBG_SLAVE_READ_REG:
+			{
+				uint16_t reg = 0;
+				BHL_ReadRegister(DataTable[REG_DBG_SLAVE_NID], DataTable[REG_DBG_SLAVE_REG], &reg);
+				DataTable[REG_DBG_SLAVE_DATA] = reg;
+			}
+			break;
+
+		case ACT_DBG_SLAVE_WRITE_REG:
+			{
+				BHL_WriteRegister(DataTable[REG_DBG_SLAVE_NID], DataTable[REG_DBG_SLAVE_REG], DataTable[REG_DBG_SLAVE_DATA]);
+			}
+			break;
+
+		case ACT_DBG_RESET_INT_ERROR:
+			{
+				BHL_ResetError();
 			}
 			break;
 

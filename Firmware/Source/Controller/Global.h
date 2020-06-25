@@ -10,6 +10,7 @@
 #include "SysConfig.h"
 
 #define	SCCI_TIMEOUT_TICKS		1000			// Таймаут протоколоа SCCI (мс)
+#define	BCCIM_TIMEOUT_TICKS		1000			// Таймаут протоколоа мастер BCCI (мс)
 #define EP_WRITE_COUNT			0				// Количество массивов для записи
 #define EP_COUNT				0				// Количество массивов для чтения
 #define ENABLE_LOCKING			FALSE			// Защита паролем
