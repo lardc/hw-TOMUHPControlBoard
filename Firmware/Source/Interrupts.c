@@ -13,31 +13,47 @@
 // Variables
 //
 volatile Int64U LED_BlinkTimeCounter = 0;
-volatile bool Overflow90 = FALSE;
-volatile bool Overflow10 = FALSE;
+volatile bool Overflow90 = false;
+volatile bool Overflow10 = false;
+volatile bool DMAOperation = false;
 
 // Functions
 //
 void EXTI4_IRQHandler()
 {
-	Overflow90 = TRUE;
-	EXTI_FlagReset(EXTI_4);
+	if(EXTI_FlagCheck(EXTI_4))
+	{
+		Overflow90 = true;
+		EXTI_FlagReset(EXTI_4);
+	}
 }
 //-----------------------------------------
 
 void EXTI9_5_IRQHandler()
 {
-	if (EXTI_FlagCheck(EXTI_8))
+	if(EXTI_FlagCheck(EXTI_8))
 	{
-		Overflow10 = TRUE;
+		Overflow10 = true;
 		EXTI_FlagReset(EXTI_8);
+	}
+}
+//-----------------------------------------
+
+void DMA1_Channel1_IRQHandler()
+{
+	if(DMA_IsTransferComplete(DMA1, DMA_ISR_TCIF1))
+	{
+		TIM_Stop(TIM6);
+		TIM_Reset(TIM6);
+		DMAOperation = false;
+		DMA_TransferCompleteReset(DMA1, DMA_IFCR_CTCIF1);
 	}
 }
 //-----------------------------------------
 
 void USART1_IRQHandler()
 {
-	if (ZwSCI_RecieveCheck(USART1))
+	if(ZwSCI_RecieveCheck(USART1))
 	{
 		ZwSCI_RegisterToFIFO(USART1);
 		ZwSCI_RecieveFlagClear(USART1);
@@ -47,7 +63,7 @@ void USART1_IRQHandler()
 
 void USB_LP_CAN_RX0_IRQHandler()
 {
-	if (NCAN_RecieveCheck())
+	if(NCAN_RecieveCheck())
 	{
 		NCAN_RecieveData();
 		NCAN_RecieveFlagReset();
@@ -57,11 +73,11 @@ void USB_LP_CAN_RX0_IRQHandler()
 
 void TIM3_IRQHandler()
 {
-	if (TIM_StatusCheck(TIM3))
+	if(TIM_StatusCheck(TIM3))
 	{
 		CONTROL_TimeCounter++;
-
-		if (CONTROL_TimeCounter > (LED_BlinkTimeCounter + LED_BLINK_PERIOD))
+		
+		if(CONTROL_TimeCounter > (LED_BlinkTimeCounter + LED_BLINK_PERIOD))
 		{
 			LL_ToggleLED();
 			LED_BlinkTimeCounter = CONTROL_TimeCounter;
