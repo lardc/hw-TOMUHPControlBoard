@@ -134,6 +134,12 @@ bool DIAG_HandleDiagnosticAction(uint16_t ActionID, uint16_t *pUserError)
 			}
 			break;
 
+		case ACT_DBG_READ_PRESSURE:
+			{
+				DataTable[REG_DBG] = LL_IsPressure();
+			}
+			break;
+
 		case ACT_DBG_TRIG_RST:
 			{
 				LL_GateLatchReset();
