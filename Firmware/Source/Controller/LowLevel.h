@@ -22,5 +22,6 @@ void LL_SyncTOCU(bool State);
 bool LL_IsOverflow90();
 bool LL_IsOverflow10();
 void LL_WriteDACx(uint16_t Data, GPIO_PortPinSetting CS_SYNC);
+bool LL_IsPressure();
 
 #endif //__LOWLEVEL_H

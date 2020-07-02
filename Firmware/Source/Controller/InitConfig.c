@@ -176,6 +176,6 @@ void SPI_Config()
 void WatchDog_Config()
 {
 	IWDG_Config();
-	IWDG_ConfigureFastUpdate();
+	IWDG_ConfigureSlowUpdate();
 }
 //------------------------------------------------------------------------------
