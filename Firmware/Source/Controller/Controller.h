@@ -7,7 +7,7 @@
 // Types
 typedef enum __AnodeVoltage
 {
-	TOU_500V = 500,
+	TOU_600V = 600,
 	TOU_1000V = 1000,
 	TOU_1500V = 1500
 } AnodeVoltageEnum;

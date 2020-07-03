@@ -27,6 +27,7 @@
 #define ACT_DBG_READ_EXT_REG			27	// Проверка чтения внешнего регистра
 #define ACT_DBG_TRIG_RST				28	// Проверка сброса триггера
 #define ACT_DBG_M_RESET					29	// Проверка выхода M_RESET
+#define ACT_DBG_START					30	// Последовательность запуска в отладочном режиме
 
 #define ACT_DBG_SLAVE_CALL				40	// Запуск команды на slave-узле
 #define ACT_DBG_SLAVE_READ_REG			41	// Чтение регистра из slave-узла

@@ -8,9 +8,10 @@
 #include "DeviceObjectDictionary.h"
 
 // Definitions
-#define COMM_TOSU_MASK_500		0x0
-#define COMM_TOSU_MASK_1000		0x0
-#define COMM_TOSU_MASK_1500		0x0
+#define COMM_TOSU_MASK_500		0x3
+#define COMM_TOSU_MASK_1000		0x9
+#define COMM_TOSU_MASK_1500		0xA
+#define COMM_TOSU_MASK_OFF		0x0F
 
 // Forward functions
 void COMM_OutputRegister_Write(uint16_t Data);
@@ -25,7 +26,7 @@ void COMM_InternalCommutation(bool State)
 
 bool COMM_IsPressureTrig()
 {
-	return GPIO_GetState(GPIO_PRESSURE);
+	return !GPIO_GetState(GPIO_PRESSURE);
 }
 //-----------------------------
 
@@ -60,7 +61,7 @@ void COMM_TOSU(AnodeVoltageEnum AnodeVoltage)
 {
 	switch (AnodeVoltage)
 	{
-		case TOU_500V:
+		case TOU_600V:
 			COMM_OutputRegister_Write(COMM_TOSU_MASK_500);
 			break;
 
@@ -73,7 +74,9 @@ void COMM_TOSU(AnodeVoltageEnum AnodeVoltage)
 			break;
 
 		default:
+			COMM_OutputRegister_Write(COMM_TOSU_MASK_OFF);
 			break;
 	}
 }
 //-----------------------------
+

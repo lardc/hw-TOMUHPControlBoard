@@ -12,7 +12,7 @@
 
 // Definitions
 //
-#define TOCU1_CAN_NID		1
+#define TOCU1_CAN_NID		21
 #define TOCU1_BIT_MASK		0x3FF
 
 // Types
@@ -67,6 +67,8 @@ bool LOGIC_WriteSlavesConfig()
 {
 	bool result;
 	
+	DataTable[REG_DBG] = NodeArray[0].Mask;
+
 	for(uint16_t i = 0; i < NODE_ARRAY_SIZE; ++i)
 	{
 		result = false;
@@ -146,7 +148,7 @@ void LOGIC_AssignVItoSlaves(AnodeVoltageEnum AnodeVoltage, float AnodeCurrent)
 bool LOGIC_IsAnodeVRegCorrect()
 {
 	uint16_t v = DataTable[REG_ANODE_VOLTAGE];
-	return (v == TOU_500V) || (v == TOU_1000V) || (v == TOU_1500V);
+	return (v == TOU_600V) || (v == TOU_1000V) || (v == TOU_1500V);
 }
 //-----------------------------------------------
 
@@ -178,7 +180,7 @@ void LOGIC_ConfigVoltageComparators(AnodeVoltageEnum AnodeVoltage)
 {
 	switch (AnodeVoltage)
 	{
-		case TOU_500V:
+		case TOU_600V:
 			MEASURE_SetUref10(DataTable[REG_VCOMP10_500]);
 			MEASURE_SetUref90(DataTable[REG_VCOMP90_500]);
 			break;

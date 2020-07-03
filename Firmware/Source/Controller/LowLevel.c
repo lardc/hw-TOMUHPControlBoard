@@ -94,12 +94,6 @@ bool LL_IsOverflow10()
 }
 //-----------------------------
 
-bool LL_IsPressure()
-{
-	return !GPIO_GetState(GPIO_PRESSURE);
-}
-//-----------------------------
-
 void LL_WriteDACx(uint16_t Data, GPIO_PortPinSetting CS_SYNC)
 {
 	GPIO_SetState(CS_SYNC, false);

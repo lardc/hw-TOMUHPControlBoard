@@ -16,6 +16,26 @@ bool DIAG_HandleDiagnosticAction(uint16_t ActionID, uint16_t *pUserError)
 {
 	switch(ActionID)
 	{
+		case ACT_DBG_START:
+			{
+				LL_ExternalLED(true);
+				DELAY_US(100000);
+
+				LL_SyncTOCU(true);
+				DELAY_US(10);
+
+				GateDriver_Sync(true);
+				DELAY_US(100);
+				GateDriver_Sync(false);
+
+				LL_SyncTOCU(false);
+
+
+				DELAY_US(1000000);
+				LL_ExternalLED(false);
+			}
+			break;
+
 		case ACT_DBG_GD_I_SET:
 			{
 				GateDriver_SetCurrent(DataTable[REG_DBG]);
@@ -50,9 +70,7 @@ bool DIAG_HandleDiagnosticAction(uint16_t ActionID, uint16_t *pUserError)
 
 		case ACT_DBG_PS_EN:
 			{
-				LL_PsBoard_PowerOutput(true);
-				DELAY_US(1000000);
-				LL_PsBoard_PowerOutput(false);
+				LL_PsBoard_PowerOutput(DataTable[REG_DBG] ? true : false);
 			}
 			break;
 
@@ -82,9 +100,7 @@ bool DIAG_HandleDiagnosticAction(uint16_t ActionID, uint16_t *pUserError)
 
 		case ACT_DBG_RELAY:
 			{
-				LL_PsBoard_PowerInput(true);
-				DELAY_US(1000000);
-				LL_PsBoard_PowerInput(false);
+				LL_PsBoard_PowerInput(DataTable[REG_DBG] ? true : false);
 			}
 			break;
 
@@ -136,7 +152,7 @@ bool DIAG_HandleDiagnosticAction(uint16_t ActionID, uint16_t *pUserError)
 
 		case ACT_DBG_READ_PRESSURE:
 			{
-				DataTable[REG_DBG] = LL_IsPressure();
+				DataTable[REG_DBG] = COMM_IsPressureTrig();
 			}
 			break;
 

@@ -134,6 +134,7 @@ void CONTROL_ResetHardware(bool KeepPower)
 	LL_SyncTOCU(false);
 	
 	COMM_EnableSafetyInput(false);
+	COMM_TOSU(false);
 }
 //-----------------------------------------------
 
@@ -210,7 +211,8 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 			{
 				if(CONTROL_State == DS_InProcess)
 				{
-					// Остановка процесса
+					CONTROL_ResetHardware(false);
+					CONTROL_SetDeviceState(DS_Ready, SS_None);
 				}
 				else
 					*pUserError = ERR_OPERATION_BLOCKED;
