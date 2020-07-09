@@ -8,10 +8,15 @@
 #include "DeviceObjectDictionary.h"
 
 // Definitions
-#define COMM_TOSU_MASK_500		0x3
+#define COMM_TOSU_MASK_600		0xA
 #define COMM_TOSU_MASK_1000		0x9
-#define COMM_TOSU_MASK_1500		0xA
+#define COMM_TOSU_MASK_1500		0x3
 #define COMM_TOSU_MASK_OFF		0x0F
+
+#define COMM_POT_SW_MASK		0x10
+
+// Variables
+uint8_t CommutationMask = 0;
 
 // Forward functions
 void COMM_OutputRegister_Write(uint16_t Data);
@@ -39,6 +44,7 @@ bool COMM_IsSafetyTrig()
 void COMM_EnableSafetyInput(bool State)
 {
 	GPIO_SetState(GPIO_SFTY_EN, State);
+	GPIO_SetState(GPIO_SREG_OE, State);
 }
 //-----------------------------
 
@@ -47,7 +53,6 @@ void COMM_OutputRegister_Write(uint16_t Data)
 	GPIO_SetState(GPIO_SREG_CS, false);
 	SPI_WriteByte(SPI2, Data);
 	GPIO_SetState(GPIO_SREG_CS, true);
-	GPIO_SetState(GPIO_SREG_OE, false);
 }
 //-----------------------------
 
@@ -62,21 +67,30 @@ void COMM_TOSU(AnodeVoltageEnum AnodeVoltage)
 	switch (AnodeVoltage)
 	{
 		case TOU_600V:
-			COMM_OutputRegister_Write(COMM_TOSU_MASK_500);
+			CommutationMask = COMM_TOSU_MASK_600;
 			break;
 
 		case TOU_1000V:
-			COMM_OutputRegister_Write(COMM_TOSU_MASK_1000);
+			CommutationMask = COMM_TOSU_MASK_1000;
 			break;
 
 		case TOU_1500V:
-			COMM_OutputRegister_Write(COMM_TOSU_MASK_1500);
+			CommutationMask = COMM_TOSU_MASK_1500;
 			break;
 
 		default:
-			COMM_OutputRegister_Write(COMM_TOSU_MASK_OFF);
+			CommutationMask = COMM_TOSU_MASK_OFF;
 			break;
 	}
+
+	COMM_OutputRegister_Write(CommutationMask);
+}
+//-----------------------------
+
+void COMM_PotSwitch(bool State)
+{
+	State ? (CommutationMask |= COMM_POT_SW_MASK) : (CommutationMask &=~ COMM_POT_SW_MASK);
+	COMM_OutputRegister_Write(CommutationMask);
 }
 //-----------------------------
 

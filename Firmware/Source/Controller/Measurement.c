@@ -25,14 +25,14 @@ uint16_t MEASURE_UrefToDAC(uint16_t Voltage)
 void MEASURE_SetUref10(uint16_t Voltage)
 {
 	uint16_t Data = MEASURE_UrefToDAC(Voltage) | DAC_CHANNEL_B;
-	LL_WriteDACx(Data, GPIO_CS_DAC);
+	LL_WriteDACx(Data, GPIO_CS_DAC, RISE_Edge);
 }
 //---------------------
 
 void MEASURE_SetUref90(uint16_t Voltage)
 {
 	uint16_t Data = MEASURE_UrefToDAC(Voltage) & (~DAC_CHANNEL_B);
-	LL_WriteDACx(Data, GPIO_CS_DAC);
+	LL_WriteDACx(Data, GPIO_CS_DAC, RISE_Edge);
 }
 //---------------------
 

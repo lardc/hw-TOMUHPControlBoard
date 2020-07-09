@@ -66,8 +66,6 @@ bool LOGIC_ReadSlavesState()
 bool LOGIC_WriteSlavesConfig()
 {
 	bool result;
-	
-	DataTable[REG_DBG] = NodeArray[0].Mask;
 
 	for(uint16_t i = 0; i < NODE_ARRAY_SIZE; ++i)
 	{
@@ -181,8 +179,8 @@ void LOGIC_ConfigVoltageComparators(AnodeVoltageEnum AnodeVoltage)
 	switch (AnodeVoltage)
 	{
 		case TOU_600V:
-			MEASURE_SetUref10(DataTable[REG_VCOMP10_500]);
-			MEASURE_SetUref90(DataTable[REG_VCOMP90_500]);
+			MEASURE_SetUref10(DataTable[REG_VCOMP10_600]);
+			MEASURE_SetUref90(DataTable[REG_VCOMP90_600]);
 			break;
 			
 		case TOU_1000V:
@@ -226,7 +224,7 @@ uint16_t LOGIC_Pulse()
 	// Запуск тока управления
 	LL_SyncOscilloscope(true);
 	GateDriver_Sync(true);
-	DELAY_US(100);
+	DELAY_US(90);
 	
 	// Считывание данных счётчиков
 	
@@ -239,6 +237,11 @@ uint16_t LOGIC_Pulse()
 	LL_HSTimers_Reset();
 	LL_GateLatchReset();
 	
+	// Включение питания GateDriver
+	LL_PsBoard_PowerOutput(true);
+
+	COMM_PotSwitch(false);
+
 	return PROBLEM_NONE;
 }
 //-----------------------------------------------

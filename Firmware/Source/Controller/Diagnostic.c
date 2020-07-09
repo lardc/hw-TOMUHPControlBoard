@@ -16,26 +16,6 @@ bool DIAG_HandleDiagnosticAction(uint16_t ActionID, uint16_t *pUserError)
 {
 	switch(ActionID)
 	{
-		case ACT_DBG_START:
-			{
-				LL_ExternalLED(true);
-				DELAY_US(100000);
-
-				LL_SyncTOCU(true);
-				DELAY_US(10);
-
-				GateDriver_Sync(true);
-				DELAY_US(100);
-				GateDriver_Sync(false);
-
-				LL_SyncTOCU(false);
-
-
-				DELAY_US(1000000);
-				LL_ExternalLED(false);
-			}
-			break;
-
 		case ACT_DBG_GD_I_SET:
 			{
 				GateDriver_SetCurrent(DataTable[REG_DBG]);
@@ -92,9 +72,7 @@ bool DIAG_HandleDiagnosticAction(uint16_t ActionID, uint16_t *pUserError)
 
 		case ACT_DBG_RLC:
 			{
-				COMM_InternalCommutation(true);
-				DELAY_US(1000000);
-				COMM_InternalCommutation(false);
+				COMM_InternalCommutation(DataTable[REG_DBG] ? true : false);
 			}
 			break;
 
@@ -119,7 +97,7 @@ bool DIAG_HandleDiagnosticAction(uint16_t ActionID, uint16_t *pUserError)
 		case ACT_DBG_SNC_TOCU:
 			{
 				LL_SyncTOCU(true);
-				DELAY_US(1000000);
+				DELAY_US(100);
 				LL_SyncTOCU(false);
 			}
 			break;
@@ -147,6 +125,18 @@ bool DIAG_HandleDiagnosticAction(uint16_t ActionID, uint16_t *pUserError)
 				LL_SyncOscilloscope(true);
 				DELAY_US(1000000);
 				LL_SyncOscilloscope(false);
+			}
+			break;
+
+		case ACT_DBG_TOSU_SWITCH:
+			{
+				COMM_TOSU(DataTable[REG_DBG]);
+			}
+			break;
+
+		case ACT_DBG_POT_SWITCH:
+			{
+				COMM_PotSwitch(DataTable[REG_DBG]);
 			}
 			break;
 

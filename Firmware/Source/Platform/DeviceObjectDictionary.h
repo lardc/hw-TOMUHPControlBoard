@@ -19,15 +19,18 @@
 #define ACT_DBG_RELAY					19	// Проверка выхода RELAY
 #define ACT_DBG_SNC_TOCU				20	// Проверка выхода SNC_TOCU
 #define ACT_DBG_OSC_SYNC				21	// Проверка выхода SYNC
-#define ACT_DBG_U_REF_U10				22	// Проверка установки опорного напряжения для компаратора U10
-#define ACT_DBG_U_REF_U90				23	// Проверка установки опорного напряжения для компаратора U90
-#define ACT_DBG_READ_PRESSURE			24	// Проверка работы датчика давления
-#define ACT_DBG_SFTY_ACTIVATION			25	// Проверка выхода SFTY_EN
-#define ACT_DBG_OUT_ISO					26	// Проверка изолированных выходов
-#define ACT_DBG_READ_EXT_REG			27	// Проверка чтения внешнего регистра
-#define ACT_DBG_TRIG_RST				28	// Проверка сброса триггера
-#define ACT_DBG_M_RESET					29	// Проверка выхода M_RESET
-#define ACT_DBG_START					30	// Последовательность запуска в отладочном режиме
+#define ACT_DBG_TOSU_SWITCH				22	// Проверка коммутации TOSU
+#define ACT_DBG_POT_SWITCH				23	// Проверка управления PotSwitch
+
+#define ACT_DBG_U_REF_U10				24	// Проверка установки опорного напряжения для компаратора U10
+#define ACT_DBG_U_REF_U90				25	// Проверка установки опорного напряжения для компаратора U90
+#define ACT_DBG_READ_PRESSURE			26	// Проверка работы датчика давления
+#define ACT_DBG_SFTY_ACTIVATION			27	// Проверка выхода SFTY_EN
+#define ACT_DBG_OUT_ISO					28	// Проверка изолированных выходов
+#define ACT_DBG_READ_EXT_REG			29	// Проверка чтения внешнего регистра
+#define ACT_DBG_TRIG_RST				30	// Проверка сброса триггера
+#define ACT_DBG_M_RESET					31	// Проверка выхода M_RESET
+
 
 #define ACT_DBG_SLAVE_CALL				40	// Запуск команды на slave-узле
 #define ACT_DBG_SLAVE_READ_REG			41	// Чтение регистра из slave-узла
@@ -56,8 +59,8 @@
 #define REG_TOCU_RES_PER_BIT			7	// Сопротивление одного бита блока TOCU (Ом)
 #define REG_MUTE_SAFETY_MONITOR			8	// Отключение мониторинга системы безопасности
 #define REG_MUTE_PRESSURE_MONITOR		9	// Отключение мониторинга давления в системе
-#define REG_VCOMP10_500					10	// Напряжение на компараторе канала напряжения уровня 10% для 500В (мВ)
-#define REG_VCOMP90_500					11	// Напряжение на компараторе канала напряжения уровня 90% для 500В (мВ)
+#define REG_VCOMP10_600					10	// Напряжение на компараторе канала напряжения уровня 10% для 500В (мВ)
+#define REG_VCOMP90_600					11	// Напряжение на компараторе канала напряжения уровня 90% для 500В (мВ)
 #define REG_VCOMP10_1000				12	// Напряжение на компараторе канала напряжения уровня 10% для 1000В (мВ)
 #define REG_VCOMP90_1000				13	// Напряжение на компараторе канала напряжения уровня 90% для 1000В (мВ)
 #define REG_VCOMP10_1500				14	// Напряжение на компараторе канала напряжения уровня 10% для 1500В (мВ)
@@ -113,6 +116,7 @@
 #define ACT_TOCU_FAULT_CLEAR			3	// Очистка fault
 #define ACT_TOCU_WARNING_CLEAR			4	// Очистка warning
 #define ACT_TOCU_PULSE_CONFIG			100	// Конфигурация напряжения и настройка затворов транзисторов
+#define ACT_TOCU_PS_BOARD_DIS			102	// Выключение питания силовых плат
 
 #define REG_TOCU_VOLTAGE_SETPOINT		128	// Значение задания напряжения (В)
 #define REG_TOCU_GATE_REGISTER			129	// Значение-маска конфигурации затворов

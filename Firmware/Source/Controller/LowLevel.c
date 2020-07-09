@@ -94,8 +94,10 @@ bool LL_IsOverflow10()
 }
 //-----------------------------
 
-void LL_WriteDACx(uint16_t Data, GPIO_PortPinSetting CS_SYNC)
+void LL_WriteDACx(uint16_t Data, GPIO_PortPinSetting CS_SYNC, SPI_SyncPolarityEnum Polarity)
 {
+	SPI_SetSyncPolarity(SPI2, Polarity);
+
 	GPIO_SetState(CS_SYNC, false);
 	SPI_WriteByte(SPI2, Data);
 	GPIO_SetState(CS_SYNC, true);

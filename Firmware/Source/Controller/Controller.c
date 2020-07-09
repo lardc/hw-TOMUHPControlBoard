@@ -24,17 +24,19 @@ typedef enum __DeviceState
 } DeviceState;
 typedef enum __SubState
 {
-	SS_None = 0,
-	SS_PowerOn = 1,
-	SS_WaitCharge = 2,
+	SS_None 				= 0,
+	SS_PowerOn 				= 1,
+	SS_WaitCharge 			= 2,
 	
-	SS_PowerOff = 3,
+	SS_PowerOff 			= 3,
 	
-	SS_ConfigSlaves = 4,
-	SS_ConfigSlavesApply = 5,
-	SS_ConfigHardware = 6,
-	SS_CommPause = 7,
-	SS_StartPulse = 8
+	SS_ConfigSlaves 		= 4,
+	SS_ConfigSlavesApply 	= 5,
+	SS_WaitConfig			= 6,
+	SS_ConfigHardware 		= 7,
+	SS_CommPause 			= 8,
+	SS_TOCU_PsOff 			= 9,
+	SS_StartPulse 			= 10
 } SubState;
 typedef enum __TOCUDeviceState
 {
@@ -66,6 +68,7 @@ void CONTROL_ResetToDefaultState();
 void CONTROL_ResetHardware(bool KeepPower);
 void CONTROL_ResetData();
 void CONTROL_SlavesStateUpdate();
+bool CONTROL_ForceSlavesStateUpdate();
 void CONTROL_MonitorSafety();
 void CONTROL_MonitorPressure();
 void CONTROL_HandlePowerOn();
@@ -102,7 +105,16 @@ void CONTROL_ResetToDefaultState()
 	BHL_ResetError();
 	
 	CONTROL_ResetHardware(false);
-	CONTROL_SetDeviceState(DS_None, SS_None);
+
+	if(LOGIC_CallCommandForSlaves(ACT_TOCU_FAULT_CLEAR))
+		if(LOGIC_CallCommandForSlaves(ACT_TOCU_DISABLE_POWER))
+			CONTROL_SetDeviceState(DS_None, SS_None);
+		else
+			CONTROL_SwitchToFault(DF_INTERFACE);
+	else
+		CONTROL_SwitchToFault(DF_INTERFACE);
+
+
 }
 //-----------------------------------------------
 
@@ -348,7 +360,25 @@ void CONTROL_HandlePulseConfig()
 			case SS_ConfigSlavesApply:
 				{
 					if(LOGIC_CallCommandForSlaves(ACT_TOCU_PULSE_CONFIG))
-						CONTROL_SetDeviceState(DS_InProcess, SS_ConfigHardware);
+					{
+						CONTROL_TimeCounterDelay = CONTROL_TimeCounter + APPLY_SETTINGS_TIMEOUT;
+						CONTROL_SetDeviceState(DS_InProcess, SS_WaitConfig);
+					}
+					else
+						CONTROL_SwitchToFault(DF_INTERFACE);
+				}
+				break;
+
+			case SS_WaitConfig:
+				{
+					if(CONTROL_ForceSlavesStateUpdate())
+					{
+						if(LOGIC_AreSlavesInStateX(TOCUDS_Ready))
+							CONTROL_SetDeviceState(DS_InProcess, SS_ConfigHardware);
+						else
+							if(CONTROL_TimeCounter > CONTROL_TimeCounterDelay)
+								CONTROL_SwitchToFault(DF_TOCU_STATE_TIMEOUT);
+					}
 					else
 						CONTROL_SwitchToFault(DF_INTERFACE);
 				}
@@ -359,6 +389,7 @@ void CONTROL_HandlePulseConfig()
 					// Настройка системы коммутации
 					COMM_TOSU(CachedMeasurementSettings.AnodeVoltage);
 					COMM_InternalCommutation(true);
+					COMM_PotSwitch(true);
 					
 					// Настройка компараторов напряжения
 					LOGIC_ConfigVoltageComparators(CachedMeasurementSettings.AnodeVoltage);
@@ -371,19 +402,36 @@ void CONTROL_HandlePulseConfig()
 					
 					CONTROL_TimeCounterDelay = CONTROL_TimeCounter + COMMUTATION_PAUSE;
 					CONTROL_SetDeviceState(DS_InProcess, SS_CommPause);
+
+					// Выключить питание GateDriver
+					LL_PsBoard_PowerOutput(false);
 				}
 				break;
 				
 			case SS_CommPause:
 				{
 					if(CONTROL_TimeCounter > CONTROL_TimeCounterDelay)
+						CONTROL_SetDeviceState(DS_InProcess, SS_TOCU_PsOff);
+				}
+				break;
+
+			case SS_TOCU_PsOff:
+				{
+					if(LOGIC_CallCommandForSlaves(ACT_TOCU_PS_BOARD_DIS))
 						CONTROL_SetDeviceState(DS_InProcess, SS_StartPulse);
+					else
+						CONTROL_SwitchToFault(DF_INTERFACE);
 				}
 				break;
 				
 			case SS_StartPulse:
 				{
-					LOGIC_Pulse();
+					DataTable[REG_PROBLEM] = LOGIC_Pulse();
+
+					if(DataTable[REG_PROBLEM])
+						CONTROL_SetDeviceState(DS_Fault, SS_None);
+					else
+						CONTROL_SetDeviceState(DS_Ready, SS_None);
 				}
 				break;
 				
@@ -403,10 +451,16 @@ void CONTROL_SlavesStateUpdate()
 		if(CONTROL_TimeCounter > NextUpdate)
 		{
 			NextUpdate = CONTROL_TimeCounter + SLAVE_UPDATE_PERIOD;
-			if(!LOGIC_ReadSlavesState())
+			if(!CONTROL_ForceSlavesStateUpdate())
 				CONTROL_SwitchToFault(DF_INTERFACE);
 		}
 	}
+}
+//-----------------------------------------------
+
+bool CONTROL_ForceSlavesStateUpdate()
+{
+	return LOGIC_ReadSlavesState();
 }
 //-----------------------------------------------
 
