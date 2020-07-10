@@ -115,8 +115,8 @@
 #define ACT_TOCU_DISABLE_POWER			2	// Отключение блока
 #define ACT_TOCU_FAULT_CLEAR			3	// Очистка fault
 #define ACT_TOCU_WARNING_CLEAR			4	// Очистка warning
-#define ACT_TOCU_PULSE_CONFIG			100	// Конфигурация напряжения и настройка затворов транзисторов
-#define ACT_TOCU_PS_BOARD_DIS			102	// Выключение питания силовых плат
+#define ACT_TOCU_VOLTAGE_CONFIG			100	// Конфигурация напряжения блока
+#define ACT_TOCU_PULSE_CONFIG			101	// Конфигурация блока под требуемый ток
 
 #define REG_TOCU_VOLTAGE_SETPOINT		128	// Значение задания напряжения (В)
 #define REG_TOCU_GATE_REGISTER			129	// Значение-маска конфигурации затворов

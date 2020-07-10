@@ -35,7 +35,7 @@ typedef enum __SubState
 	SS_WaitConfig			= 6,
 	SS_ConfigHardware 		= 7,
 	SS_CommPause 			= 8,
-	SS_TOCU_PsOff 			= 9,
+	SS_TOCU_PulseConfig		= 9,
 	SS_StartPulse 			= 10
 } SubState;
 typedef enum __TOCUDeviceState
@@ -106,15 +106,23 @@ void CONTROL_ResetToDefaultState()
 	
 	CONTROL_ResetHardware(false);
 
-	if(LOGIC_CallCommandForSlaves(ACT_TOCU_FAULT_CLEAR))
-		if(LOGIC_CallCommandForSlaves(ACT_TOCU_DISABLE_POWER))
-			CONTROL_SetDeviceState(DS_None, SS_None);
+	if(CONTROL_ForceSlavesStateUpdate())
+	{
+		if(LOGIC_AreSlavesInStateX(TOCUDS_Fault))
+		{
+			if(!LOGIC_CallCommandForSlaves(ACT_TOCU_FAULT_CLEAR))
+				CONTROL_SwitchToFault(DF_INTERFACE);
+		}
 		else
-			CONTROL_SwitchToFault(DF_INTERFACE);
+		{
+			if(LOGIC_CallCommandForSlaves(ACT_TOCU_DISABLE_POWER))
+				CONTROL_SetDeviceState(DS_None, SS_None);
+			else
+				CONTROL_SwitchToFault(DF_INTERFACE);
+		}
+	}
 	else
 		CONTROL_SwitchToFault(DF_INTERFACE);
-
-
 }
 //-----------------------------------------------
 
@@ -359,7 +367,7 @@ void CONTROL_HandlePulseConfig()
 				
 			case SS_ConfigSlavesApply:
 				{
-					if(LOGIC_CallCommandForSlaves(ACT_TOCU_PULSE_CONFIG))
+					if(LOGIC_CallCommandForSlaves(ACT_TOCU_VOLTAGE_CONFIG))
 					{
 						CONTROL_TimeCounterDelay = CONTROL_TimeCounter + APPLY_SETTINGS_TIMEOUT;
 						CONTROL_SetDeviceState(DS_InProcess, SS_WaitConfig);
@@ -411,13 +419,13 @@ void CONTROL_HandlePulseConfig()
 			case SS_CommPause:
 				{
 					if(CONTROL_TimeCounter > CONTROL_TimeCounterDelay)
-						CONTROL_SetDeviceState(DS_InProcess, SS_TOCU_PsOff);
+						CONTROL_SetDeviceState(DS_InProcess, SS_TOCU_PulseConfig);
 				}
 				break;
 
-			case SS_TOCU_PsOff:
+			case SS_TOCU_PulseConfig:
 				{
-					if(LOGIC_CallCommandForSlaves(ACT_TOCU_PS_BOARD_DIS))
+					if(LOGIC_CallCommandForSlaves(ACT_TOCU_PULSE_CONFIG))
 						CONTROL_SetDeviceState(DS_InProcess, SS_StartPulse);
 					else
 						CONTROL_SwitchToFault(DF_INTERFACE);
