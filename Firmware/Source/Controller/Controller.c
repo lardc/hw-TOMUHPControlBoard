@@ -36,7 +36,8 @@ typedef enum __SubState
 	SS_ConfigHardware 		= 7,
 	SS_CommPause 			= 8,
 	SS_TOCU_PulseConfig		= 9,
-	SS_StartPulse 			= 10
+	SS_StartPulse 			= 10,
+	SS_AfterPulseWaiting	= 11
 } SubState;
 typedef enum __TOCUDeviceState
 {
@@ -439,7 +440,25 @@ void CONTROL_HandlePulseConfig()
 					if(DataTable[REG_PROBLEM])
 						CONTROL_SetDeviceState(DS_Fault, SS_None);
 					else
-						CONTROL_SetDeviceState(DS_Ready, SS_None);
+					{
+						CONTROL_TimeCounterDelay = CONTROL_TimeCounter + AFTER_PULSE_TIMEOUT;
+						CONTROL_SetDeviceState(DS_InProcess, SS_AfterPulseWaiting);
+					}
+				}
+				break;
+
+			case SS_AfterPulseWaiting:
+				{
+					if(CONTROL_ForceSlavesStateUpdate())
+					{
+						if(LOGIC_AreSlavesInStateX(TOCUDS_Ready))
+							CONTROL_SetDeviceState(DS_Ready, SS_None);
+						else
+							if(CONTROL_TimeCounter > CONTROL_TimeCounterDelay)
+								CONTROL_SwitchToFault(DF_TOCU_STATE_TIMEOUT);
+					}
+					else
+						CONTROL_SwitchToFault(DF_INTERFACE);
 				}
 				break;
 				
