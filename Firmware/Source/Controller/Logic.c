@@ -36,6 +36,12 @@ const NodeBitmask NodeBitmaskArray[] = {{TOCU1_CAN_NID, TOCU1_BIT_MASK}};
 #define NODE_ARRAY_SIZE		(sizeof NodeBitmaskArray / sizeof NodeBitmaskArray[0])
 NodeState NodeArray[NODE_ARRAY_SIZE] = {0};
 
+
+// Functions prototypes
+//
+void LOGIC_TurnOnMeasurement();
+//
+
 // Functions
 //
 bool LOGIC_ReadSlavesState()
@@ -201,8 +207,9 @@ void LOGIC_ConfigVoltageComparators(AnodeVoltageEnum AnodeVoltage)
 
 uint16_t LOGIC_Pulse()
 {
-	// Включение подачи напряжения
+	// Подача синхронизации на TOCU HP
 	LL_SyncTOCU(true);
+
 	DELAY_US(10);
 	
 	// Проверка уровня тока до отпирания прибора
@@ -210,8 +217,8 @@ uint16_t LOGIC_Pulse()
 		return PROBLEM_SHORT;
 	
 	// Сброс системы счёта
-	LL_HSTimers_Reset();
 	LL_GateLatchReset();
+	LL_HSTimers_Reset();
 	Overflow90 = false;
 	Overflow10 = false;
 	
@@ -224,22 +231,16 @@ uint16_t LOGIC_Pulse()
 	// Запуск тока управления
 	LL_SyncOscilloscope(true);
 	GateDriver_Sync(true);
+
 	DELAY_US(90);
 	
-	// Считывание данных счётчиков
-	
-	// Отключение синхронизация
+	LOGIC_TurnOnMeasurement();
+
+	// Завершение процесса измерения
 	LL_SyncOscilloscope(false);
 	GateDriver_Sync(false);
 	LL_SyncTOCU(false);
-	
-	// Сброс системы счёта
-	LL_HSTimers_Reset();
-	LL_GateLatchReset();
-	
-	// Включение питания GateDriver
 	LL_PsBoard_PowerOutput(true);
-
 	COMM_PotSwitch(false);
 
 	return PROBLEM_NONE;
@@ -257,5 +258,23 @@ MeasurementSettings LOGIC_CacheMeasurementSettings()
 	result.GateCurrentFallRate = (float)DataTable[REG_GD_CURRENT_FALL_RATE] / 10;
 	
 	return result;
+}
+//-----------------------------------------------
+
+void LOGIC_TurnOnMeasurement()
+{
+	uint32_t DataRaw;
+	uint16_t TurnOn, TurnOnDelay;
+
+	DataRaw = LL_HSTimers_Read();
+
+	TurnOn = (DataRaw >> 12) & 0x0FF0;
+	TurnOn |= (DataRaw >> 28) & 0x000F;
+
+	TurnOnDelay = DataRaw & 0x00FF;
+	TurnOnDelay |= (DataRaw >> 16) & 0x0F00;
+
+	DataTable[REG_MEAS_TIME_ON] = TurnOn * COUNTER_CLOCK_PERIOD_NS;
+	DataTable[REG_MEAS_TIME_DELAY] = TurnOnDelay * COUNTER_CLOCK_PERIOD_NS;
 }
 //-----------------------------------------------

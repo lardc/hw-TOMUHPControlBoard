@@ -26,7 +26,7 @@
 
 // SPI
 #define SPI1_BAUDRATE_BITS				0x5
-#define SPI1_LSB_FIRST					false
+#define SPI1_LSB_FIRST					true
 #define SPI2_BAUDRATE_BITS				0x5
 #define SPI2_LSB_FIRST					false
 // ----------------------------------------------
@@ -39,6 +39,9 @@
 // CAN
 #define CAN_BAUDRATE					1000000		// Битрейт CAN
 // ----------------------------------------------
+
+// External time counter
+#define COUNTER_CLOCK_PERIOD_NS			100				// Период тактового сигнала внешнего счетчика, нс
 
 
 #endif // __SYSCONFIG_H

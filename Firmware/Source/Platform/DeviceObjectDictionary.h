@@ -86,7 +86,8 @@
 #define REG_DBG_SLAVE_DATA				182	// Данные регистра (записываемые или вычитываемые) slave-узла
 #define REG_DBG_SLAVE_ACT				183	// Команда для slave-узла
 
-#define REG_DBG							190	// Отладочный регистр
+#define REG_DBG							190	// Отладочный регистр 1
+#define REG_DBG1						191	// Отладочный регистр 2
 
 // Регистры только чтение
 #define REG_DEV_STATE					192	// Регистр состояния
