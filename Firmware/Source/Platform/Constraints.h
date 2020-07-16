@@ -19,9 +19,9 @@
 #define DUT_VOLTAGE_MAX			1500	// Â
 #define DUT_VOLTAGE_DEF			500		// Â
 
-#define DUT_CURRENT_MIN			10		// À
-#define DUT_CURRENT_MAX			100		// À
-#define DUT_CURRENT_DEF			10		// À
+#define DUT_CURRENT_MIN			100		// À x10
+#define DUT_CURRENT_MAX			1000	// À x10
+#define DUT_CURRENT_DEF			100		// À x10
 
 #define GATE_CURRENT_MIN		10		// A x10
 #define GATE_CURRENT_MAX		200		// A x10
@@ -50,6 +50,10 @@
 #define GATE_I_RATE_MIN			1		// À/ìêñ õ10
 #define GATE_I_RATE_MAX			100		// À/ìêñ õ10
 #define GATE_I_RATE_DEF			10		// À/ìêñ õ10
+
+#define ID_THRESHOLD_MIN		0		// %
+#define ID_THRESHOLD_MAX		80		// %
+#define ID_THRESHOLD_DEF		50		// %
 
 // Types
 //

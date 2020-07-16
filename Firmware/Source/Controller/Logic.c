@@ -9,6 +9,7 @@
 #include "Delay.h"
 #include "Interrupts.h"
 #include "GateDriver.h"
+#include "InitConfig.h"
 
 // Definitions
 //
@@ -213,7 +214,7 @@ uint16_t LOGIC_Pulse()
 	DELAY_US(10);
 	
 	// Проверка уровня тока до отпирания прибора
-	if(MEASURE_ReadCurrent() > DataTable[MAX_ANODE_CURRENT])
+	if(MEASURE_CheckAnodeCurrent())
 		return PROBLEM_SHORT;
 	
 	// Сброс системы счёта
@@ -221,11 +222,8 @@ uint16_t LOGIC_Pulse()
 	LL_HSTimers_Reset();
 	Overflow90 = false;
 	Overflow10 = false;
-	
+
 	// Запуск оцифровки
-	DMA_ChannelReload(DMA_ADC_DUT_I_CHANNEL, PULSE_ARR_MAX_LENGTH);
-	DMA_ChannelEnable(DMA_ADC_DUT_I_CHANNEL, true);
-	DMAOperation = true;
 	TIM_Start(TIM6);
 	
 	// Запуск тока управления
@@ -243,6 +241,10 @@ uint16_t LOGIC_Pulse()
 	LL_PsBoard_PowerOutput(true);
 	COMM_PotSwitch(false);
 
+	// Сохранение оцифрованных значений в endpoint
+	MEASURE_ConvertRawArray(&LOGIC_OutputPulseRaw[0], &CONTROL_Values_Current[0], PULSE_ARR_MAX_LENGTH);
+	CONTROL_Values_Counter = PULSE_ARR_MAX_LENGTH;
+
 	return PROBLEM_NONE;
 }
 //-----------------------------------------------
@@ -252,7 +254,7 @@ MeasurementSettings LOGIC_CacheMeasurementSettings()
 	MeasurementSettings result;
 	
 	result.AnodeVoltage = DataTable[REG_ANODE_VOLTAGE];
-	result.AnodeCurrent = (float)DataTable[REG_ANODE_CURRENT];
+	result.AnodeCurrent = (float)DataTable[REG_ANODE_CURRENT] / 10;
 	result.GateCurrent = (float)DataTable[REG_GATE_CURRENT] / 10;
 	result.GateCurrentRiseRate = (float)DataTable[REG_GATE_CURRENT_RISE_RATE] / 10;
 	result.GateCurrentFallRate = (float)DataTable[REG_GD_CURRENT_FALL_RATE] / 10;

@@ -6,6 +6,15 @@
 #include "Global.h"
 #include "DataTable.h"
 #include "SysConfig.h"
+#include "InitConfig.h"
+#include "Interrupts.h"
+#include "Delay.h"
+
+// Macro
+//
+#define ABS(a)	(((a) < 0) ? -(a) : (a))
+//
+#define MEASURE_POINTS_NUMBER		5		// Количество точек при единичном измерении
 
 // Variables
 volatile uint16_t LOGIC_OutputPulseRaw[PULSE_ARR_MAX_LENGTH];
@@ -36,7 +45,7 @@ void MEASURE_SetUref90(uint16_t Voltage)
 }
 //---------------------
 
-void MEASURE_ConvertRawArray(uint16_t* RawArray, uint16_t* OutputArray, uint16_t DataLength)
+void MEASURE_ConvertRawArray(volatile uint16_t* RawArray, volatile uint16_t* OutputArray, uint16_t DataLength)
 {
 	uint16_t i;
 	float tmp;
@@ -60,13 +69,31 @@ void MEASURE_ConvertRawArray(uint16_t* RawArray, uint16_t* OutputArray, uint16_t
 }
 //---------------------
 
-uint16_t MEASURE_ReadCurrent()
+bool MEASURE_CheckAnodeCurrent()
 {
-	uint16_t raw, result;
+	uint16_t AnodeCurrent = 0, AnodeCurrentRaw = 0;
+	float AlowedError = 0;
 
-	raw = ADC_Measure(ADC1, ADC1_CURRENT_CHANNEL);
-	MEASURE_ConvertRawArray(&raw, &result, 1);
+	// Запуск процесса оцифровки тока
+	DMA_ChannelReload(DMA_ADC_DUT_I_CHANNEL, MEASURE_POINTS_NUMBER);
+	TIM_Reset(TIM6);
+	TIM_Start(TIM6);
 
-	return result;
+	DELAY_US(2);
+
+	DMA_ChannelReload(DMA_ADC_DUT_I_CHANNEL, PULSE_ARR_MAX_LENGTH);
+
+	// Усреднение результата измерения
+	for(int i=0; i < MEASURE_POINTS_NUMBER; i++)
+		AnodeCurrentRaw += LOGIC_OutputPulseRaw[i];
+	AnodeCurrentRaw = AnodeCurrentRaw / MEASURE_POINTS_NUMBER;
+
+	MEASURE_ConvertRawArray(&AnodeCurrentRaw, &AnodeCurrent, 1);
+	AlowedError = ABS(1 - (float)AnodeCurrent / 10 / CachedMeasurementSettings.AnodeCurrent) * 100;
+
+	if(AlowedError <= DataTable[REG_ID_THRESHOLD])
+		return true;
+	else
+		return false;
 }
 //---------------------

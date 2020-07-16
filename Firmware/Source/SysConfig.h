@@ -21,7 +21,7 @@
 
 // Timers
 #define TIMER3_uS						1000		// Период работы таймера общего назначения
-#define TIMER6_uS						0.5f		// Период работы таймера тактирования АЦП
+#define TIMER6_uS						0.3f		// Период работы таймера тактирования АЦП
 // ----------------------------------------------
 
 // SPI
@@ -33,7 +33,7 @@
 
 // ADC
 #define DMA_ADC_DUT_I_CHANNEL			DMA1_Channel1	// Канал DMA для АЦП тока
-#define ADC1_CURRENT_CHANNEL			2			// АЦП1 номер канала тока
+#define ADC1_CURRENT_CHANNEL			2				// АЦП1 номер канала тока
 // ----------------------------------------------
 
 // CAN
@@ -41,7 +41,7 @@
 // ----------------------------------------------
 
 // External time counter
-#define COUNTER_CLOCK_PERIOD_NS			100				// Период тактового сигнала внешнего счетчика, нс
+#define COUNTER_CLOCK_PERIOD_NS			10				// Период тактового сигнала внешнего счетчика, нс
 
 
 #endif // __SYSCONFIG_H

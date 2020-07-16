@@ -7,7 +7,6 @@
 #include "GateDriver.h"
 #include "Diagnostic.h"
 #include "LowLevel.h"
-#include "Measurement.h"
 #include "Logic.h"
 #include "Commutation.h"
 
@@ -156,6 +155,10 @@ void CONTROL_ResetHardware(bool KeepPower)
 	
 	COMM_EnableSafetyInput(false);
 	COMM_TOSU(false);
+
+	LL_GateLatchReset();
+	LL_HSTimers_Reset();
+	LL_HSTimers_Read();
 }
 //-----------------------------------------------
 

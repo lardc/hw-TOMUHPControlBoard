@@ -25,7 +25,7 @@ const TableItemConstraint NVConstraint[DATA_TABLE_NV_SIZE] =
 	{DAC_VOLTAGE_MIN, DAC_VOLTAGE_MAX, DAC_VOLTAGE_DEF},						// 13
 	{DAC_VOLTAGE_MIN, DAC_VOLTAGE_MAX, DAC_VOLTAGE_DEF},						// 14
 	{DAC_VOLTAGE_MIN, DAC_VOLTAGE_MAX, DAC_VOLTAGE_DEF},						// 15
-	{DUT_CURRENT_MIN, DUT_CURRENT_MAX, 0},										// 16
+	{ID_THRESHOLD_MIN, ID_THRESHOLD_MAX, ID_THRESHOLD_DEF},						// 16
 	{0, 0, 0},																	// 17
 	{0, 0, 0},																	// 18
 	{0, 0, 0},																	// 19
@@ -204,5 +204,5 @@ const TableItemConstraint VConstraint[DATA_TABLE_WP_START - DATA_TABLE_WR_START]
 	{0, 0, 0},																	// 188
 	{0, 0, 0},																	// 189
 	{0, INT16U_MAX, 0},															// 190
-	{0, INT16U_MAX, 0}															// 191
+	{0, 0, 0}																	// 191
 };

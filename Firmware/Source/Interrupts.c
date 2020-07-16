@@ -15,7 +15,6 @@
 volatile Int64U LED_BlinkTimeCounter = 0;
 volatile bool Overflow90 = false;
 volatile bool Overflow10 = false;
-volatile bool DMAOperation = false;
 
 // Functions
 //
@@ -45,7 +44,6 @@ void DMA1_Channel1_IRQHandler()
 	{
 		TIM_Stop(TIM6);
 		TIM_Reset(TIM6);
-		DMAOperation = false;
 		DMA_TransferCompleteReset(DMA1, DMA_IFCR_CTCIF1);
 	}
 }

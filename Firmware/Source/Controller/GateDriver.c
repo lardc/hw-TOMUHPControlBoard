@@ -50,7 +50,6 @@ void GateDriver_SetCurrent(float GateCurrent)
 {
 	uint16_t Data = GateDriver_ItoDAC(GateCurrent) & ~DAC_CHANNEL_B;
 	LL_WriteDACx(Data, GPIO_CS_GD2, RISE_Edge);
-	DataTable[REG_DBG] = Data;
 }
 //---------------------
 

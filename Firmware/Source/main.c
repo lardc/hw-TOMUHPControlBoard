@@ -27,10 +27,6 @@ int main()
 	// Настройка UART
 	UART_Config();
 
-	// Настройка таймеров
-	Timer3_Config();
-	Timer6_Config();
-
 	// SPI config
 	SPI_Config();
 
@@ -40,8 +36,12 @@ int main()
 	// Настройка DMA
 	DMA_Config();
 
+	// Настройка таймеров
+	Timer3_Config();
+	Timer6_Config();
+
 	// Настройка сторожевого таймера
-	//WatchDog_Config();
+	WatchDog_Config();
 
 	// Инициализация логики контроллера
 	CONTROL_Init();
