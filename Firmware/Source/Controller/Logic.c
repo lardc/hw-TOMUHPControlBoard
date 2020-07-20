@@ -10,6 +10,7 @@
 #include "Interrupts.h"
 #include "GateDriver.h"
 #include "InitConfig.h"
+#include "Constraints.h"
 
 // Definitions
 //
@@ -215,7 +216,10 @@ uint16_t LOGIC_Pulse()
 	
 	// Проверка уровня тока до отпирания прибора
 	if(MEASURE_CheckAnodeCurrent())
+	{
+		LL_SyncTOCU(false);
 		return PROBLEM_SHORT;
+	}
 	
 	// Сброс системы счёта
 	LL_GateLatchReset();
@@ -224,6 +228,7 @@ uint16_t LOGIC_Pulse()
 	Overflow10 = false;
 
 	// Запуск оцифровки
+	DMA_ChannelEnable(DMA_ADC_DUT_I_CHANNEL, true);
 	TIM_Start(TIM6);
 	
 	// Запуск тока управления
@@ -244,6 +249,20 @@ uint16_t LOGIC_Pulse()
 	// Сохранение оцифрованных значений в endpoint
 	MEASURE_ConvertRawArray(&LOGIC_OutputPulseRaw[0], &CONTROL_Values_Current[0], PULSE_ARR_MAX_LENGTH);
 	CONTROL_Values_Counter = PULSE_ARR_MAX_LENGTH;
+
+	// Обработка внештатных ситуаций
+	if (Overflow90 && Overflow10 && (DataTable[REG_MEAS_CURRENT_VALUE] < DUT_CURRENT_MIN))
+	{
+		return PROBLEM_NO_PWR;
+	}
+	else if(Overflow90)
+	{
+		return PROBLEM_OVERFLOW90;
+	}
+	else if(Overflow10)
+	{
+		return PROBLEM_OVERFLOW10;
+	}
 
 	return PROBLEM_NONE;
 }
@@ -270,13 +289,20 @@ void LOGIC_TurnOnMeasurement()
 
 	DataRaw = LL_HSTimers_Read();
 
-	TurnOn = (DataRaw >> 12) & 0x0FF0;
-	TurnOn |= (DataRaw >> 28) & 0x000F;
+	TurnOn = ((DataRaw >> 12) & 0x0FF0) | ((DataRaw >> 28) & 0x000F);
+	TurnOn = TurnOn * COUNTER_CLOCK_PERIOD_NS;
 
-	TurnOnDelay = DataRaw & 0x00FF;
-	TurnOnDelay |= (DataRaw >> 16) & 0x0F00;
+	if(TurnOn < DataTable[REG_MEAS_TIME_LOW])
+		TurnOn = 0;
 
-	DataTable[REG_MEAS_TIME_ON] = TurnOn * COUNTER_CLOCK_PERIOD_NS;
-	DataTable[REG_MEAS_TIME_DELAY] = TurnOnDelay * COUNTER_CLOCK_PERIOD_NS;
+	DataTable[REG_MEAS_TIME_ON] = TurnOn;
+
+	TurnOnDelay = (DataRaw & 0x00FF) | ((DataRaw >> 16) & 0x0F00);
+	TurnOnDelay = TurnOnDelay * COUNTER_CLOCK_PERIOD_NS;
+
+	if(TurnOnDelay < DataTable[REG_MEAS_TIME_LOW])
+		TurnOnDelay = 0;
+
+	DataTable[REG_MEAS_TIME_DELAY] = TurnOnDelay;
 }
 //-----------------------------------------------

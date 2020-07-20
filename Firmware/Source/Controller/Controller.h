@@ -5,6 +5,11 @@
 #include "stdinc.h"
 #include "Measurement.h"
 
+// Defines
+//
+#define EP_SIZE			(PULSE_ARR_MAX_LENGTH / 2)
+//
+
 // Types
 typedef enum __AnodeVoltage
 {

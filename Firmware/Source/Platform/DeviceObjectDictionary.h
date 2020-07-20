@@ -66,7 +66,8 @@
 #define REG_VCOMP10_1500				14	// Напряжение на компараторе канала напряжения уровня 10% для 1500В (мВ)
 #define REG_VCOMP90_1500				15	// Напряжение на компараторе канала напряжения уровня 90% для 1500В (мВ)
 #define REG_ID_THRESHOLD				16	// Порог анодного тока до отпирания прибора (% от REG_ANODE_CURRENT)
-// 16 - 19
+#define REG_MEAS_TIME_LOW				17	// Минимальное измеряемое значение времени (нс)
+// 17 - 19
 #define REG_GD_CURRENT_SHUNT			20	// Сопротивление шунта в цепи упрвления (мОм) (x10)
 #define REG_GD_I_SET_K					21	// Пересчёт тока в значение ЦАП пропорциональный коэффициент (х1000)
 #define REG_GD_I_SET_OFFSET				22	// Пересчёт тока в значение ЦАП смещение
@@ -147,13 +148,12 @@
 
 // Problem
 #define PROBLEM_NONE					0
-#define PROBLEM_NO_CTRL_NO_PWR			1	// Отсутствие тока управления и силового тока
-#define PROBLEM_NO_PWR					2	// Отсутствие силового тока
-#define PROBLEM_SHORT					3	// КЗ на выходе
-#define PROBLEM_NO_POT_SIGNAL			4	// Нет сигнала с потенциальной линии
-#define PROBLEM_OVERFLOW90				5	// Переполнение счётчика уровня 90%
-#define PROBLEM_OVERFLOW10				6	// Переполнение счётчика уровня 10%
-#define PROBLEM_SAFETY_VIOLATION		7	// Срабатывание контура безопасности
+#define PROBLEM_NO_PWR					1	// Отсутствие силового тока
+#define PROBLEM_SHORT					2	// КЗ на выходе
+#define PROBLEM_NO_POT_NO_CTRL			3	// Нет сигнала с потенциальной линии или сигнала управления
+#define PROBLEM_OVERFLOW90				4	// Переполнение счётчика уровня 90%
+#define PROBLEM_OVERFLOW10				5	// Переполнение счётчика уровня 10%
+#define PROBLEM_SAFETY_VIOLATION		6	// Срабатывание контура безопасности
 
 //  Warning
 #define WARNING_NONE					0

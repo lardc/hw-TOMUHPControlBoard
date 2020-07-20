@@ -65,6 +65,10 @@ void MEASURE_ConvertRawArray(volatile uint16_t* RawArray, volatile uint16_t* Out
 		tmp = tmp / ShuntRes;
 		tmp = tmp * tmp * P2 + tmp * P1 + P0;
 		OutputArray[i] = (tmp > 0) ? (uint16_t)tmp : 0;
+
+		if(OutputArray[i] > DataTable[REG_MEAS_CURRENT_VALUE])
+			DataTable[REG_MEAS_CURRENT_VALUE] = OutputArray[i];
+
 	}
 }
 //---------------------
@@ -76,20 +80,21 @@ bool MEASURE_CheckAnodeCurrent()
 
 	// Запуск процесса оцифровки тока
 	DMA_ChannelReload(DMA_ADC_DUT_I_CHANNEL, MEASURE_POINTS_NUMBER);
-	TIM_Reset(TIM6);
+	DMA_ChannelEnable(DMA_ADC_DUT_I_CHANNEL, true);
 	TIM_Start(TIM6);
 
 	DELAY_US(2);
 
 	DMA_ChannelReload(DMA_ADC_DUT_I_CHANNEL, PULSE_ARR_MAX_LENGTH);
+	DMA_ChannelEnable(DMA_ADC_DUT_I_CHANNEL, true);
 
 	// Усреднение результата измерения
-	for(int i=0; i < MEASURE_POINTS_NUMBER; i++)
+	for(int i = 0; i < MEASURE_POINTS_NUMBER; i++)
 		AnodeCurrentRaw += LOGIC_OutputPulseRaw[i];
-	AnodeCurrentRaw = AnodeCurrentRaw / MEASURE_POINTS_NUMBER;
+	AnodeCurrentRaw = (float)AnodeCurrentRaw / MEASURE_POINTS_NUMBER;
 
 	MEASURE_ConvertRawArray(&AnodeCurrentRaw, &AnodeCurrent, 1);
-	AlowedError = ABS(1 - (float)AnodeCurrent / 10 / CachedMeasurementSettings.AnodeCurrent) * 100;
+	AlowedError = (1 - (float)AnodeCurrent / 10 / CachedMeasurementSettings.AnodeCurrent) * 100;
 
 	if(AlowedError <= DataTable[REG_ID_THRESHOLD])
 		return true;

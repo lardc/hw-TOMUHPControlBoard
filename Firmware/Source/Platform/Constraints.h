@@ -55,6 +55,10 @@
 #define ID_THRESHOLD_MAX		80		// %
 #define ID_THRESHOLD_DEF		50		// %
 
+#define MEAS_TIME_LOW_MIN		0		// нс
+#define MEAS_TIME_LOW_MAX		1000	// нс
+#define MEAS_TIME_LOW_DEF		500		// нс
+
 // Types
 //
 typedef struct __TableItemConstraint

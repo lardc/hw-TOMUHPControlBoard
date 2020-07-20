@@ -43,7 +43,6 @@ void DMA1_Channel1_IRQHandler()
 	if(DMA_IsTransferComplete(DMA1, DMA_ISR_TCIF1))
 	{
 		TIM_Stop(TIM6);
-		TIM_Reset(TIM6);
 		DMA_TransferCompleteReset(DMA1, DMA_IFCR_CTCIF1);
 	}
 }
