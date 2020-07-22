@@ -10,7 +10,7 @@
 // Forward functions
 uint16_t GateDriver_ItoDAC(float GateCurrent);
 uint16_t GateDriver_IrefToDAC(float GateCurrent);
-uint16_t GateDriver_IrateToDAC(float CurrentRate, uint16_t KRegister);
+uint16_t GateDriver_IrateToDAC(float CurrentRate, uint16_t K, int16_t Offset);
 
 // Functions
 void GateDriver_Sync(bool State)
@@ -37,11 +37,9 @@ uint16_t GateDriver_IrefToDAC(float GateCurrentThreshold)
 }
 //---------------------
 
-uint16_t GateDriver_IrateToDAC(float CurrentRate, uint16_t KRegister)
+uint16_t GateDriver_IrateToDAC(float CurrentRate, uint16_t K, int16_t Offset)
 {
-	float K = (float)DataTable[KRegister];
-	
-	uint32_t result = CurrentRate * K;
+	uint32_t result = CurrentRate * K + Offset;
 	return (result > DAC_RESOLUTION) ? DAC_RESOLUTION : result;
 }
 //---------------------
@@ -60,16 +58,40 @@ void GateDriver_SetCompThreshold(float GateCurrentThreshold)
 }
 //---------------------
 
-void GateDriver_SetFallRate(float GateCurrentFallRate)
+void GateDriver_SetFallRate(MeasurementSettings *Settings)
 {
-	uint16_t Data = GateDriver_IrateToDAC(GateCurrentFallRate, REG_GD_FALL_RATE_TO_DAC) & ~DAC_CHANNEL_B;
-	LL_WriteDACx(Data, GPIO_CS_GD1, RISE_Edge);
+	float FrontTime, FrontTimeMin, GateCurrentFallRate;
+	uint16_t Data;
+
+	FrontTime = Settings->GateCurrent / Settings->GateCurrentFallRate;
+	FrontTimeMin = (float)DataTable[REG_GD_FRONT_TIME_MIN] / 10;
+
+	if(FrontTime < FrontTimeMin)
+		GateCurrentFallRate = FrontTimeMin * Settings->GateCurrent;
+	else
+		GateCurrentFallRate = Settings->GateCurrentFallRate;
+
+	Data = GateDriver_IrateToDAC(GateCurrentFallRate, DataTable[REG_GD_I_FALL_RATE_K], DataTable[REG_GD_I_FALL_RATE_OFFSET]);
+	LL_WriteDACx((Data & ~DAC_CHANNEL_B), GPIO_CS_GD1, RISE_Edge);
 }
 //---------------------
 
-void GateDriver_SetRiseRate(float GateCurrentRiseRate)
+void GateDriver_SetRiseRate(MeasurementSettings *Settings)
 {
-	uint16_t Data = GateDriver_IrateToDAC(GateCurrentRiseRate, REG_GD_RISE_RATE_TO_DAC) | DAC_CHANNEL_B;
-	LL_WriteDACx(Data, GPIO_CS_GD1, RISE_Edge);
+	float FrontTime, FrontTimeMin, GateCurrentRiseRate;
+	uint16_t Data;
+
+	FrontTime = Settings->GateCurrent / Settings->GateCurrentRiseRate;
+	FrontTimeMin = (float)DataTable[REG_GD_FRONT_TIME_MIN] / 10;
+
+	if(FrontTime < FrontTimeMin)
+		GateCurrentRiseRate = FrontTimeMin * Settings->GateCurrent;
+	else
+		GateCurrentRiseRate = Settings->GateCurrentRiseRate;
+
+	DataTable[190] = (uint16_t)(FrontTime * 10);
+
+	Data = GateDriver_IrateToDAC(GateCurrentRiseRate, DataTable[REG_GD_I_RISE_RATE_K], DataTable[REG_GD_I_RISE_RATE_OFFSET]);
+	LL_WriteDACx((Data | DAC_CHANNEL_B), GPIO_CS_GD1, RISE_Edge);
 }
 //---------------------

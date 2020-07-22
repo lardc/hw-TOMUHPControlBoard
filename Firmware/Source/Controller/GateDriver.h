@@ -3,12 +3,13 @@
 
 // Includes
 #include "stdinc.h"
+#include "Controller.h"
 
 // Functions prototypes
 void GateDriver_Sync(bool State);
 void GateDriver_SetCurrent(float GateCurrent);
 void GateDriver_SetCompThreshold(float GateCurrentThreshold);
-void GateDriver_SetFallRate(float GateCurrentFallRate);
-void GateDriver_SetRiseRate(float GateCurrentRiseRate);
+void GateDriver_SetFallRate(MeasurementSettings *Settings);
+void GateDriver_SetRiseRate(MeasurementSettings *Settings);
 
 #endif // __GATEDRIVER_H

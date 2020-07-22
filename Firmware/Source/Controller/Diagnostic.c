@@ -10,6 +10,7 @@
 #include "Measurement.h"
 #include "Commutation.h"
 #include "BCCIMHighLevel.h"
+#include "Controller.h"
 
 // Functions
 bool DIAG_HandleDiagnosticAction(uint16_t ActionID, uint16_t *pUserError)
@@ -18,25 +19,28 @@ bool DIAG_HandleDiagnosticAction(uint16_t ActionID, uint16_t *pUserError)
 	{
 		case ACT_DBG_GD_I_SET:
 			{
-				GateDriver_SetCurrent(DataTable[REG_DBG]);
+				CachedMeasurementSettings.GateCurrent = (float)DataTable[REG_DBG] / 10;
+				GateDriver_SetCurrent(CachedMeasurementSettings.GateCurrent);
 			}
 			break;
 
 		case ACT_DBG_GD_TRIG_THRESHOLD:
 			{
-				GateDriver_SetCompThreshold(DataTable[REG_DBG]);
+				GateDriver_SetCompThreshold((float)DataTable[REG_DBG] / 10);
 			}
 			break;
 
 		case ACT_DBG_GD_I_RISE_RATE:
 			{
-				GateDriver_SetRiseRate(DataTable[REG_DBG]);
+				CachedMeasurementSettings.GateCurrentRiseRate = (float)DataTable[REG_DBG] / 10;
+				GateDriver_SetRiseRate(&CachedMeasurementSettings);
 			}
 			break;
 
 		case ACT_DBG_GD_I_FALL_RATE:
 			{
-				GateDriver_SetFallRate(DataTable[REG_DBG]);
+				CachedMeasurementSettings.GateCurrentFallRate = (float)DataTable[REG_DBG] / 10;
+				GateDriver_SetFallRate(&CachedMeasurementSettings);
 			}
 			break;
 

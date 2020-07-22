@@ -105,7 +105,7 @@ void LL_WriteDACx(uint16_t Data, GPIO_PortPinSetting CS_SYNC, SPI_SyncPolarityEn
 	DELAY_US(1);
 
 	GPIO_SetState(GPIO_LDAC, false);
-	DELAY_US(1);
+	DELAY_US(5);
 	GPIO_SetState(GPIO_LDAC, true);
 	DELAY_US(1);
 }

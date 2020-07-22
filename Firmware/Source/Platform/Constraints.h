@@ -27,6 +27,10 @@
 #define GATE_CURRENT_MAX		200		// A x10
 #define GATE_CURRENT_DEF		10		// A x10
 
+#define GATE_FRONT_MIN			0		// мкс х10
+#define GATE_FRONT_MAX			20		// мкс х10
+#define GATE_FRONT_DEF			10		// мкс х10
+
 #define CURRENT_SHUNT_MIN		1		// мќм х10
 #define CURRENT_SHUNT_MAX		10000	// мќм х10
 #define CURRENT_SHUNT_DEF		1000	// мќм х10

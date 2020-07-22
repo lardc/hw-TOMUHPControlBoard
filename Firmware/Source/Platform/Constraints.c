@@ -33,11 +33,11 @@ const TableItemConstraint NVConstraint[DATA_TABLE_NV_SIZE] =
 	{GAIN_COEFFICIENT_MIN, GAIN_COEFFICIENT_MAX, GAIN_COEFFICIENT_DEF},			// 21
 	{0, INT16U_MAX, 0},															// 22
 	{GATE_I_RATE_MIN, GATE_I_RATE_MAX, GATE_I_RATE_DEF},						// 23
-	{GAIN_COEFFICIENT_MIN, GAIN_COEFFICIENT_MAX, GAIN_COEFFICIENT_DEF},			// 24
+	{GATE_FRONT_MIN, GATE_FRONT_MAX, GATE_FRONT_DEF},							// 24
 	{GAIN_COEFFICIENT_MIN, GAIN_COEFFICIENT_MAX, GAIN_COEFFICIENT_DEF},			// 25
-	{0, 0, 0},																	// 26
-	{0, 0, 0},																	// 27
-	{0, 0, 0},																	// 28
+	{0, INT16U_MAX, 0},															// 26
+	{GAIN_COEFFICIENT_MIN, GAIN_COEFFICIENT_MAX, GAIN_COEFFICIENT_DEF},			// 27
+	{0, INT16U_MAX, 0},															// 28
 	{0, 0, 0},																	// 29
 	{0, 0, 0},																	// 30
 	{0, 0, 0},																	// 31

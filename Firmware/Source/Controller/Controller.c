@@ -409,8 +409,8 @@ void CONTROL_HandlePulseConfig()
 					// Настройка параметров цепи управления
 					GateDriver_SetCurrent(CachedMeasurementSettings.GateCurrent);
 					GateDriver_SetCompThreshold(CachedMeasurementSettings.GateCurrent * GATE_CURRENT_THRESHOLD);
-					GateDriver_SetFallRate(CachedMeasurementSettings.GateCurrentFallRate);
-					GateDriver_SetRiseRate(CachedMeasurementSettings.GateCurrentRiseRate);
+					GateDriver_SetFallRate(&CachedMeasurementSettings);
+					GateDriver_SetRiseRate(&CachedMeasurementSettings);
 					
 					CONTROL_TimeCounterDelay = CONTROL_TimeCounter + COMMUTATION_PAUSE;
 					CONTROL_SetDeviceState(DS_InProcess, SS_CommPause);

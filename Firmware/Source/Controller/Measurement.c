@@ -14,7 +14,7 @@
 //
 #define ABS(a)	(((a) < 0) ? -(a) : (a))
 //
-#define MEASURE_POINTS_NUMBER		5		//  оличество точек при единичном измерении
+#define MEASURE_POINTS_NUMBER		20		//  оличество точек при единичном измерении
 
 // Variables
 volatile uint16_t LOGIC_OutputPulseRaw[PULSE_ARR_MAX_LENGTH];
@@ -83,7 +83,7 @@ bool MEASURE_CheckAnodeCurrent()
 	DMA_ChannelEnable(DMA_ADC_DUT_I_CHANNEL, true);
 	TIM_Start(TIM6);
 
-	DELAY_US(2);
+	DELAY_US(7);
 
 	DMA_ChannelReload(DMA_ADC_DUT_I_CHANNEL, PULSE_ARR_MAX_LENGTH);
 	DMA_ChannelEnable(DMA_ADC_DUT_I_CHANNEL, true);
