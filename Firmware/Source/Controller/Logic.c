@@ -42,6 +42,7 @@ NodeState NodeArray[NODE_ARRAY_SIZE] = {0};
 // Functions prototypes
 //
 void LOGIC_TurnOnMeasurement();
+void LOGIC_AnodeCurrentTune(AnodeVoltageEnum AnodeVoltage, float *AnodeCurrent);
 //
 
 // Functions
@@ -130,6 +131,12 @@ void LOGIC_AssignVItoSlaves(AnodeVoltageEnum AnodeVoltage, float AnodeCurrent)
 	float CurrentPerBit;
 	uint16_t ActualBitmask = 0, MaximumBitmask = 0;
 	
+	DataTable[190] = (uint16_t)(AnodeCurrent * 10);
+
+	LOGIC_AnodeCurrentTune(AnodeVoltage, &AnodeCurrent);
+
+	DataTable[191] = (uint16_t)(AnodeCurrent * 10);
+
 	// Определение максимально допустимой битовой маски
 	for(uint16_t i = 0; i < NODE_ARRAY_SIZE; ++i)
 		MaximumBitmask |= NodeBitmaskArray[i].SupportedBits;
@@ -148,6 +155,40 @@ void LOGIC_AssignVItoSlaves(AnodeVoltageEnum AnodeVoltage, float AnodeCurrent)
 		NodeArray[i].Voltage = AnodeVoltage;
 		NodeArray[i].Mask = NodeBitmaskArray[i].SupportedBits & ActualBitmask;
 	}
+}
+//-----------------------------------------------
+
+void LOGIC_AnodeCurrentTune(AnodeVoltageEnum AnodeVoltage, float *AnodeCurrent)
+{
+	float P2, P1, P0, I;
+
+	switch(AnodeVoltage)
+	{
+		case TOU_600V:
+			P2 = ((float) ((int16_t)DataTable[REG_P2_I_DUT_600V])) / 1000000;
+			P1 = ((float) DataTable[REG_P1_I_DUT_600V]) / 1000;
+			P0 = (int16_t) DataTable[REG_P0_I_DUT_600V];
+			break;
+
+		case TOU_1000V:
+			P2 = ((float) ((int16_t)DataTable[REG_P2_I_DUT_1000V])) / 1000000;
+			P1 = ((float) DataTable[REG_P1_I_DUT_1000V]) / 1000;
+			P0 = (int16_t) DataTable[REG_P0_I_DUT_1000V];
+			break;
+
+		case TOU_1500V:
+			P2 = ((float) ((int16_t)DataTable[REG_P2_I_DUT_1500V])) / 1000000;
+			P1 = ((float) DataTable[REG_P1_I_DUT_1500V]) / 1000;
+			P0 = (int16_t) DataTable[REG_P0_I_DUT_1500V];
+			break;
+
+		default:
+			return;
+	}
+
+	I = *AnodeCurrent;
+
+	*AnodeCurrent = I * I * P2 + I * P1 + P0;
 }
 //-----------------------------------------------
 

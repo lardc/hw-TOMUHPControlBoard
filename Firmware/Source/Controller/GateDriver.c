@@ -89,8 +89,6 @@ void GateDriver_SetRiseRate(MeasurementSettings *Settings)
 	else
 		GateCurrentRiseRate = Settings->GateCurrentRiseRate;
 
-	DataTable[190] = (uint16_t)(FrontTime * 10);
-
 	Data = GateDriver_IrateToDAC(GateCurrentRiseRate, DataTable[REG_GD_I_RISE_RATE_K], DataTable[REG_GD_I_RISE_RATE_OFFSET]);
 	LL_WriteDACx((Data | DAC_CHANNEL_B), GPIO_CS_GD1, RISE_Edge);
 }
