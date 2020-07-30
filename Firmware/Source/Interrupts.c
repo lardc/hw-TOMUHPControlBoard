@@ -79,6 +79,10 @@ void TIM3_IRQHandler()
 			LL_ToggleLED();
 			LED_BlinkTimeCounter = CONTROL_TimeCounter;
 		}
+
+		// Алгоритм работы вентилятора
+		CONTROL_UnitFan();
+
 		TIM_StatusClear(TIM3);
 	}
 }

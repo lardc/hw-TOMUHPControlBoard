@@ -35,5 +35,6 @@ extern MeasurementSettings CachedMeasurementSettings;
 // Functions
 void CONTROL_Init();
 void CONTROL_Idle();
+void CONTROL_UnitFan();
 
 #endif // __CONTROLLER_H

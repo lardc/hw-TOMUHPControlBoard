@@ -67,7 +67,8 @@
 #define REG_VCOMP90_1500				15	// Напряжение на компараторе канала напряжения уровня 90% для 1500В (мВ)
 #define REG_ID_THRESHOLD				16	// Порог анодного тока до отпирания прибора (% от REG_ANODE_CURRENT)
 #define REG_MEAS_TIME_LOW				17	// Минимальное измеряемое значение времени (нс)
-// 17 - 19
+#define REG_FAN_OPERATE_TIME			18	// Время работы вентилятора (с)
+#define REG_FAN_OPERATE_PERIOD			19	// Период работы вентилятора
 #define REG_GD_CURRENT_SHUNT			20	// Сопротивление шунта в цепи упрвления (мОм) (x10)
 #define REG_GD_I_SET_K					21	// Пересчёт тока в значение ЦАП пропорциональный коэффициент
 #define REG_GD_I_SET_OFFSET				22	// Пересчёт тока в значение ЦАП смещение

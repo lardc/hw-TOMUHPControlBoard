@@ -52,6 +52,7 @@ typedef enum __TOCUDeviceState
 volatile DeviceState CONTROL_State = DS_None;
 volatile SubState SUB_State = SS_None;
 volatile Int64U CONTROL_TimeCounter = 0;
+volatile Int64U CONTROL_FanTimeCounter = 0;
 static Boolean CycleActive = FALSE;
 Int64U CONTROL_TimeCounterDelay = 0;
 MeasurementSettings CachedMeasurementSettings;
@@ -146,7 +147,6 @@ void CONTROL_ResetData()
 void CONTROL_ResetHardware(bool KeepPower)
 {
 	LL_ExternalLED(false);
-	LL_UnitFan(false);
 	if(!KeepPower)
 	{
 		LL_PsBoard_PowerInput(false);
@@ -185,7 +185,7 @@ void CONTROL_Idle()
 	CONTROL_HandlePowerOn();
 	CONTROL_HandlePowerOff();
 	CONTROL_HandlePulseConfig();
-	
+
 	CONTROL_WatchDogUpdate();
 }
 //-----------------------------------------------
@@ -539,3 +539,28 @@ void CONTROL_WatchDogUpdate()
 		IWDG_Refresh();
 }
 //-----------------------------------------------
+
+void CONTROL_UnitFan()
+{
+	static uint32_t IncrementCounter = 0;
+	static uint64_t FanOnTimeout = 0;
+
+	// Увеличение счётчика в простое
+	if (CONTROL_State != DS_InProcess)
+		IncrementCounter++;
+
+	// Включение вентилятора
+	if ((IncrementCounter > ((uint32_t)DataTable[REG_FAN_OPERATE_PERIOD] * 1000)) || (CONTROL_State == DS_InProcess))
+	{
+		IncrementCounter = 0;
+		FanOnTimeout = CONTROL_TimeCounter + ((uint32_t)DataTable[REG_FAN_OPERATE_TIME] * 1000);
+		LL_UnitFan(true);
+	}
+
+	// Отключение вентилятора
+	if (FanOnTimeout && (CONTROL_TimeCounter > FanOnTimeout))
+	{
+		FanOnTimeout = 0;
+		LL_UnitFan(false);
+	}
+}

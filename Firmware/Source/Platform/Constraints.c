@@ -27,8 +27,8 @@ const TableItemConstraint NVConstraint[DATA_TABLE_NV_SIZE] =
 	{DAC_VOLTAGE_MIN, DAC_VOLTAGE_MAX, DAC_VOLTAGE_DEF},						// 15
 	{ID_THRESHOLD_MIN, ID_THRESHOLD_MAX, ID_THRESHOLD_DEF},						// 16
 	{MEAS_TIME_LOW_MIN, MEAS_TIME_LOW_MAX, MEAS_TIME_LOW_DEF},					// 17
-	{0, 0, 0},																	// 18
-	{0, 0, 0},																	// 19
+	{0, INT16U_MAX, 0},															// 18
+	{0, INT16U_MAX, 0},															// 19
 	{CURRENT_SHUNT_MIN, CURRENT_SHUNT_MAX, CURRENT_SHUNT_DEF},					// 20
 	{GAIN_COEFFICIENT_MIN, GAIN_COEFFICIENT_MAX, GAIN_COEFFICIENT_DEF},			// 21
 	{0, INT16U_MAX, 0},															// 22
