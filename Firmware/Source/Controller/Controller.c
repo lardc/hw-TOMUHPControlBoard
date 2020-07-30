@@ -159,6 +159,12 @@ void CONTROL_ResetHardware(bool KeepPower)
 	LL_GateLatchReset();
 	LL_HSTimers_Reset();
 	LL_HSTimers_Read();
+
+	LOGIC_ConfigVoltageComparators(0);
+	GateDriver_SetCurrent(0);
+	GateDriver_SetCompThreshold(0);
+	GateDriver_SetFallRate(NULL);
+	GateDriver_SetRiseRate(NULL);
 }
 //-----------------------------------------------
 
