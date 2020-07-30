@@ -147,9 +147,11 @@ void CONTROL_ResetHardware(bool KeepPower)
 {
 	LL_ExternalLED(false);
 	LL_UnitFan(false);
-	LL_PsBoard_PowerOutput(false);
 	if(!KeepPower)
+	{
 		LL_PsBoard_PowerInput(false);
+		LL_PsBoard_PowerOutput(false);
+	}
 	LL_SyncOscilloscope(false);
 	LL_SyncTOCU(false);
 	
@@ -461,7 +463,10 @@ void CONTROL_HandlePulseConfig()
 					if(CONTROL_ForceSlavesStateUpdate())
 					{
 						if(LOGIC_AreSlavesInStateX(TOCUDS_Ready))
+						{
 							CONTROL_SetDeviceState(DS_Ready, SS_None);
+							CONTROL_ResetHardware(true);
+						}
 						else
 							if(CONTROL_TimeCounter > CONTROL_TimeCounterDelay)
 								CONTROL_SwitchToFault(DF_TOCU_STATE_TIMEOUT);
