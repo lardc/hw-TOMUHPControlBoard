@@ -10,6 +10,10 @@
 #include "Logic.h"
 #include "Commutation.h"
 
+// Defines
+//
+#define TIME_TOCU_POWER_UP		1000
+
 // Types
 //
 typedef void (*FUNC_AsyncDelegate)();
@@ -32,11 +36,12 @@ typedef enum __SubState
 	SS_ConfigSlaves 		= 4,
 	SS_ConfigSlavesApply 	= 5,
 	SS_WaitConfig			= 6,
-	SS_ConfigHardware 		= 7,
+	SS_ConfigCommutation	= 7,
 	SS_CommPause 			= 8,
-	SS_TOCU_PulseConfig		= 9,
-	SS_StartPulse 			= 10,
-	SS_AfterPulseWaiting	= 11
+	SS_HardwareConfig		= 9,
+	SS_TOCU_PulseConfig		= 10,
+	SS_StartPulse 			= 11,
+	SS_AfterPulseWaiting	= 12
 } SubState;
 typedef enum __TOCUDeviceState
 {
@@ -96,6 +101,10 @@ void CONTROL_Init()
 	// Сброс значений
 	DEVPROFILE_ResetControlSection();
 	
+	// Ожидание запуска TOCU
+	uint64_t CONTROL_TOCUPowerUpTimer = CONTROL_TimeCounter + TIME_TOCU_POWER_UP;
+	while(CONTROL_TimeCounter < CONTROL_TOCUPowerUpTimer){}
+
 	CONTROL_ResetToDefaultState();
 }
 //-----------------------------------------------
@@ -146,12 +155,12 @@ void CONTROL_ResetData()
 
 void CONTROL_ResetHardware(bool KeepPower)
 {
-	LL_ExternalLED(false);
 	if(!KeepPower)
 	{
 		LL_PsBoard_PowerInput(false);
 		LL_PsBoard_PowerOutput(false);
 	}
+	LL_ExternalLED(false);
 	LL_SyncOscilloscope(false);
 	LL_SyncTOCU(false);
 	
@@ -227,7 +236,7 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 						CONTROL_ResetData();
 						
 						COMM_EnableSafetyInput(DataTable[REG_MUTE_SAFETY_MONITOR] ? false : true);
-						LL_ExternalLED(true);
+						//LL_ExternalLED(true);
 						
 						CONTROL_SetDeviceState(DS_InProcess, SS_ConfigSlaves);
 					}
@@ -394,7 +403,7 @@ void CONTROL_HandlePulseConfig()
 					if(CONTROL_ForceSlavesStateUpdate())
 					{
 						if(LOGIC_AreSlavesInStateX(TOCUDS_Ready))
-							CONTROL_SetDeviceState(DS_InProcess, SS_ConfigHardware);
+							CONTROL_SetDeviceState(DS_InProcess, SS_ConfigCommutation);
 						else
 							if(CONTROL_TimeCounter > CONTROL_TimeCounterDelay)
 								CONTROL_SwitchToFault(DF_TOCU_STATE_TIMEOUT);
@@ -404,27 +413,15 @@ void CONTROL_HandlePulseConfig()
 				}
 				break;
 				
-			case SS_ConfigHardware:
+			case SS_ConfigCommutation:
 				{
 					// Настройка системы коммутации
 					COMM_TOSU(CachedMeasurementSettings.AnodeVoltage);
 					COMM_InternalCommutation(true);
 					COMM_PotSwitch(true);
-					
-					// Настройка компараторов напряжения
-					LOGIC_ConfigVoltageComparators(CachedMeasurementSettings.AnodeVoltage);
-					
-					// Настройка параметров цепи управления
-					GateDriver_SetCurrent(CachedMeasurementSettings.GateCurrent);
-					GateDriver_SetCompThreshold(CachedMeasurementSettings.GateCurrent * GATE_CURRENT_THRESHOLD);
-					GateDriver_SetFallRate(&CachedMeasurementSettings);
-					GateDriver_SetRiseRate(&CachedMeasurementSettings);
-					
+
 					CONTROL_TimeCounterDelay = CONTROL_TimeCounter + COMMUTATION_PAUSE;
 					CONTROL_SetDeviceState(DS_InProcess, SS_CommPause);
-
-					// Выключить питание GateDriver
-					LL_PsBoard_PowerOutput(false);
 				}
 				break;
 				
@@ -438,12 +435,30 @@ void CONTROL_HandlePulseConfig()
 			case SS_TOCU_PulseConfig:
 				{
 					if(LOGIC_CallCommandForSlaves(ACT_TOCU_PULSE_CONFIG))
-						CONTROL_SetDeviceState(DS_InProcess, SS_StartPulse);
+						CONTROL_SetDeviceState(DS_InProcess, SS_HardwareConfig);
 					else
 						CONTROL_SwitchToFault(DF_INTERFACE);
 				}
 				break;
 				
+			case SS_HardwareConfig:
+				{
+					// Выключить питание GateDriver
+					LL_PsBoard_PowerOutput(false);
+
+					// Настройка компараторов напряжения
+					LOGIC_ConfigVoltageComparators(CachedMeasurementSettings.AnodeVoltage);
+
+					// Настройка параметров цепи управления
+					GateDriver_SetCurrent(CachedMeasurementSettings.GateCurrent);
+					GateDriver_SetCompThreshold(CachedMeasurementSettings.GateCurrent * GATE_CURRENT_THRESHOLD);
+					GateDriver_SetFallRate(&CachedMeasurementSettings);
+					GateDriver_SetRiseRate(&CachedMeasurementSettings);
+
+					CONTROL_SetDeviceState(DS_InProcess, SS_StartPulse);
+				}
+				break;
+
 			case SS_StartPulse:
 				{
 					DataTable[REG_PROBLEM] = LOGIC_Pulse();

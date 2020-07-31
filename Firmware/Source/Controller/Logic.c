@@ -284,8 +284,11 @@ uint16_t LOGIC_Pulse()
 	LL_SyncOscilloscope(false);
 	GateDriver_Sync(false);
 	LL_SyncTOCU(false);
-	LL_PsBoard_PowerOutput(true);
 	COMM_PotSwitch(false);
+
+	// ¬ключаем питание с задержкой, чтобы на экране не было шумов
+	DELAY_US(100);
+	LL_PsBoard_PowerOutput(true);
 
 	// —охранение оцифрованных значений в endpoint
 	MEASURE_ConvertRawArray(&LOGIC_OutputPulseRaw[0], &CONTROL_Values_Current[0], PULSE_ARR_MAX_LENGTH);

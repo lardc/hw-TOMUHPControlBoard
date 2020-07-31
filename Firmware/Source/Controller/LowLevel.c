@@ -4,6 +4,8 @@
 // Include
 #include "Delay.h"
 
+uint16_t SPI_Data;
+
 // Functions
 //
 void LL_ToggleLED()
@@ -108,5 +110,7 @@ void LL_WriteDACx(uint16_t Data, GPIO_PortPinSetting CS_SYNC, SPI_SyncPolarityEn
 	DELAY_US(5);
 	GPIO_SetState(GPIO_LDAC, true);
 	DELAY_US(1);
+
+	SPI_Data = Data;
 }
 //---------------------

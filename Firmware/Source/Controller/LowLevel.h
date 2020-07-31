@@ -5,6 +5,8 @@
 #include "stdinc.h"
 #include "Board.h"
 
+extern uint16_t SPI_Data;
+
 // Defines
 #define DAC_CHANNEL_B		BIT15
 
