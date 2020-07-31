@@ -278,11 +278,12 @@ uint16_t LOGIC_Pulse()
 
 	DELAY_US(90);
 	
+	GateDriver_Sync(false);
+
 	LOGIC_TurnOnMeasurement();
 
 	// Завершение процесса измерения
 	LL_SyncOscilloscope(false);
-	GateDriver_Sync(false);
 	LL_SyncTOCU(false);
 	COMM_PotSwitch(false);
 
