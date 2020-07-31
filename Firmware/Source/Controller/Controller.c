@@ -160,12 +160,15 @@ void CONTROL_ResetHardware(bool KeepPower)
 		LL_PsBoard_PowerInput(false);
 		LL_PsBoard_PowerOutput(false);
 	}
+
+	if(!DataTable[REG_TOSU_ALWAYS_ON])
+		COMM_TOSU(false);
+
+	LL_SyncTOCU(false);
 	LL_ExternalLED(false);
 	LL_SyncOscilloscope(false);
-	LL_SyncTOCU(false);
 	
 	COMM_EnableSafetyInput(false);
-	COMM_TOSU(false);
 
 	LL_GateLatchReset();
 	LL_HSTimers_Reset();
