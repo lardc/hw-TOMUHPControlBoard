@@ -239,7 +239,7 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 						CONTROL_ResetData();
 						
 						COMM_EnableSafetyInput(DataTable[REG_MUTE_SAFETY_MONITOR] ? false : true);
-						//LL_ExternalLED(true);
+						LL_ExternalLED(true);
 						
 						CONTROL_SetDeviceState(DS_InProcess, SS_ConfigSlaves);
 					}
@@ -273,7 +273,7 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 		case ACT_WARNING_CLEAR:
 			DataTable[REG_WARNING] = 0;
 			break;
-			
+
 		default:
 			return DIAG_HandleDiagnosticAction(ActionID, pUserError);
 	}
