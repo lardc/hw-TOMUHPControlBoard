@@ -276,16 +276,15 @@ uint16_t LOGIC_Pulse()
 	LL_SyncOscilloscope(true);
 	GateDriver_Sync(true);
 
-	DELAY_US(90);
+	DELAY_US(40);
 	
-	GateDriver_Sync(false);
-
-	LOGIC_TurnOnMeasurement();
-
 	// Завершение процесса измерения
+	GateDriver_Sync(false);
 	LL_SyncOscilloscope(false);
 	LL_SyncTOCU(false);
 	COMM_PotSwitch(false);
+
+	LOGIC_TurnOnMeasurement();
 
 	// Включаем питание с задержкой, чтобы на экране не было шумов
 	DELAY_US(100);

@@ -104,7 +104,6 @@ void CONTROL_Init()
 	// ќжидание запуска TOCU
 	uint64_t CONTROL_TOCUPowerUpTimer = CONTROL_TimeCounter + TIME_TOCU_POWER_UP;
 	while(CONTROL_TimeCounter < CONTROL_TOCUPowerUpTimer){}
-	CONTROL_WatchDogUpdate();
 
 	CONTROL_ResetToDefaultState();
 }
