@@ -26,7 +26,7 @@ bool DIAG_HandleDiagnosticAction(uint16_t ActionID, uint16_t *pUserError)
 
 		case ACT_DBG_GD_TRIG_THRESHOLD:
 			{
-				GateDriver_SetCompThreshold((float)DataTable[REG_DBG] / 10);
+				GateDriver_SetCompThreshold(((float)DataTable[REG_DBG] / 10) * GATE_CURRENT_THRESHOLD);
 			}
 			break;
 

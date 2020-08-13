@@ -48,8 +48,8 @@ const TableItemConstraint NVConstraint[DATA_TABLE_NV_SIZE] =
 	{0, INT16U_MAX, 0},															// 36
 	{GAIN_COEFFICIENT_MIN, GAIN_COEFFICIENT_MAX, GAIN_COEFFICIENT_DEF},			// 37
 	{0, INT16U_MAX, 0},															// 38
-	{0, 0, 0},																	// 39
-	{0, 0, 0},																	// 40
+	{GAIN_COEFFICIENT_MIN, GAIN_COEFFICIENT_MAX, GAIN_COEFFICIENT_DEF},			// 39
+	{0, INT16U_MAX, 0},															// 40
 	{0, 0, 0},																	// 41
 	{0, 0, 0},																	// 42
 	{0, 0, 0},																	// 43
