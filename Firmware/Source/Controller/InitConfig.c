@@ -63,6 +63,7 @@ void IO_Config()
 	GPIO_SetState(GPIO_LDAC, true);
 	GPIO_SetState(GPIO_M_RESET, true);
 	GPIO_SetState(GPIO_LOAD, true);
+	GPIO_SetState(GPIO_PS_EN, false);
 
 	// Выход с открытым коллектором
 	GPIO_InitOpenDrainOutput(GPIO_TRIG_RST, NoPull);

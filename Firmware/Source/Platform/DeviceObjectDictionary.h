@@ -11,7 +11,7 @@
 #define ACT_DBG_GD_TRIG_THRESHOLD		11	// Проверка установки порога срабатывания компаратора
 #define ACT_DBG_GD_I_RISE_RATE			12	// Проверка установки скорости нарастания тока у TOMUHPGateDriver
 #define ACT_DBG_GD_I_FALL_RATE			13	// Проверка установки скорости спада тока у TOMUHPGateDriver
-#define ACT_DBG_GD_OSC_SYNC				14	// Проверка выхода Sync_GD
+#define ACT_DBG_GD_SYNC					14	// Проверка выхода Sync_GD
 #define ACT_DBG_PS_EN					15	// Проверка выхода PS_EN
 #define ACT_DBG_FAN						16	// Проверка выхода FAN
 #define ACT_DBG_IND						17	// Проверка выхода IND
@@ -39,6 +39,8 @@
 
 #define ACT_MEASURE_START				100	// Запуск измерения
 #define ACT_MEASURE_STOP				101	// Остановка измерения
+//
+#define ACT_GATE_PULSE					110	// Формирование тока управления
 
 #define ACT_SAVE_TO_ROM					200	// Сохранение пользовательских данных во FLASH процессора
 #define ACT_RESTORE_FROM_ROM			201	// Восстановление данных из FLASH
@@ -93,6 +95,8 @@
 //
 #define REG_P1_GD_THRESHOLD				39	// Калибровочный коэффициент P1 задания уровня срабатывания компаратора
 #define REG_P0_GD_THRESHOLD				40	// Калибровочный коэффициент P0 задания уровня срабатывания компаратора
+//
+#define REG_GD_TIME_CHRAGE				41	// Время заряда GateDriver (мс)
 // - 127
 
 // Несохраняемы регистры чтения-записи

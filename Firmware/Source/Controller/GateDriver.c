@@ -40,7 +40,13 @@ uint16_t GateDriver_IrefToDAC(float GateCurrentThreshold)
 	P1 = (float) DataTable[REG_P1_GD_THRESHOLD] / 1000;
 	P0 = (Int16S)DataTable[REG_P0_GD_THRESHOLD];
 
+	// Корректировка амплитуды задания порога
 	GateCurrentThreshold_mA = GateCurrentThreshold_mA * P1 + P0;
+
+	// Компенсация изменения порога задания от скорости нарастания тока
+	//P1 = GATE_CURRENT_MIN / DataTable[REG_GATE_CURRENT_RISE_RATE];
+	//GateCurrentThreshold_mA = GateCurrentThreshold_mA * P1;
+
 	result = (uint16_t)(GateCurrentThreshold_mA * ShuntRes_Ohm * DAC_RESOLUTION / DAC_REF_MV);
 
 	return (result > DAC_RESOLUTION) ? DAC_RESOLUTION : result;

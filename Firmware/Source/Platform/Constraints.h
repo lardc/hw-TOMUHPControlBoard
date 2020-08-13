@@ -31,6 +31,14 @@
 #define GATE_FRONT_MAX			20		// мкс х10
 #define GATE_FRONT_DEF			10		// мкс х10
 
+#define GATE_I_RATE_MIN			1		// ј/мкс х10
+#define GATE_I_RATE_MAX			100		// ј/мкс х10
+#define GATE_I_RATE_DEF			10		// ј/мкс х10
+
+#define GATE_TIME_CHRG_MIN		100		// мс
+#define GATE_TIME_CHRG_MAX		1000	// мс
+#define GATE_TIME_CHRG_DEF		500		// мс
+
 #define CURRENT_SHUNT_MIN		1		// мќм х10
 #define CURRENT_SHUNT_MAX		10000	// мќм х10
 #define CURRENT_SHUNT_DEF		1000	// мќм х10
@@ -50,10 +58,6 @@
 #define DAC_VOLTAGE_MIN			0		// м¬
 #define DAC_VOLTAGE_MAX			5000	// м¬
 #define DAC_VOLTAGE_DEF			100		// м¬
-
-#define GATE_I_RATE_MIN			1		// ј/мкс х10
-#define GATE_I_RATE_MAX			100		// ј/мкс х10
-#define GATE_I_RATE_DEF			10		// ј/мкс х10
 
 #define ID_THRESHOLD_MIN		0		// %
 #define ID_THRESHOLD_MAX		80		// %

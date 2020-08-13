@@ -44,13 +44,11 @@ bool DIAG_HandleDiagnosticAction(uint16_t ActionID, uint16_t *pUserError)
 			}
 			break;
 
-		case ACT_DBG_GD_OSC_SYNC:
+		case ACT_DBG_GD_SYNC:
 			{
-				LL_SyncOscilloscope(true);
 				GateDriver_Sync(true);
 				DELAY_US(100);
 				GateDriver_Sync(false);
-				LL_SyncOscilloscope(false);
 			}
 			break;
 

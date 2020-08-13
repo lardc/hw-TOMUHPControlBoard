@@ -286,10 +286,6 @@ uint16_t LOGIC_Pulse()
 
 	LOGIC_TurnOnMeasurement();
 
-	// ¬ключаем питание с задержкой, чтобы на экране не было шумов
-	DELAY_US(100);
-	LL_PsBoard_PowerOutput(true);
-
 	// —охранение оцифрованных значений в endpoint
 	MEASURE_ConvertRawArray(&LOGIC_OutputPulseRaw[0], &CONTROL_Values_Current[0], PULSE_ARR_MAX_LENGTH);
 	CONTROL_Values_Counter = PULSE_ARR_MAX_LENGTH;

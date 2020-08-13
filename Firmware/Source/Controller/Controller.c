@@ -9,6 +9,8 @@
 #include "LowLevel.h"
 #include "Logic.h"
 #include "Commutation.h"
+#include "Constraints.h"
+#include "Delay.h"
 
 // Defines
 //
@@ -80,6 +82,7 @@ void CONTROL_MonitorPressure();
 void CONTROL_HandlePowerOn();
 void CONTROL_HandlePowerOff();
 void CONTROL_HandlePulseConfig();
+void CONTROL_GateDriverCharge();
 
 // Functions
 //
@@ -177,9 +180,11 @@ void CONTROL_ResetHardware(bool KeepPower)
 
 	LOGIC_ConfigVoltageComparators(0);
 	GateDriver_SetCurrent(0);
-	GateDriver_SetCompThreshold(0);
 	GateDriver_SetFallRate(NULL);
 	GateDriver_SetRiseRate(NULL);
+
+	// Уровень для компаратора выставляем высокий, чтобы исключить срабатывание во время простоя от шумов
+	GateDriver_SetCompThreshold((GATE_CURRENT_MAX / 10) * GATE_CURRENT_THRESHOLD);
 }
 //-----------------------------------------------
 
@@ -264,6 +269,24 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 			}
 			break;
 			
+		case ACT_GATE_PULSE:
+			{
+				CONTROL_GateDriverCharge();
+
+				CachedMeasurementSettings = LOGIC_CacheMeasurementSettings();
+				GateDriver_SetCurrent(CachedMeasurementSettings.GateCurrent);
+				GateDriver_SetCompThreshold(CachedMeasurementSettings.GateCurrent * GATE_CURRENT_THRESHOLD);
+				GateDriver_SetRiseRate(&CachedMeasurementSettings);
+				GateDriver_SetFallRate(&CachedMeasurementSettings);
+
+				GateDriver_Sync(true);
+				DELAY_US(100);
+				GateDriver_Sync(false);
+
+				CONTROL_ResetHardware(true);
+			}
+			break;
+
 		case ACT_FAULT_CLEAR:
 			{
 				if(CONTROL_State == DS_Fault)
@@ -325,7 +348,7 @@ void CONTROL_HandlePowerOn()
 			case SS_PowerOn:
 				{
 					LL_PsBoard_PowerInput(true);
-					LL_PsBoard_PowerOutput(true);
+					CONTROL_GateDriverCharge();
 					
 					if(LOGIC_CallCommandForSlaves(ACT_TOCU_ENABLE_POWER))
 					{
@@ -447,8 +470,8 @@ void CONTROL_HandlePulseConfig()
 				
 			case SS_HardwareConfig:
 				{
-					// Выключить питание GateDriver
-					LL_PsBoard_PowerOutput(false);
+					// Зарядить GateDriver
+					CONTROL_GateDriverCharge();
 
 					// Настройка компараторов напряжения
 					LOGIC_ConfigVoltageComparators(CachedMeasurementSettings.AnodeVoltage);
@@ -583,3 +606,12 @@ void CONTROL_UnitFan()
 		LL_UnitFan(false);
 	}
 }
+//-----------------------------------------------
+
+void CONTROL_GateDriverCharge()
+{
+	LL_PsBoard_PowerOutput(true);
+	DELAY_MS(DataTable[REG_GD_TIME_CHRAGE]);
+	LL_PsBoard_PowerOutput(false);
+}
+//-----------------------------------------------
