@@ -63,7 +63,7 @@ bool LOGIC_ReadSlavesState()
 				NodeArray[i].OpResult = OpResult;
 				result = true;
 			}
-		
+
 		if(!result)
 			return false;
 	}

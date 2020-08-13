@@ -19,11 +19,11 @@
 typedef void (*FUNC_AsyncDelegate)();
 typedef enum __DeviceState
 {
-	DS_None = 0,
-	DS_Fault = 1,
-	DS_Disabled = 2,
-	DS_Ready = 3,
-	DS_InProcess = 4
+	DS_None 				= 0,
+	DS_Fault 				= 1,
+	DS_Disabled 			= 2,
+	DS_Ready 				= 3,
+	DS_InProcess 			= 4
 } DeviceState;
 typedef enum __SubState
 {
@@ -45,11 +45,11 @@ typedef enum __SubState
 } SubState;
 typedef enum __TOCUDeviceState
 {
-	TOCUDS_None = 0,
-	TOCUDS_Fault = 1,
-	TOCUDS_Disabled = 2,
-	TOCUDS_Ready = 3,
-	TOCUDS_InProcess = 4
+	TOCUDS_None 			= 0,
+	TOCUDS_Fault 			= 1,
+	TOCUDS_Disabled 		= 2,
+	TOCUDS_Ready 			= 3,
+	TOCUDS_InProcess 		= 4
 } TOCUDeviceState;
 
 // Variables
@@ -104,6 +104,7 @@ void CONTROL_Init()
 	// ќжидание запуска TOCU
 	uint64_t CONTROL_TOCUPowerUpTimer = CONTROL_TimeCounter + TIME_TOCU_POWER_UP;
 	while(CONTROL_TimeCounter < CONTROL_TOCUPowerUpTimer){}
+	CONTROL_WatchDogUpdate();
 
 	CONTROL_ResetToDefaultState();
 }
