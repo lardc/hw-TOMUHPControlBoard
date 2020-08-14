@@ -442,6 +442,9 @@ void CONTROL_HandlePulseConfig()
 				
 			case SS_ConfigCommutation:
 				{
+					// Зарядить GateDriver
+					CONTROL_GateDriverCharge();
+
 					// Настройка системы коммутации
 					COMM_TOSU(CachedMeasurementSettings.AnodeVoltage);
 					COMM_InternalCommutation(true);
@@ -470,9 +473,6 @@ void CONTROL_HandlePulseConfig()
 				
 			case SS_HardwareConfig:
 				{
-					// Зарядить GateDriver
-					CONTROL_GateDriverCharge();
-
 					// Настройка компараторов напряжения
 					LOGIC_ConfigVoltageComparators(CachedMeasurementSettings.AnodeVoltage);
 
