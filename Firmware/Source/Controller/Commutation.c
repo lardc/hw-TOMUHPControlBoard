@@ -8,10 +8,10 @@
 #include "DeviceObjectDictionary.h"
 
 // Definitions
-#define COMM_TOSU_MASK_600		0xA
-#define COMM_TOSU_MASK_1000		0x9
-#define COMM_TOSU_MASK_1500		0x3
-#define COMM_TOSU_MASK_OFF		0x0F
+#define COMM_TOSU_MASK_600		0x05
+#define COMM_TOSU_MASK_1000		0x09
+#define COMM_TOSU_MASK_1500		0x03
+#define COMM_TOSU_MASK_OFF		0x00
 
 #define COMM_POT_SW_MASK		0x10
 
