@@ -31,7 +31,7 @@ void COMM_InternalCommutation(bool State)
 
 bool COMM_IsPressureTrig()
 {
-	return !GPIO_GetState(GPIO_PRESSURE);
+	return GPIO_GetState(GPIO_PRESSURE);
 }
 //-----------------------------
 

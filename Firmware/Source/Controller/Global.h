@@ -18,7 +18,7 @@
 #define SLAVE_UPDATE_PERIOD		100				// Период опроса блоков-рабов (мс)
 #define PRESSURE_FAULT_DELAY	100				// Задержка срабатывания аварии по давлению (мс)
 #define LED_BLINK_PERIOD		500				// Период моргания светодиода на плате (мс)
-#define COMMUTATION_PAUSE		200				// Задержка на коммутацию (мс)
+#define COMMUTATION_PAUSE		500				// Задержка на коммутацию (мс)
 #define APPLY_SETTINGS_TIMEOUT	5000			// Таймаут ожидания конфигурации блока (мс)
 #define AFTER_PULSE_TIMEOUT		10000			// Задержка после импульса (мс)
 
