@@ -250,6 +250,8 @@ void LOGIC_ConfigVoltageComparators(AnodeVoltageEnum AnodeVoltage)
 
 uint16_t LOGIC_Pulse()
 {
+	uint16_t Problem = PROBLEM_NONE;
+
 	// Подача синхронизации на TOCU HP
 	LL_SyncTOCU(true);
 
@@ -259,52 +261,57 @@ uint16_t LOGIC_Pulse()
 	if(MEASURE_CheckAnodeCurrent())
 	{
 		LL_SyncTOCU(false);
-		return PROBLEM_SHORT;
+		Problem = PROBLEM_SHORT;
 	}
-	
-	// Сброс системы счёта
-	LL_GateLatchReset();
-	LL_HSTimers_Reset();
-	Overflow90 = false;
-	Overflow10 = false;
-
-	// Запуск оцифровки
-	DMA_ChannelEnable(DMA_ADC_DUT_I_CHANNEL, true);
-	TIM_Start(TIM6);
-	
-	// Запуск тока управления
-	LL_SyncOscilloscope(true);
-	GateDriver_Sync(true);
-
-	DELAY_US(40);
-	
-	// Завершение процесса измерения
-	GateDriver_Sync(false);
-	LL_SyncOscilloscope(false);
-	LL_SyncTOCU(false);
-	COMM_PotSwitch(false);
-
-	LOGIC_TurnOnMeasurement();
-
-	// Сохранение оцифрованных значений в endpoint
-	MEASURE_ConvertRawArray(&LOGIC_OutputPulseRaw[0], &CONTROL_Values_Current[0], PULSE_ARR_MAX_LENGTH);
-	CONTROL_Values_Counter = PULSE_ARR_MAX_LENGTH;
-
-	// Обработка внештатных ситуаций
-	if (Overflow90 && Overflow10 && (DataTable[REG_MEAS_CURRENT_VALUE] < DUT_CURRENT_MIN))
+	else
 	{
-		return PROBLEM_NO_PWR;
-	}
-	else if(Overflow90)
-	{
-		return PROBLEM_OVERFLOW90;
-	}
-	else if(Overflow10)
-	{
-		return PROBLEM_OVERFLOW10;
+		// Сброс системы счёта
+		LL_GateLatchReset();
+		LL_HSTimers_Reset();
+		Overflow90 = false;
+		Overflow10 = false;
+	
+		// Запуск оцифровки
+		DMA_ChannelEnable(DMA_ADC_DUT_I_CHANNEL, true);
+		TIM_Start(TIM6);
+
+		// Запуск тока управления
+		LL_SyncOscilloscope(true);
+		GateDriver_Sync(true);
+
+		DELAY_US(40);
+
+		// Завершение процесса измерения
+		GateDriver_Sync(false);
+		LL_SyncOscilloscope(false);
+		LL_SyncTOCU(false);
+		COMM_PotSwitch(false);
+
+		LOGIC_TurnOnMeasurement();
+	
+		// Сохранение оцифрованных значений в endpoint
+		MEASURE_ConvertRawArray(&LOGIC_OutputPulseRaw[0], &CONTROL_Values_Current[0], PULSE_ARR_MAX_LENGTH);
+		CONTROL_Values_Counter = PULSE_ARR_MAX_LENGTH;
+	
+		// Обработка внештатных ситуаций
+		if (Overflow90 && Overflow10 && (DataTable[REG_MEAS_CURRENT_VALUE] < DUT_CURRENT_MIN))
+		{
+			Problem = PROBLEM_NO_PWR;
+		}
+		else if(Overflow90)
+		{
+			Problem = PROBLEM_OVERFLOW90;
+		}
+		else if(Overflow10)
+		{
+			Problem = PROBLEM_OVERFLOW10;
+		}
 	}
 
-	return PROBLEM_NONE;
+	if(DataTable[REG_MUTE_PROBLEM])
+		return PROBLEM_NONE;
+	else
+		return Problem;
 }
 //-----------------------------------------------
 
