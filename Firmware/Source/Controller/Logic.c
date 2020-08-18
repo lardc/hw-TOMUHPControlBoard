@@ -43,6 +43,7 @@ NodeState NodeArray[NODE_ARRAY_SIZE] = {0};
 //
 void LOGIC_TurnOnMeasurement();
 void LOGIC_AnodeCurrentTune(AnodeVoltageEnum AnodeVoltage, float *AnodeCurrent);
+void LOGIC_AreInterruptsActive(bool State);
 //
 
 // Functions
@@ -275,6 +276,8 @@ uint16_t LOGIC_Pulse()
 		DMA_ChannelEnable(DMA_ADC_DUT_I_CHANNEL, true);
 		TIM_Start(TIM6);
 
+		LOGIC_AreInterruptsActive(false);
+
 		// Запуск тока управления
 		LL_SyncOscilloscope(true);
 		GateDriver_Sync(true);
@@ -286,6 +289,8 @@ uint16_t LOGIC_Pulse()
 		LL_SyncOscilloscope(false);
 		LL_SyncTOCU(false);
 		COMM_PotSwitch(false);
+
+		LOGIC_AreInterruptsActive(true);
 
 		LOGIC_TurnOnMeasurement();
 	
@@ -351,5 +356,13 @@ void LOGIC_TurnOnMeasurement()
 		TurnOnDelay = 0;
 
 	DataTable[REG_MEAS_TIME_DELAY] = TurnOnDelay;
+}
+//-----------------------------------------------
+
+void LOGIC_AreInterruptsActive(bool State)
+{
+	NCAN_FIFOInterrupt(State);
+	USART_Recieve_Interupt(USART1, 0, State);
+	TIM_Interupt(TIM3, 0, State);
 }
 //-----------------------------------------------
