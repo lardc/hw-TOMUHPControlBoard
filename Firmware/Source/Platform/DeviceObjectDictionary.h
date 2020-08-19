@@ -175,7 +175,7 @@
 #define PROBLEM_NONE					0
 #define PROBLEM_NO_PWR					1	// Отсутствие силового тока
 #define PROBLEM_SHORT					2	// КЗ на выходе
-#define PROBLEM_NO_POT					3	// Нет сигнала с потенциальной линии или сигнала управления
+#define PROBLEM_NO_POT					3	// Нет сигнала с потенциальной линии
 #define PROBLEM_OVERFLOW90				4	// Переполнение счётчика уровня 90%
 #define PROBLEM_OVERFLOW10				5	// Переполнение счётчика уровня 10%
 #define PROBLEM_SAFETY_VIOLATION		6	// Срабатывание контура безопасности
