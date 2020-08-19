@@ -295,9 +295,13 @@ uint16_t LOGIC_Pulse()
 		CONTROL_Values_Counter = PULSE_ARR_MAX_LENGTH;
 	
 		// Обработка внештатных ситуаций
-		if (Overflow90 && Overflow10 && (DataTable[REG_MEAS_CURRENT_VALUE] < DUT_CURRENT_MIN))
+		if (DataTable[REG_MEAS_CURRENT_VALUE] < DUT_CURRENT_MIN)
 		{
 			Problem = PROBLEM_NO_PWR;
+		}
+		else if(!DataTable[REG_MEAS_TIME_DELAY] || !DataTable[REG_MEAS_TIME_ON])
+		{
+			Problem = PROBLEM_NO_POT;
 		}
 		else if(Overflow90)
 		{
