@@ -98,7 +98,7 @@
 //
 #define REG_GD_TIME_CHRAGE				41	// Время заряда GateDriver (мс)
 //
-#define REG_MUTE_PROBLEM				50	// Контроль ошибок (1 - вкл, 0 - выкл)
+#define REG_MUTE_PROBLEM				50	// Контроль ошибок (0 - вкл, 1 - выкл)
 // - 127
 
 // Несохраняемы регистры чтения-записи

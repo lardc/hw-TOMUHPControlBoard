@@ -168,6 +168,8 @@ void CONTROL_ResetHardware(bool KeepPower)
 	if(!DataTable[REG_TOSU_ALWAYS_ON])
 		COMM_TOSU(false);
 
+	COMM_InternalCommutation(false);
+
 	LL_SyncTOCU(false);
 	LL_ExternalLED(false);
 	LL_SyncOscilloscope(false);

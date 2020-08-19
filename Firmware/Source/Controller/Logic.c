@@ -131,12 +131,8 @@ void LOGIC_AssignVItoSlaves(AnodeVoltageEnum AnodeVoltage, float AnodeCurrent)
 {
 	float CurrentPerBit;
 	uint16_t ActualBitmask = 0, MaximumBitmask = 0;
-	
-	DataTable[190] = (uint16_t)(AnodeCurrent * 10);
 
 	LOGIC_AnodeCurrentTune(AnodeVoltage, &AnodeCurrent);
-
-	DataTable[191] = (uint16_t)(AnodeCurrent * 10);
 
 	// Определение максимально допустимой битовой маски
 	for(uint16_t i = 0; i < NODE_ARRAY_SIZE; ++i)
