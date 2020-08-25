@@ -21,8 +21,8 @@ void GateDriver_Sync(bool State)
 
 uint16_t GateDriver_ItoDAC(float GateCurrent)
 {
-	float K = (float)DataTable[REG_GD_I_SET_K];
-	float Offset = (float)((int16_t)DataTable[REG_GD_I_SET_OFFSET]);
+	float K = (float)DataTable[REG_GATE_I_SET_K];
+	float Offset = (float)((int16_t)DataTable[REG_GATE_I_SET_OFFSET]);
 	
 	uint32_t result = GateCurrent * K + Offset;
 	return (result > DAC_RESOLUTION) ? DAC_RESOLUTION : result;
@@ -31,23 +31,24 @@ uint16_t GateDriver_ItoDAC(float GateCurrent)
 
 uint16_t GateDriver_IrefToDAC(float GateCurrentThreshold)
 {
-	float GateCurrentThreshold_mA, ShuntRes_Ohm, P1;
+	float ComparatorThreshold_mA, ShuntRes_Ohm, P1, P2;
 	Int16S P0;
 	uint16_t result;
 
-	GateCurrentThreshold_mA = GateCurrentThreshold * 1000;
-	ShuntRes_Ohm = (float)DataTable[REG_GD_CURRENT_SHUNT] / 1000;
-	P1 = (float) DataTable[REG_P1_GD_THRESHOLD] / 1000;
-	P0 = (Int16S)DataTable[REG_P0_GD_THRESHOLD];
+	ComparatorThreshold_mA = GateCurrentThreshold * 1000;
+	ShuntRes_Ohm = (float)DataTable[REG_GATE_CURRENT_SHUNT] / 1000;
+	P2 = (float) DataTable[REG_GATE_COMP_THRE_P2] / 1000000;
+	P1 = (float) DataTable[REG_GATE_COMP_THRE_P1] / 1000;
+	P0 = (Int16S)DataTable[REG_GATE_COMP_THRE_P0];
 
 	// Корректировка амплитуды задания порога
-	GateCurrentThreshold_mA = GateCurrentThreshold_mA * P1 + P0;
+	ComparatorThreshold_mA = ComparatorThreshold_mA * ComparatorThreshold_mA * P2 + ComparatorThreshold_mA * P1 + P0;
 
 	// Компенсация изменения порога задания от скорости нарастания тока
 	//P1 = GATE_CURRENT_MIN / DataTable[REG_GATE_CURRENT_RISE_RATE];
 	//GateCurrentThreshold_mA = GateCurrentThreshold_mA * P1;
 
-	result = (uint16_t)(GateCurrentThreshold_mA * ShuntRes_Ohm * DAC_RESOLUTION / DAC_REF_MV);
+	result = (uint16_t)(ComparatorThreshold_mA * ShuntRes_Ohm * DAC_RESOLUTION / DAC_REF_MV);
 
 	return (result > DAC_RESOLUTION) ? DAC_RESOLUTION : result;
 }
@@ -80,7 +81,7 @@ void GateDriver_SetFallRate(MeasurementSettings *Settings)
 	uint16_t Data;
 
 	FrontTime = Settings->GateCurrent / Settings->GateCurrentFallRate;
-	FrontTimeMin = (float)DataTable[REG_GD_FRONT_TIME_MIN] / 10;
+	FrontTimeMin = (float)DataTable[REG_GATE_EDGE_TIME_MIN] / 10;
 
 	if(FrontTime < FrontTimeMin)
 		GateCurrentFallRate = FrontTimeMin * Settings->GateCurrent;
@@ -98,14 +99,14 @@ void GateDriver_SetRiseRate(MeasurementSettings *Settings)
 	uint16_t Data;
 
 	FrontTime = Settings->GateCurrent / Settings->GateCurrentRiseRate;
-	FrontTimeMin = (float)DataTable[REG_GD_FRONT_TIME_MIN] / 10;
+	FrontTimeMin = (float)DataTable[REG_GATE_EDGE_TIME_MIN] / 10;
 
 	if(FrontTime < FrontTimeMin)
 		GateCurrentRiseRate = FrontTimeMin * Settings->GateCurrent;
 	else
 		GateCurrentRiseRate = Settings->GateCurrentRiseRate;
 
-	Data = GateDriver_IrateToDAC(GateCurrentRiseRate, DataTable[REG_GD_I_RISE_RATE_K], DataTable[REG_GD_I_RISE_RATE_OFFSET]);
+	Data = GateDriver_IrateToDAC(GateCurrentRiseRate, DataTable[REG_GATE_I_RISE_RATE_K], DataTable[REG_GATE_I_RISE_RATE_OFFSET]);
 	LL_WriteDACx((Data & ~DAC_CHANNEL_B), GPIO_CS_GD2, RISE_Edge);
 }
 //---------------------

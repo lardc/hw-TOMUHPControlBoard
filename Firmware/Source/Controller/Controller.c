@@ -165,10 +165,11 @@ void CONTROL_ResetHardware(bool KeepPower)
 		LL_PsBoard_PowerOutput(false);
 	}
 
-	if(!DataTable[REG_TOSU_ALWAYS_ON])
+	if(!DataTable[REG_MUTE_COMMUTATION])
+	{
 		COMM_TOSU(false);
-
-	COMM_InternalCommutation(false);
+		COMM_InternalCommutation(false);
+	}
 
 	LL_SyncTOCU(false);
 	LL_ExternalLED(false);
@@ -613,7 +614,7 @@ void CONTROL_UnitFan()
 void CONTROL_GateDriverCharge()
 {
 	LL_PsBoard_PowerOutput(true);
-	DELAY_MS(DataTable[REG_GD_TIME_CHRAGE]);
+	DELAY_MS(DataTable[REG_GATE_TIME_CHARGE]);
 	LL_PsBoard_PowerOutput(false);
 }
 //-----------------------------------------------

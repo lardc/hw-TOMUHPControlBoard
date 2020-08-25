@@ -162,21 +162,21 @@ void LOGIC_AnodeCurrentTune(AnodeVoltageEnum AnodeVoltage, float *AnodeCurrent)
 	switch(AnodeVoltage)
 	{
 		case TOU_600V:
-			P2 = ((float) ((int16_t)DataTable[REG_P2_I_DUT_600V])) / 1000000;
-			P1 = ((float) DataTable[REG_P1_I_DUT_600V]) / 1000;
-			P0 = (int16_t) DataTable[REG_P0_I_DUT_600V];
+			P2 = ((float) ((int16_t)DataTable[REG_I_DUT_600V_P2])) / 1000000;
+			P1 = ((float) DataTable[REG_I_DUT_600V_P1]) / 1000;
+			P0 = (int16_t) DataTable[REG_I_DUT_600V_P0];
 			break;
 
 		case TOU_1000V:
-			P2 = ((float) ((int16_t)DataTable[REG_P2_I_DUT_1000V])) / 1000000;
-			P1 = ((float) DataTable[REG_P1_I_DUT_1000V]) / 1000;
-			P0 = (int16_t) DataTable[REG_P0_I_DUT_1000V];
+			P2 = ((float) ((int16_t)DataTable[REG_I_DUT_1000V_P2])) / 1000000;
+			P1 = ((float) DataTable[REG_I_DUT_1000V_P1]) / 1000;
+			P0 = (int16_t) DataTable[REG_I_DUT_1000V_P0];
 			break;
 
 		case TOU_1500V:
-			P2 = ((float) ((int16_t)DataTable[REG_P2_I_DUT_1500V])) / 1000000;
-			P1 = ((float) DataTable[REG_P1_I_DUT_1500V]) / 1000;
-			P0 = (int16_t) DataTable[REG_P0_I_DUT_1500V];
+			P2 = ((float) ((int16_t)DataTable[REG_I_DUT_1500V_P2])) / 1000000;
+			P1 = ((float) DataTable[REG_I_DUT_1500V_P1]) / 1000;
+			P0 = (int16_t) DataTable[REG_I_DUT_1500V_P0];
 			break;
 
 		default:
@@ -225,18 +225,18 @@ void LOGIC_ConfigVoltageComparators(AnodeVoltageEnum AnodeVoltage)
 	switch (AnodeVoltage)
 	{
 		case TOU_600V:
-			MEASURE_SetUref10(DataTable[REG_VCOMP10_600]);
-			MEASURE_SetUref90(DataTable[REG_VCOMP90_600]);
+			MEASURE_SetUref10(DataTable[REG_VCOMP10_600V]);
+			MEASURE_SetUref90(DataTable[REG_VCOMP90_600V]);
 			break;
 			
 		case TOU_1000V:
-			MEASURE_SetUref10(DataTable[REG_VCOMP10_1000]);
-			MEASURE_SetUref90(DataTable[REG_VCOMP90_1000]);
+			MEASURE_SetUref10(DataTable[REG_VCOMP10_1000V]);
+			MEASURE_SetUref90(DataTable[REG_VCOMP90_1000V]);
 			break;
 			
 		case TOU_1500V:
-			MEASURE_SetUref10(DataTable[REG_VCOMP10_1500]);
-			MEASURE_SetUref90(DataTable[REG_VCOMP90_1500]);
+			MEASURE_SetUref10(DataTable[REG_VCOMP10_1500V]);
+			MEASURE_SetUref90(DataTable[REG_VCOMP90_1500V]);
 			break;
 			
 		default:
@@ -328,7 +328,7 @@ MeasurementSettings LOGIC_CacheMeasurementSettings()
 	result.AnodeCurrent = (float)DataTable[REG_ANODE_CURRENT] / 10;
 	result.GateCurrent = (float)DataTable[REG_GATE_CURRENT] / 10;
 	result.GateCurrentRiseRate = (float)DataTable[REG_GATE_CURRENT_RISE_RATE] / 10;
-	result.GateCurrentFallRate = (float)DataTable[REG_GD_CURRENT_FALL_RATE] / 10;
+	result.GateCurrentFallRate = (float)DataTable[REG_GATE_I_FALL_RATE] / 10;
 	
 	return result;
 }

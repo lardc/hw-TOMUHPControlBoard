@@ -50,8 +50,8 @@ void MEASURE_ConvertRawArray(volatile uint16_t* RawArray, volatile uint16_t* Out
 	uint16_t i;
 	float tmp;
 
-	float Offset = (float)((int16_t)DataTable[REG_DUT_CURRENT_OFFSET]);
-	float K = (float)DataTable[REG_DUT_CURRENT_GAIN] / 1000;
+	float Offset = (float)((int16_t)DataTable[REG_I_DUT_OFFSET]);
+	float K = (float)DataTable[REG_I_DUT_GAIN] / 1000;
 
 	float ShuntRes = (float)DataTable[REG_DUT_CURRENT_SHUNT] / 10;
 
