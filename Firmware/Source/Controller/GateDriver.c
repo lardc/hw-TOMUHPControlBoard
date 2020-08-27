@@ -21,8 +21,19 @@ void GateDriver_Sync(bool State)
 
 uint16_t GateDriver_ItoDAC(float GateCurrent)
 {
-	float K = (float)DataTable[REG_GATE_I_SET_K];
-	float Offset = (float)((int16_t)DataTable[REG_GATE_I_SET_OFFSET]);
+	float K, Offset, I, P2, P1, P0;
+
+	K = (float)DataTable[REG_GATE_I_SET_K] / 1000;
+	Offset = (float)((int16_t)DataTable[REG_GATE_I_SET_OFFSET]);
+
+	// Тонкая подстройка
+	P2 = ((float) ((int16_t)DataTable[REG_GATE_I_SET_P2])) / 1000000;
+	P1 = (float) DataTable[REG_GATE_I_SET_P1] / 1000;
+	P0 = ((float)(int16_t) DataTable[REG_GATE_I_SET_P0]);
+
+	I = GateCurrent;
+
+	GateCurrent = I * I * P2 + I * P1 + P0;
 	
 	uint32_t result = GateCurrent * K + Offset;
 	return (result > DAC_RESOLUTION) ? DAC_RESOLUTION : result;
@@ -31,24 +42,23 @@ uint16_t GateDriver_ItoDAC(float GateCurrent)
 
 uint16_t GateDriver_IrefToDAC(float GateCurrentThreshold)
 {
-	float ComparatorThreshold_mA, ShuntRes_Ohm, P1, P2;
-	Int16S P0;
+	float ShuntRes_Ohm, P1, P2;
+	int16_t P0;
 	uint16_t result;
 
-	ComparatorThreshold_mA = GateCurrentThreshold * 1000;
 	ShuntRes_Ohm = (float)DataTable[REG_GATE_CURRENT_SHUNT] / 1000;
-	P2 = (float) DataTable[REG_GATE_COMP_THRE_P2] / 1000000;
+	P2 = ((float)(int16_t)DataTable[REG_GATE_COMP_THRE_P2]) / 1000000;
 	P1 = (float) DataTable[REG_GATE_COMP_THRE_P1] / 1000;
-	P0 = (Int16S)DataTable[REG_GATE_COMP_THRE_P0];
+	P0 = (int16_t)DataTable[REG_GATE_COMP_THRE_P0];
 
 	// Корректировка амплитуды задания порога
-	ComparatorThreshold_mA = ComparatorThreshold_mA * ComparatorThreshold_mA * P2 + ComparatorThreshold_mA * P1 + P0;
+	GateCurrentThreshold = GateCurrentThreshold * GateCurrentThreshold * P2 + GateCurrentThreshold * P1 + P0;
 
 	// Компенсация изменения порога задания от скорости нарастания тока
 	//P1 = GATE_CURRENT_MIN / DataTable[REG_GATE_CURRENT_RISE_RATE];
 	//GateCurrentThreshold_mA = GateCurrentThreshold_mA * P1;
 
-	result = (uint16_t)(ComparatorThreshold_mA * ShuntRes_Ohm * DAC_RESOLUTION / DAC_REF_MV);
+	result = (uint16_t)(GateCurrentThreshold * ShuntRes_Ohm * DAC_RESOLUTION / DAC_REF_MV);
 
 	return (result > DAC_RESOLUTION) ? DAC_RESOLUTION : result;
 }
@@ -56,7 +66,7 @@ uint16_t GateDriver_IrefToDAC(float GateCurrentThreshold)
 
 uint16_t GateDriver_IrateToDAC(float CurrentRate, uint16_t K, int16_t Offset)
 {
-	uint32_t result = CurrentRate * K + Offset;
+	uint32_t result = CurrentRate * K / 1000 + Offset;
 	return (result > DAC_RESOLUTION) ? DAC_RESOLUTION : result;
 }
 //---------------------

@@ -23,17 +23,17 @@
 #define DUT_CURRENT_MAX			1000	// ְ x10
 #define DUT_CURRENT_DEF			100		// ְ x10
 
-#define GATE_CURRENT_MIN		10		// A x10
-#define GATE_CURRENT_MAX		200		// A x10
-#define GATE_CURRENT_DEF		10		// A x10
+#define GATE_CURRENT_MIN		1000	// לA
+#define GATE_CURRENT_MAX		20000	// לA
+#define GATE_CURRENT_DEF		1000	// לA
 
 #define GATE_FRONT_MIN			0		// לךס ץ10
 #define GATE_FRONT_MAX			20		// לךס ץ10
 #define GATE_FRONT_DEF			10		// לךס ץ10
 
-#define GATE_I_RATE_MIN			1		// ְ/לךס ץ10
-#define GATE_I_RATE_MAX			100		// ְ/לךס ץ10
-#define GATE_I_RATE_DEF			10		// ְ/לךס ץ10
+#define GATE_I_RATE_MIN			1000	// לְ/לךס
+#define GATE_I_RATE_MAX			10000	// לְ/לךס
+#define GATE_I_RATE_DEF			5000	// לְ/לךס
 
 #define GATE_TIME_CHRG_MIN		100		// לס
 #define GATE_TIME_CHRG_MAX		1000	// לס

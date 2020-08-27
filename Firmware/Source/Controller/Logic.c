@@ -326,9 +326,9 @@ MeasurementSettings LOGIC_CacheMeasurementSettings()
 	
 	result.AnodeVoltage = DataTable[REG_ANODE_VOLTAGE];
 	result.AnodeCurrent = (float)DataTable[REG_ANODE_CURRENT] / 10;
-	result.GateCurrent = (float)DataTable[REG_GATE_CURRENT] / 10;
-	result.GateCurrentRiseRate = (float)DataTable[REG_GATE_CURRENT_RISE_RATE] / 10;
-	result.GateCurrentFallRate = (float)DataTable[REG_GATE_I_FALL_RATE] / 10;
+	result.GateCurrent = (float)DataTable[REG_GATE_CURRENT];
+	result.GateCurrentRiseRate = (float)DataTable[REG_GATE_CURRENT_RISE_RATE];
+	result.GateCurrentFallRate = (float)DataTable[REG_GATE_I_FALL_RATE];
 	
 	return result;
 }
