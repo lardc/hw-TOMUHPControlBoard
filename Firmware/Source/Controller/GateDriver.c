@@ -7,6 +7,9 @@
 #include "DataTable.h"
 #include "DeviceObjectDictionary.h"
 
+// Variables
+float RealGateCurrentRiseRate = 0;
+
 // Forward functions
 uint16_t GateDriver_ItoDAC(float GateCurrent);
 uint16_t GateDriver_IrefToDAC(float GateCurrent);
@@ -42,22 +45,32 @@ uint16_t GateDriver_ItoDAC(float GateCurrent)
 
 uint16_t GateDriver_IrefToDAC(float GateCurrentThreshold)
 {
-	float ShuntRes_Ohm, P1, P2;
-	int16_t P0;
+	float ShuntRes_Ohm, P1, P2, K, Kc;
+	int16_t P0, Offset;
 	uint16_t result;
 
 	ShuntRes_Ohm = (float)DataTable[REG_GATE_CURRENT_SHUNT] / 1000;
+
+	// Компенсация изменения порога задания от скорости нарастания тока (Kc = от 1 до 1.25)
+	Kc = 1 - RealGateCurrentRiseRate / DataTable[REG_GATE_CURRENT] * (float)DataTable[REG_GATE_I_REF_COMPENSATION] / 1000;
+	GateCurrentThreshold = GateCurrentThreshold * Kc;
+
+	DataTable[189] = (uint16_t)GateCurrentThreshold;
+
+	// Тонкая подстройка уровня компаратора
 	P2 = ((float)(int16_t)DataTable[REG_GATE_COMP_THRE_P2]) / 1000000;
 	P1 = (float) DataTable[REG_GATE_COMP_THRE_P1] / 1000;
 	P0 = (int16_t)DataTable[REG_GATE_COMP_THRE_P0];
 
-	// Корректировка амплитуды задания порога
 	GateCurrentThreshold = GateCurrentThreshold * GateCurrentThreshold * P2 + GateCurrentThreshold * P1 + P0;
 
-	// Компенсация изменения порога задания от скорости нарастания тока
-	//P1 = GATE_CURRENT_MIN / DataTable[REG_GATE_CURRENT_RISE_RATE];
-	//GateCurrentThreshold_mA = GateCurrentThreshold_mA * P1;
+	// Грубая подстройка уровня компаратора
+	K = (float)DataTable[REG_GATE_I_REF_K] / 1000;
+	Offset = (int16_t)DataTable[REG_GATE_I_REF_OFFSET];
 
+	GateCurrentThreshold = GateCurrentThreshold * K + Offset;
+
+	// Пересчет в значение ЦАП
 	result = (uint16_t)(GateCurrentThreshold * ShuntRes_Ohm * DAC_RESOLUTION / DAC_REF_MV);
 
 	return (result > DAC_RESOLUTION) ? DAC_RESOLUTION : result;
@@ -98,7 +111,7 @@ void GateDriver_SetFallRate(MeasurementSettings *Settings)
 	else
 		GateCurrentFallRate = Settings->GateCurrentFallRate;
 
-	Data = GateDriver_IrateToDAC(GateCurrentFallRate, DataTable[REG_GD_I_FALL_RATE_K], DataTable[REG_GD_I_FALL_RATE_OFFSET]);
+	Data = GateDriver_IrateToDAC(GateCurrentFallRate, DataTable[REG_GATE_I_FALL_RATE_K], DataTable[REG_GATE_I_FALL_RATE_OFFSET]);
 	LL_WriteDACx((Data | DAC_CHANNEL_B), GPIO_CS_GD2, RISE_Edge);
 }
 //---------------------
@@ -108,6 +121,7 @@ void GateDriver_SetRiseRate(MeasurementSettings *Settings)
 	float FrontTime, FrontTimeMin, GateCurrentRiseRate, GateCurrentRiseRate2, P2, P1, P0;
 	uint16_t Data;
 
+	// Ограчичение минимальной длительности фронта тока
 	FrontTime = Settings->GateCurrent / Settings->GateCurrentRiseRate;
 	FrontTimeMin = (float)DataTable[REG_GATE_EDGE_TIME_MIN] / 10;
 
@@ -115,6 +129,10 @@ void GateDriver_SetRiseRate(MeasurementSettings *Settings)
 		GateCurrentRiseRate = FrontTimeMin * Settings->GateCurrent;
 	else
 		GateCurrentRiseRate = Settings->GateCurrentRiseRate;
+
+	// Сохранение фактической скорости нарастания тока
+	if(GateCurrentRiseRate > 0)
+		RealGateCurrentRiseRate = GateCurrentRiseRate;
 
 	// Тонкая подстройка скорости нарастания тока
 	P2 = (float)((int16_t)DataTable[REG_GATE_I_RISE_RATE_P2]) / 1000000;

@@ -183,11 +183,11 @@ void CONTROL_ResetHardware(bool KeepPower)
 
 	LOGIC_ConfigVoltageComparators(0);
 	GateDriver_SetCurrent(0);
-	GateDriver_SetFallRate(NULL);
-	GateDriver_SetRiseRate(NULL);
+	//GateDriver_SetFallRate(NULL);
+	//GateDriver_SetRiseRate(NULL);
 
 	// Уровень для компаратора выставляем высокий, чтобы исключить срабатывание во время простоя от шумов
-	GateDriver_SetCompThreshold((GATE_CURRENT_MAX / 10) * GATE_CURRENT_THRESHOLD);
+	GateDriver_SetCompThreshold(GATE_CURRENT_MAX * GATE_CURRENT_THRESHOLD);
 }
 //-----------------------------------------------
 
@@ -278,9 +278,9 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 
 				CachedMeasurementSettings = LOGIC_CacheMeasurementSettings();
 				GateDriver_SetCurrent(CachedMeasurementSettings.GateCurrent);
-				GateDriver_SetCompThreshold(CachedMeasurementSettings.GateCurrent * GATE_CURRENT_THRESHOLD);
 				GateDriver_SetRiseRate(&CachedMeasurementSettings);
 				GateDriver_SetFallRate(&CachedMeasurementSettings);
+				GateDriver_SetCompThreshold(CachedMeasurementSettings.GateCurrent * GATE_CURRENT_THRESHOLD);
 
 				GateDriver_Sync(true);
 				DELAY_US(100);
@@ -481,9 +481,9 @@ void CONTROL_HandlePulseConfig()
 
 					// Настройка параметров цепи управления
 					GateDriver_SetCurrent(CachedMeasurementSettings.GateCurrent);
-					GateDriver_SetCompThreshold(CachedMeasurementSettings.GateCurrent * GATE_CURRENT_THRESHOLD);
 					GateDriver_SetFallRate(&CachedMeasurementSettings);
 					GateDriver_SetRiseRate(&CachedMeasurementSettings);
+					GateDriver_SetCompThreshold(CachedMeasurementSettings.GateCurrent * GATE_CURRENT_THRESHOLD);
 
 					CONTROL_SetDeviceState(DS_InProcess, SS_StartPulse);
 				}
