@@ -183,8 +183,8 @@ void CONTROL_ResetHardware(bool KeepPower)
 
 	LOGIC_ConfigVoltageComparators(0);
 	GateDriver_SetCurrent(0);
-	//GateDriver_SetFallRate(NULL);
-	//GateDriver_SetRiseRate(NULL);
+	GateDriver_SetFallRate(NULL);
+	GateDriver_SetRiseRate(NULL);
 
 	// Уровень для компаратора выставляем высокий, чтобы исключить срабатывание во время простоя от шумов
 	GateDriver_SetCompThreshold(GATE_CURRENT_MAX * GATE_CURRENT_THRESHOLD);

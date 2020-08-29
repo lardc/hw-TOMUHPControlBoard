@@ -55,8 +55,6 @@ uint16_t GateDriver_IrefToDAC(float GateCurrentThreshold)
 	Kc = 1 - RealGateCurrentRiseRate / DataTable[REG_GATE_CURRENT] * (float)DataTable[REG_GATE_I_REF_COMPENSATION] / 1000;
 	GateCurrentThreshold = GateCurrentThreshold * Kc;
 
-	DataTable[189] = (uint16_t)GateCurrentThreshold;
-
 	// Тонкая подстройка уровня компаратора
 	P2 = ((float)(int16_t)DataTable[REG_GATE_COMP_THRE_P2]) / 1000000;
 	P1 = (float) DataTable[REG_GATE_COMP_THRE_P1] / 1000;
