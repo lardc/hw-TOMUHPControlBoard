@@ -334,7 +334,8 @@ void CONTROL_MonitorPressure()
 	if(PressureOK)
 		LastSuccessfulScan = CONTROL_TimeCounter;
 	
-	if(CONTROL_State == DS_InProcess || CONTROL_State == DS_Ready)
+	if((CONTROL_State == DS_InProcess || CONTROL_State == DS_Ready)
+			&& ((SUB_State != SS_ConfigCommutation) || (SUB_State != SS_CommPause)))
 	{
 		if((CONTROL_TimeCounter - LastSuccessfulScan) > PRESSURE_FAULT_DELAY)
 			CONTROL_SwitchToFault(DF_PRESSURE);
