@@ -15,6 +15,9 @@
 #define ABS(a)	(((a) < 0) ? -(a) : (a))
 //
 #define MEASURE_POINTS_NUMBER		20		// Количество точек при единичном измерении
+//
+#define I_MAX_START_INDEX			75		// Начальный адрес в массиве тока для определения максимального значения
+#define I_MAX_STOP_INDEX			85		// Конечный адрес в массиве тока для определения максимального значения
 
 // Variables
 volatile uint16_t LOGIC_OutputPulseRaw[PULSE_ARR_MAX_LENGTH];
@@ -47,8 +50,8 @@ void MEASURE_SetUref90(uint16_t Voltage)
 
 void MEASURE_ConvertRawArray(volatile uint16_t* RawArray, volatile uint16_t* OutputArray, uint16_t DataLength)
 {
-	uint16_t i;
-	float tmp;
+	uint16_t i, Imax = 0;
+	float tmp = 0;
 
 	float Offset = (float)((int16_t)DataTable[REG_I_DUT_OFFSET]);
 	float K = (float)DataTable[REG_I_DUT_GAIN] / 1000;
@@ -66,10 +69,12 @@ void MEASURE_ConvertRawArray(volatile uint16_t* RawArray, volatile uint16_t* Out
 		tmp = tmp * tmp * P2 + tmp * P1 + P0;
 		OutputArray[i] = (tmp > 0) ? (uint16_t)tmp : 0;
 
-		if(OutputArray[i] > DataTable[REG_MEAS_CURRENT_VALUE])
-			DataTable[REG_MEAS_CURRENT_VALUE] = OutputArray[i];
-
+		// Определение максимума тока
+		if((i >= I_MAX_START_INDEX) && (i < I_MAX_STOP_INDEX))
+			Imax += OutputArray[i];
 	}
+
+	DataTable[REG_MEAS_CURRENT_VALUE] = Imax / (I_MAX_STOP_INDEX - I_MAX_START_INDEX);
 }
 //---------------------
 
@@ -94,7 +99,7 @@ bool MEASURE_CheckAnodeCurrent()
 	AnodeCurrentRaw = (float)AnodeCurrentRaw / MEASURE_POINTS_NUMBER;
 
 	MEASURE_ConvertRawArray(&AnodeCurrentRaw, &AnodeCurrent, 1);
-	AlowedError = (1 - (float)AnodeCurrent / 10 / CachedMeasurementSettings.AnodeCurrent) * 100;
+	AlowedError = (1 - (float)AnodeCurrent / CachedMeasurementSettings.AnodeCurrent) * 100;
 
 	if(AlowedError <= DataTable[REG_ID_THRESHOLD])
 		return true;

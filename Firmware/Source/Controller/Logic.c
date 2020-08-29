@@ -185,7 +185,9 @@ void LOGIC_AnodeCurrentTune(AnodeVoltageEnum AnodeVoltage, float *AnodeCurrent)
 
 	I = *AnodeCurrent;
 
-	*AnodeCurrent = I * I * P2 + I * P1 + P0;
+	I = I * I * P2 + I * P1 + P0;
+
+	*AnodeCurrent = I / 10;
 }
 //-----------------------------------------------
 
@@ -295,7 +297,7 @@ uint16_t LOGIC_Pulse()
 		CONTROL_Values_Counter = PULSE_ARR_MAX_LENGTH;
 	
 		// Обработка внештатных ситуаций
-		if (DataTable[REG_MEAS_CURRENT_VALUE] < DUT_CURRENT_MIN)
+		if (DataTable[REG_MEAS_CURRENT_VALUE] < DataTable[REG_ID_THRESHOLD])
 		{
 			Problem = PROBLEM_NO_PWR;
 		}
@@ -325,7 +327,7 @@ MeasurementSettings LOGIC_CacheMeasurementSettings()
 	MeasurementSettings result;
 	
 	result.AnodeVoltage = DataTable[REG_ANODE_VOLTAGE];
-	result.AnodeCurrent = (float)DataTable[REG_ANODE_CURRENT] / 10;
+	result.AnodeCurrent = (float)DataTable[REG_ANODE_CURRENT];
 	result.GateCurrent = (float)DataTable[REG_GATE_CURRENT];
 	result.GateCurrentRiseRate = (float)DataTable[REG_GATE_CURRENT_RISE_RATE];
 	result.GateCurrentFallRate = (float)DataTable[REG_GATE_I_FALL_RATE];
