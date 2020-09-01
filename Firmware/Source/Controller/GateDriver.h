@@ -11,5 +11,6 @@ void GateDriver_SetCurrent(float GateCurrent);
 void GateDriver_SetCompThreshold(float GateCurrentThreshold);
 void GateDriver_SetFallRate(MeasurementSettings *Settings);
 void GateDriver_SetRiseRate(MeasurementSettings *Settings);
+void GateDriver_SetForceCompThresholdMax();
 
 #endif // __GATEDRIVER_H

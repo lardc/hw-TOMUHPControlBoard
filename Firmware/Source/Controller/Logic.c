@@ -254,7 +254,8 @@ uint16_t LOGIC_Pulse()
 	// Подача синхронизации на TOCU HP
 	LL_SyncTOCU(true);
 
-	DELAY_US(10);
+	// Установка уровня срабатывания компаратора
+	GateDriver_SetCompThreshold(CachedMeasurementSettings.GateCurrent * GATE_CURRENT_THRESHOLD);
 	
 	// Проверка уровня тока до отпирания прибора
 	if(MEASURE_CheckAnodeCurrent())
@@ -287,6 +288,9 @@ uint16_t LOGIC_Pulse()
 		LL_SyncOscilloscope(false);
 		LL_SyncTOCU(false);
 		COMM_PotSwitch(false);
+
+		// Установка максимального уровня компаратора для збегания ложного срабатывания от шумов TOCU HP
+		GateDriver_SetForceCompThresholdMax();
 
 		LOGIC_AreInterruptsActive(true);
 
