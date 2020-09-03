@@ -199,7 +199,6 @@
 
 //  Warning
 #define WARNING_NONE					0
-#define WARNING_I_OUT_OF_RANGE			1	// Измеренное значение тока вне диапазона
 
 //  User Errors
 #define ERR_NONE						0
