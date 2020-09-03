@@ -103,7 +103,7 @@ void CONTROL_Init()
 	DEVPROFILE_InitEPService(EPIndexes, EPSized, EPCounters, EPDatas);
 	// —брос значений
 	DEVPROFILE_ResetControlSection();
-	
+
 	// ќжидание запуска TOCU
 	uint64_t CONTROL_TOCUPowerUpTimer = CONTROL_TimeCounter + TIME_TOCU_POWER_UP;
 	while(CONTROL_TimeCounter < CONTROL_TOCUPowerUpTimer){}
@@ -181,7 +181,8 @@ void CONTROL_ResetHardware(bool KeepPower)
 	LL_HSTimers_Reset();
 	LL_HSTimers_Read();
 
-	LOGIC_ConfigVoltageComparators(0);
+	// ”становка максимального уровн€ компаратора дл€ избежани€ ложного срабатывани€ от шумов TOCU HP
+	GateDriver_SetForceCompThresholdMax();
 }
 //-----------------------------------------------
 

@@ -92,14 +92,13 @@ void GateDriver_SetCurrent(float GateCurrent)
 void GateDriver_SetCompThreshold(float GateCurrentThreshold)
 {
 	uint16_t Data = GateDriver_IrefToDAC(GateCurrentThreshold) | DAC_CHANNEL_B;
-	DataTable[188] = Data;
 	LL_WriteDACx(Data, GPIO_CS_GD1, RISE_Edge);
 }
 //---------------------
 
 void GateDriver_SetForceCompThresholdMax()
 {
-	LL_WriteDACx((4095 | DAC_CHANNEL_B), GPIO_CS_GD1, RISE_Edge);
+	LL_WriteDACx((DAC_RESOLUTION | DAC_CHANNEL_B), GPIO_CS_GD1, RISE_Edge);
 }
 
 void GateDriver_SetFallRate(MeasurementSettings *Settings)
