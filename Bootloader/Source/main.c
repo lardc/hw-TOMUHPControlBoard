@@ -6,7 +6,12 @@
 #include "SysConfig.h"
 #include "BoardConfig.h"
 #include "BCCIxParams.h"
+#include "Delay.h"
 
+// Defines
+#define DAC_RESOLUTION		4095
+#define SPI2_BAUDRATE_BITS	0x5
+#define DAC_CHANNEL_B		BIT15
 
 // Forward functions
 //
@@ -16,6 +21,7 @@ void CAN_Config();
 void UART_Config();
 void Timer2_Config();
 void WatchDog_Config();
+void SPI2_Config();
 
 
 // Functions
@@ -31,6 +37,7 @@ int main()
 	IO_Config();
 	CAN_Config();
 	UART_Config();
+	SPI2_Config();
 	Timer2_Config();
 	WatchDog_Config();
 
@@ -60,8 +67,13 @@ void IO_Config()
 
 	// Выходы
 	GPIO_Config(GPIOC, Pin_13, Output, PushPull, HighSpeed, NoPull);	// PC13(LED)
-	GPIO_Bit_Rst(GPIOC, Pin_14);
 	GPIO_Config(GPIOC, Pin_14, Output, PushPull, HighSpeed, NoPull);	// PC14(Sync_GD)
+	GPIO_Config(GPIOB, Pin_12, Output, PushPull, HighSpeed, NoPull);	// PB12(CS_GD1)
+	GPIO_Config(GPIOB, Pin_14, Output, PushPull, HighSpeed, NoPull);	// PB14(LDAC)
+
+	GPIO_Bit_Rst(GPIOC, Pin_14);
+	GPIO_Bit_Set(GPIOB, Pin_12);
+	GPIO_Bit_Set(GPIOB, Pin_14);
 
 	// Альтернативные функции портов
 	GPIO_Config(GPIOA, Pin_9, AltFn, PushPull, HighSpeed, NoPull);		// PA9(USART1 TX)
@@ -75,8 +87,31 @@ void IO_Config()
 
 	GPIO_Config(GPIOA, Pin_12, AltFn, PushPull, HighSpeed, NoPull);		// PA12(CAN TX)
 	GPIO_AltFn(GPIOA, Pin_12, AltFn_9);
+
+	GPIO_Config(GPIOB, Pin_15, AltFn, PushPull, HighSpeed, NoPull);		// PB15(DOUT)
+	GPIO_AltFn(GPIOB, Pin_15, AltFn_5);
+
+	GPIO_Config(GPIOB, Pin_13, AltFn, PushPull, HighSpeed, NoPull);		// PB13(SCK)
+	GPIO_AltFn(GPIOB, Pin_13, AltFn_5);
 }
 //--------------------------------------------
+
+void SPI2_Config()
+{
+	SPI_Init(SPI2, SPI2_BAUDRATE_BITS, false);
+	SPI_SetSyncPolarity(SPI2, RISE_Edge);
+	SPI_WriteByte(SPI2, 0);
+
+	// Уровень срабатывания компаратора тока управления выставляем высоким,
+	// чтобы исключить ложные срабатывания при запуске блока
+	GPIO_Bit_Rst(GPIOB, Pin_12);
+	SPI_WriteByte(SPI2, DAC_RESOLUTION | DAC_CHANNEL_B);
+	GPIO_Bit_Set(GPIOB, Pin_12);
+	DELAY_US(1);
+	GPIO_Bit_Rst(GPIOB, Pin_14);
+	DELAY_US(5);
+	GPIO_Bit_Set(GPIOB, Pin_14);
+}
 
 void CAN_Config()
 {
