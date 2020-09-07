@@ -397,6 +397,8 @@ void CONTROL_HandlePowerOff()
 
 void CONTROL_HandlePulseConfig()
 {
+	static uint64_t SlaveUpdateTimeout = 0;
+
 	if(CONTROL_State == DS_InProcess)
 	{
 		switch (SUB_State)
@@ -500,19 +502,24 @@ void CONTROL_HandlePulseConfig()
 
 			case SS_AfterPulseWaiting:
 				{
-					if(CONTROL_ForceSlavesStateUpdate())
+					if(CONTROL_TimeCounter >= SlaveUpdateTimeout)
 					{
-						if(LOGIC_AreSlavesInStateX(TOCUDS_Ready))
+						SlaveUpdateTimeout = CONTROL_TimeCounter + SLAVE_UPDATE_PERIOD;
+
+						if(CONTROL_ForceSlavesStateUpdate())
 						{
-							CONTROL_SetDeviceState(DS_Ready, SS_None);
-							CONTROL_ResetHardware(true);
+							if(LOGIC_AreSlavesInStateX(TOCUDS_Ready))
+							{
+								CONTROL_SetDeviceState(DS_Ready, SS_None);
+								CONTROL_ResetHardware(true);
+							}
+							else
+								if(CONTROL_TimeCounter > CONTROL_TimeCounterDelay)
+									CONTROL_SwitchToFault(DF_TOCU_STATE_TIMEOUT);
 						}
 						else
-							if(CONTROL_TimeCounter > CONTROL_TimeCounterDelay)
-								CONTROL_SwitchToFault(DF_TOCU_STATE_TIMEOUT);
+							CONTROL_SwitchToFault(DF_INTERFACE);
 					}
-					else
-						CONTROL_SwitchToFault(DF_INTERFACE);
 				}
 				break;
 				
