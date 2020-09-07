@@ -347,21 +347,21 @@ void LOGIC_TurnOnMeasurement()
 
 	DataRaw = LL_HSTimers_Read();
 
-	TurnOn = ((DataRaw >> 12) & 0x0FF0) | ((DataRaw >> 28) & 0x000F);
-	TurnOn = TurnOn * COUNTER_CLOCK_PERIOD_NS;
-
-	if(TurnOn < DataTable[REG_MEAS_TIME_LOW])
-		TurnOn = 0;
-
-	DataTable[REG_MEAS_TIME_ON] = TurnOn;
-
-	TurnOnDelay = (DataRaw & 0x00FF) | ((DataRaw >> 16) & 0x0F00);
+	TurnOnDelay = ((DataRaw >> 12) & 0x0FF0) | ((DataRaw >> 28) & 0x000F);
 	TurnOnDelay = TurnOnDelay * COUNTER_CLOCK_PERIOD_NS;
 
 	if(TurnOnDelay < DataTable[REG_MEAS_TIME_LOW])
 		TurnOnDelay = 0;
 
 	DataTable[REG_MEAS_TIME_DELAY] = TurnOnDelay;
+
+	TurnOn = (DataRaw & 0x00FF) | ((DataRaw >> 16) & 0x0F00);
+	TurnOn = TurnOn * COUNTER_CLOCK_PERIOD_NS;
+
+	if(TurnOn < DataTable[REG_MEAS_TIME_LOW])
+		TurnOn = 0;
+
+	DataTable[REG_MEAS_TIME_ON] = TurnOn;
 }
 //-----------------------------------------------
 
