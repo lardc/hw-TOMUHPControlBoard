@@ -301,7 +301,7 @@ uint16_t LOGIC_Pulse()
 		CONTROL_Values_Counter = PULSE_ARR_MAX_LENGTH;
 	
 		// Обработка внештатных ситуаций
-		if (DataTable[REG_MEAS_CURRENT_VALUE] < DataTable[REG_ID_THRESHOLD])
+		if (DataTable[REG_MEAS_CURRENT_VALUE] < (CachedMeasurementSettings.AnodeCurrent * DataTable[REG_ID_THRESHOLD] / 100))
 		{
 			Problem = PROBLEM_NO_PWR;
 		}
