@@ -89,9 +89,9 @@ const TableItemConstraint NVConstraint[DATA_TABLE_NV_SIZE] =
 	{GAIN_COEFFICIENT_MIN, GAIN_COEFFICIENT_MAX, GAIN_COEFFICIENT_DEF},			// 77
 	{0, INT16U_MAX, 0},															// 78
 	{0, 0, 0},																	// 79
-	{0, 0, 0},																	// 80
-	{0, 0, 0},																 	// 81
-	{0, 0, 0},																 	// 82
+	{AVERAGE_NUM_MIN, AVERAGE_NUM_MAX, AVERAGE_NUM_DEF},						// 80
+	{ALLOWED_SPREAD_MIN, ALLOWED_SPREAD_MAX, ALLOWED_SPREAD_DEF},			 	// 81
+	{AVERAGE_PERIOD_MIN, AVERAGE_PERIOD_MAX, AVERAGE_PERIOD_DEF},			 	// 82
 	{0, 0, 0},																	// 83
 	{0, 0, 0},																 	// 84
 	{0, 0, 0},																	// 85

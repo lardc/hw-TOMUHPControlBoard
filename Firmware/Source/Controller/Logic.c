@@ -14,8 +14,10 @@
 
 // Definitions
 //
-#define TOCU1_CAN_NID		21
-#define TOCU1_BIT_MASK		0x3FF
+#define TOCU1_CAN_NID			21
+#define TOCU1_BIT_MASK			0x3FF
+//
+#define ITTERATIONS_OF_AVERAGING	3
 
 // Types
 //
@@ -37,6 +39,8 @@ typedef struct __NodeState
 const NodeBitmask NodeBitmaskArray[] = {{TOCU1_CAN_NID, TOCU1_BIT_MASK}};
 #define NODE_ARRAY_SIZE		(sizeof NodeBitmaskArray / sizeof NodeBitmaskArray[0])
 NodeState NodeArray[NODE_ARRAY_SIZE] = {0};
+Int16U LOGIC_TurnOnDelayResultBuffer[AVERAGE_NUM_MAX];
+Int16U LOGIC_TurnOnResultBuffer[AVERAGE_NUM_MAX];
 
 
 // Functions prototypes
@@ -45,6 +49,7 @@ void LOGIC_TurnOnMeasurement();
 void LOGIC_AnodeCurrentTune(AnodeVoltageEnum AnodeVoltage, float *AnodeCurrent);
 void LOGIC_AreInterruptsActive(bool State);
 void LOGIC_FineTuneTdelTon(uint16_t* TurnOnDelay, uint16_t* TurnOn);
+void LOGIC_AveragingData(Int16U *Array, Int16U *MeanValue, Int16U AllowedSpread);
 //
 
 // Functions
@@ -288,7 +293,6 @@ uint16_t LOGIC_Pulse()
 		GateDriver_Sync(false);
 		LL_SyncOscilloscope(false);
 		LL_SyncTOCU(false);
-		COMM_PotSwitch(false);
 
 		// ”становка максимального уровн€ компаратора дл€ збегани€ ложного срабатывани€ от шумов TOCU HP
 		GateDriver_SetForceCompThresholdMax();
@@ -327,6 +331,49 @@ uint16_t LOGIC_Pulse()
 }
 //-----------------------------------------------
 
+void LOGIC_TurnOnAveragingProcess()
+{
+	Int16U TonAverage = 0, TonDelayAverage = 0;
+
+	for(int i = 0; i < ITTERATIONS_OF_AVERAGING; i++)
+	{
+		LOGIC_AveragingData(&LOGIC_TurnOnDelayResultBuffer[0], &TonDelayAverage, DataTable[REG_AVERAGE_ALLOWED_SPREAD]);
+		LOGIC_AveragingData(&LOGIC_TurnOnResultBuffer[0], &TonAverage, DataTable[REG_AVERAGE_ALLOWED_SPREAD]);
+	}
+
+	DataTable[REG_MEAS_TIME_DELAY] = TonDelayAverage;
+	DataTable[REG_MEAS_TIME_ON] = TonAverage;
+}
+//-----------------------------------------------
+
+void LOGIC_AveragingData(Int16U *Array, Int16U *MeanValue, Int16U AllowedSpread)
+{
+	float Result = 0;
+	Int16U AverageCounter = 0;
+
+	if(*MeanValue == 0)
+	{
+		for(int i = 0; i < DataTable[REG_AVERAGE_NUM]; i++)
+			Result += *(Array + i);
+
+		*MeanValue = (Int16U)(Result / DataTable[REG_AVERAGE_NUM]);
+	}
+	else
+	{
+		for(int i = 0; i < DataTable[REG_AVERAGE_NUM]; i++)
+		{
+			if(((*MeanValue + AllowedSpread) >= *(Array + i)) && ((*MeanValue - AllowedSpread) <= *(Array + i)))
+			{
+				Result += *(Array + i);
+				AverageCounter++;
+			}
+		}
+
+		*MeanValue = (Int16U)(Result / AverageCounter);
+	}
+}
+//-----------------------------------------------
+
 MeasurementSettings LOGIC_CacheMeasurementSettings()
 {
 	MeasurementSettings result;
@@ -360,11 +407,15 @@ void LOGIC_TurnOnMeasurement()
 	if(TurnOn < DataTable[REG_MEAS_TIME_LOW])
 		TurnOn = 0;
 
+	DataTable[190] = (DataRaw & 0x00FF) | ((DataRaw >> 16) & 0x0F00);
+
 	if(TurnOnDelay && TurnOn)
 		LOGIC_FineTuneTdelTon(&TurnOnDelay, &TurnOn);
 
-	DataTable[REG_MEAS_TIME_DELAY] = TurnOnDelay;
-	DataTable[REG_MEAS_TIME_ON] = TurnOn;
+
+
+	LOGIC_TurnOnDelayResultBuffer[CONTROL_AverageCounter] = TurnOnDelay;
+	LOGIC_TurnOnResultBuffer[CONTROL_AverageCounter] = TurnOn;
 }
 //-----------------------------------------------
 

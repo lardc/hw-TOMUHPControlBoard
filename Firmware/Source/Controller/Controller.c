@@ -65,6 +65,8 @@ Int64U CONTROL_TimeCounterDelay = 0;
 MeasurementSettings CachedMeasurementSettings;
 volatile Int16U CONTROL_Values_Current[PULSE_ARR_MAX_LENGTH] = {0};
 volatile Int16U CONTROL_Values_Counter = 0;
+Int16U CONTROL_AverageCounter = 0;
+Int64U CONTROL_AveragePeriodCounter = 0;
 
 // Forward functions
 //
@@ -176,6 +178,7 @@ void CONTROL_ResetHardware(bool KeepPower)
 	LL_SyncOscilloscope(false);
 	
 	COMM_EnableSafetyInput(false);
+	COMM_PotSwitch(false);
 
 	LL_GateLatchReset();
 	LL_HSTimers_Reset();
@@ -465,10 +468,13 @@ void CONTROL_HandlePulseConfig()
 
 			case SS_TOCU_PulseConfig:
 				{
-					if(LOGIC_CallCommandForSlaves(ACT_TOCU_PULSE_CONFIG))
-						CONTROL_SetDeviceState(DS_InProcess, SS_HardwareConfig);
-					else
-						CONTROL_SwitchToFault(DF_INTERFACE);
+					if(CONTROL_TimeCounter > CONTROL_AveragePeriodCounter)
+					{
+						if(LOGIC_CallCommandForSlaves(ACT_TOCU_PULSE_CONFIG))
+							CONTROL_SetDeviceState(DS_InProcess, SS_HardwareConfig);
+						else
+							CONTROL_SwitchToFault(DF_INTERFACE);
+					}
 				}
 				break;
 				
@@ -483,20 +489,38 @@ void CONTROL_HandlePulseConfig()
 					GateDriver_SetRiseRate(&CachedMeasurementSettings);
 
 					CONTROL_SetDeviceState(DS_InProcess, SS_StartPulse);
+
+					CONTROL_AverageCounter = 0;
 				}
 				break;
 
 			case SS_StartPulse:
 				{
-					DataTable[REG_PROBLEM] = LOGIC_Pulse();
-
-					if(DataTable[REG_PROBLEM])
-						CONTROL_SetDeviceState(DS_Fault, SS_None);
-					else
+					if(CONTROL_ForceSlavesStateUpdate())
 					{
-						CONTROL_TimeCounterDelay = CONTROL_TimeCounter + AFTER_PULSE_TIMEOUT;
-						CONTROL_SetDeviceState(DS_InProcess, SS_AfterPulseWaiting);
+						if(LOGIC_AreSlavesInStateX(TOCUDS_Ready) && (CONTROL_TimeCounter > CONTROL_AveragePeriodCounter))
+						{
+							if(CONTROL_AverageCounter < DataTable[REG_AVERAGE_NUM])
+							{
+								DataTable[REG_PROBLEM] = LOGIC_Pulse();
+
+								CONTROL_AverageCounter++;
+								CONTROL_AveragePeriodCounter = CONTROL_TimeCounter + DataTable[REG_AVERAGE_PERIOD];
+
+								if(DataTable[REG_PROBLEM])
+									CONTROL_SetDeviceState(DS_Fault, SS_None);
+							}
+							else
+							{
+								LOGIC_TurnOnAveragingProcess();
+
+								CONTROL_TimeCounterDelay = CONTROL_TimeCounter + AFTER_PULSE_TIMEOUT;
+								CONTROL_SetDeviceState(DS_InProcess, SS_AfterPulseWaiting);
+							}
+						}
 					}
+					else
+						CONTROL_SwitchToFault(DF_INTERFACE);
 				}
 				break;
 

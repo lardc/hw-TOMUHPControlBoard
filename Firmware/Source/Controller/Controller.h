@@ -31,6 +31,7 @@ extern volatile Int64U CONTROL_TimeCounter;
 extern volatile Int16U CONTROL_Values_Current[PULSE_ARR_MAX_LENGTH];
 extern volatile Int16U CONTROL_Values_Counter;
 extern MeasurementSettings CachedMeasurementSettings;
+extern Int16U CONTROL_AverageCounter;
 
 // Functions
 void CONTROL_Init();
