@@ -44,6 +44,7 @@ NodeState NodeArray[NODE_ARRAY_SIZE] = {0};
 void LOGIC_TurnOnMeasurement();
 void LOGIC_AnodeCurrentTune(AnodeVoltageEnum AnodeVoltage, float *AnodeCurrent);
 void LOGIC_AreInterruptsActive(bool State);
+void LOGIC_FineTuneTdelTon(uint16_t* TurnOnDelay, uint16_t* TurnOn);
 //
 
 // Functions
@@ -353,15 +354,83 @@ void LOGIC_TurnOnMeasurement()
 	if(TurnOnDelay < DataTable[REG_MEAS_TIME_LOW])
 		TurnOnDelay = 0;
 
-	DataTable[REG_MEAS_TIME_DELAY] = TurnOnDelay;
-
 	TurnOn = (DataRaw & 0x00FF) | ((DataRaw >> 16) & 0x0F00);
 	TurnOn = TurnOn * COUNTER_CLOCK_PERIOD_NS;
 
 	if(TurnOn < DataTable[REG_MEAS_TIME_LOW])
 		TurnOn = 0;
 
+	if(TurnOnDelay && TurnOn)
+		LOGIC_FineTuneTdelTon(&TurnOnDelay, &TurnOn);
+
+	DataTable[REG_MEAS_TIME_DELAY] = TurnOnDelay;
 	DataTable[REG_MEAS_TIME_ON] = TurnOn;
+}
+//-----------------------------------------------
+
+void LOGIC_FineTuneTdelTon(uint16_t* TurnOnDelay, uint16_t* TurnOn)
+{
+	float Tdel_P2, Tdel_P1, Ton_P2, Ton_P1;
+	int16_t Tdel_P0, Ton_P0;
+	uint16_t T;
+
+	switch(DataTable[REG_ANODE_VOLTAGE])
+	{
+		case TOU_600V:
+		{
+			Tdel_P2 = (float)((int16_t)DataTable[REG_T_DEL_600V_P2]) / 1000000;
+			Tdel_P1 = (float)DataTable[REG_T_DEL_600V_P1] / 1000;
+			Tdel_P0 = (int16_t)DataTable[REG_T_DEL_600V_P0];
+
+			Ton_P2 = (float)((int16_t)DataTable[REG_T_ON_600V_P2]) / 1000000;
+			Ton_P1 = (float)DataTable[REG_T_ON_600V_P1] / 1000;
+			Ton_P0 = (int16_t)DataTable[REG_T_ON_600V_P0];
+		}
+		break;
+
+		case TOU_1000V:
+		{
+			Tdel_P2 = (float)((int16_t)DataTable[REG_T_DEL_1000V_P2]) / 1000000;
+			Tdel_P1 = (float)DataTable[REG_T_DEL_1000V_P1] / 1000;
+			Tdel_P0 = (int16_t)DataTable[REG_T_DEL_1000V_P0];
+
+			Ton_P2 = (float)((int16_t)DataTable[REG_T_ON_1000V_P2]) / 1000000;
+			Ton_P1 = (float)DataTable[REG_T_ON_1000V_P1] / 1000;
+			Ton_P0 = (int16_t)DataTable[REG_T_ON_1000V_P0];
+		}
+		break;
+
+		case TOU_1500V:
+		{
+			Tdel_P2 = (float)((int16_t)DataTable[REG_T_DEL_1500V_P2]) / 1000000;
+			Tdel_P1 = (float)DataTable[REG_T_DEL_1500V_P1] / 1000;
+			Tdel_P0 = (int16_t)DataTable[REG_T_DEL_1500V_P0];
+
+			Ton_P2 = (float)((int16_t)DataTable[REG_T_ON_1500V_P2]) / 1000000;
+			Ton_P1 = (float)DataTable[REG_T_ON_1500V_P1] / 1000;
+			Ton_P0 = (int16_t)DataTable[REG_T_ON_1500V_P0];
+		}
+		break;
+
+		default:
+		{
+			Tdel_P2 = 0;
+			Tdel_P1 = 0;
+			Tdel_P0 = 0;
+
+			Ton_P2 = 0;
+			Ton_P1 = 0;
+			Ton_P0 = 0;
+		}
+			break;
+	}
+
+
+	T = *TurnOnDelay;
+	*TurnOnDelay = T * T * Tdel_P2 + T * Tdel_P1 + Tdel_P0;
+
+	T = *TurnOn;
+	*TurnOn = T * T * Ton_P2 + T * Ton_P1 + Ton_P0;
 }
 //-----------------------------------------------
 
