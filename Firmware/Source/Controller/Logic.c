@@ -287,11 +287,15 @@ uint16_t LOGIC_Pulse()
 		LL_SyncOscilloscope(true);
 		GateDriver_Sync(true);
 
-		DELAY_US(40);
+		DELAY_US(30);
 
 		// Завершение процесса измерения
 		GateDriver_Sync(false);
 		LL_SyncOscilloscope(false);
+
+		DELAY_US(10);
+
+		LL_GateLatchReset();
 		LL_SyncTOCU(false);
 
 		// Установка максимального уровня компаратора для збегания ложного срабатывания от шумов TOCU HP

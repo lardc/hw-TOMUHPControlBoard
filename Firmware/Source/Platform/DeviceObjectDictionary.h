@@ -144,6 +144,8 @@
 #define REG_AVERAGE_NUM					80	// Число точек усреднений
 #define REG_AVERAGE_ALLOWED_SPREAD		81	// Допустимый разброс значений (нс)
 #define REG_AVERAGE_PERIOD				82	// Период следования импульсов при усреднении (мс)
+// 83 - 84
+#define REG_AFTER_MEASURE_DELAY			85	// Пауза после измерения
 
 // Несохраняемы регистры чтения-записи
 #define REG_ANODE_VOLTAGE				128	// Анодное напряжение (В)

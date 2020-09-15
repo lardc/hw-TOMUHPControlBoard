@@ -94,7 +94,7 @@ const TableItemConstraint NVConstraint[DATA_TABLE_NV_SIZE] =
 	{AVERAGE_PERIOD_MIN, AVERAGE_PERIOD_MAX, AVERAGE_PERIOD_DEF},			 	// 82
 	{0, 0, 0},																	// 83
 	{0, 0, 0},																 	// 84
-	{0, 0, 0},																	// 85
+	{AFTER_MEASURE_DELAY_MIN, AFTER_MEASURE_DELAY_MAX, AFTER_MEASURE_DELAY_DEF},// 85
 	{0, 0, 0},																	// 86
 	{0, 0, 0},																	// 87
 	{0, 0, 0},																	// 88

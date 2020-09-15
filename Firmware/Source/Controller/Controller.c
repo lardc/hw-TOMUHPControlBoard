@@ -496,53 +496,63 @@ void CONTROL_HandlePulseConfig()
 
 			case SS_StartPulse:
 				{
-					if(CONTROL_ForceSlavesStateUpdate())
+					if(CONTROL_TimeCounter > CONTROL_AveragePeriodCounter)
 					{
-						if(LOGIC_AreSlavesInStateX(TOCUDS_Ready) && (CONTROL_TimeCounter > CONTROL_AveragePeriodCounter))
+						if(CONTROL_ForceSlavesStateUpdate())
 						{
-							if(CONTROL_AverageCounter < DataTable[REG_AVERAGE_NUM])
+							if(LOGIC_AreSlavesInStateX(TOCUDS_Ready))
 							{
-								DataTable[REG_PROBLEM] = LOGIC_Pulse();
+								if(CONTROL_AverageCounter < DataTable[REG_AVERAGE_NUM])
+								{
+									DataTable[REG_PROBLEM] = LOGIC_Pulse();
 
-								CONTROL_AverageCounter++;
-								CONTROL_AveragePeriodCounter = CONTROL_TimeCounter + DataTable[REG_AVERAGE_PERIOD];
+									CONTROL_AverageCounter++;
+									CONTROL_AveragePeriodCounter = CONTROL_TimeCounter + DataTable[REG_AVERAGE_PERIOD];
 
-								if(DataTable[REG_PROBLEM])
-									CONTROL_SetDeviceState(DS_Fault, SS_None);
+									if(DataTable[REG_PROBLEM])
+										CONTROL_SetDeviceState(DS_Fault, SS_None);
+								}
+								else
+								{
+									LOGIC_TurnOnAveragingProcess();
+
+									CONTROL_TimeCounterDelay = CONTROL_TimeCounter + DataTable[REG_AFTER_MEASURE_DELAY];
+									CONTROL_SetDeviceState(DS_InProcess, SS_AfterPulseWaiting);
+								}
 							}
 							else
 							{
-								LOGIC_TurnOnAveragingProcess();
-
-								CONTROL_TimeCounterDelay = CONTROL_TimeCounter + AFTER_PULSE_TIMEOUT;
-								CONTROL_SetDeviceState(DS_InProcess, SS_AfterPulseWaiting);
+								if(!LOGIC_AreSlavesInStateX(TOCUDS_InProcess))
+									CONTROL_SwitchToFault(DF_TOCU_WRONG_STATE);
 							}
 						}
+						else
+							CONTROL_SwitchToFault(DF_INTERFACE);
 					}
-					else
-						CONTROL_SwitchToFault(DF_INTERFACE);
 				}
 				break;
 
 			case SS_AfterPulseWaiting:
 				{
-					if(CONTROL_TimeCounter >= SlaveUpdateTimeout)
+					if(CONTROL_TimeCounter > CONTROL_TimeCounterDelay)
 					{
-						SlaveUpdateTimeout = CONTROL_TimeCounter + SLAVE_UPDATE_PERIOD;
-
-						if(CONTROL_ForceSlavesStateUpdate())
+						if(CONTROL_TimeCounter >= SlaveUpdateTimeout)
 						{
-							if(LOGIC_AreSlavesInStateX(TOCUDS_Ready))
+							SlaveUpdateTimeout = CONTROL_TimeCounter + SLAVE_UPDATE_PERIOD;
+
+							if(CONTROL_ForceSlavesStateUpdate())
 							{
-								CONTROL_SetDeviceState(DS_Ready, SS_None);
-								CONTROL_ResetHardware(true);
+								if(LOGIC_AreSlavesInStateX(TOCUDS_Ready))
+								{
+									CONTROL_SetDeviceState(DS_Ready, SS_None);
+									CONTROL_ResetHardware(true);
+								}
+								else
+									CONTROL_SwitchToFault(DF_TOCU_STATE_TIMEOUT);
 							}
 							else
-								if(CONTROL_TimeCounter > CONTROL_TimeCounterDelay)
-									CONTROL_SwitchToFault(DF_TOCU_STATE_TIMEOUT);
+								CONTROL_SwitchToFault(DF_INTERFACE);
 						}
-						else
-							CONTROL_SwitchToFault(DF_INTERFACE);
 					}
 				}
 				break;

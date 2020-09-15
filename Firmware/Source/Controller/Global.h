@@ -20,7 +20,6 @@
 #define LED_BLINK_PERIOD		500				// Период моргания светодиода на плате (мс)
 #define COMMUTATION_PAUSE		500				// Задержка на коммутацию (мс)
 #define APPLY_SETTINGS_TIMEOUT	5000			// Таймаут ожидания конфигурации блока (мс)
-#define AFTER_PULSE_TIMEOUT		10000			// Задержка после импульса (мс)
 
 #define GATE_CURRENT_THRESHOLD	0.1f			// Порог срабатывания компоратора тока (%)
 

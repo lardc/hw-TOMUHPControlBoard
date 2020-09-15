@@ -79,6 +79,10 @@
 #define AVERAGE_PERIOD_MAX		2000	// мс
 #define AVERAGE_PERIOD_DEF		500		// мс
 
+#define AFTER_MEASURE_DELAY_MIN	1000	// мс
+#define AFTER_MEASURE_DELAY_MAX	10000	// мс
+#define AFTER_MEASURE_DELAY_DEF	5000	// мс
+
 // Types
 //
 typedef struct __TableItemConstraint
