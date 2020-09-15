@@ -3,9 +3,11 @@
 
 // Includes
 #include "stdinc.h"
+//#include "Constraints.h"
 
 // Definitions
 #define PULSE_ARR_MAX_LENGTH	300
+#define TIME_ARR_MAX_LENGTH		20
 
 // Variables
 extern volatile uint16_t LOGIC_OutputPulseRaw[PULSE_ARR_MAX_LENGTH];

@@ -39,7 +39,7 @@ typedef struct __NodeState
 const NodeBitmask NodeBitmaskArray[] = {{TOCU1_CAN_NID, TOCU1_BIT_MASK}};
 #define NODE_ARRAY_SIZE		(sizeof NodeBitmaskArray / sizeof NodeBitmaskArray[0])
 NodeState NodeArray[NODE_ARRAY_SIZE] = {0};
-Int16U LOGIC_TurnOnDelayResultBuffer[AVERAGE_NUM_MAX];
+Int16U LOGIC_TurnDelayResultBuffer[AVERAGE_NUM_MAX];
 Int16U LOGIC_TurnOnResultBuffer[AVERAGE_NUM_MAX];
 
 
@@ -48,7 +48,7 @@ Int16U LOGIC_TurnOnResultBuffer[AVERAGE_NUM_MAX];
 void LOGIC_TurnOnMeasurement();
 void LOGIC_AnodeCurrentTune(AnodeVoltageEnum AnodeVoltage, float *AnodeCurrent);
 void LOGIC_AreInterruptsActive(bool State);
-void LOGIC_FineTuneTdelTon(uint16_t* TurnOnDelay, uint16_t* TurnOn);
+void LOGIC_FineTuneTdelTon(uint16_t* TurnDelay, uint16_t* TurnOn);
 void LOGIC_AveragingData(Int16U *Array, Int16U *MeanValue, Int16U AllowedSpread);
 //
 
@@ -307,7 +307,7 @@ uint16_t LOGIC_Pulse()
 	
 		// Сохранение оцифрованных значений в endpoint
 		MEASURE_ConvertRawArray(&LOGIC_OutputPulseRaw[0], &CONTROL_Values_Current[0], PULSE_ARR_MAX_LENGTH);
-		CONTROL_Values_Counter = PULSE_ARR_MAX_LENGTH;
+		CONTROL_Values_CurrentCounter = PULSE_ARR_MAX_LENGTH;
 	
 		// Обработка внештатных ситуаций
 		if (DataTable[REG_MEAS_CURRENT_VALUE] < (CachedMeasurementSettings.AnodeCurrent * DataTable[REG_ID_THRESHOLD] / 100))
@@ -341,7 +341,7 @@ void LOGIC_TurnOnAveragingProcess()
 
 	for(int i = 0; i < ITTERATIONS_OF_AVERAGING; i++)
 	{
-		LOGIC_AveragingData(&LOGIC_TurnOnDelayResultBuffer[0], &TonDelayAverage, DataTable[REG_AVERAGE_ALLOWED_SPREAD]);
+		LOGIC_AveragingData(&LOGIC_TurnDelayResultBuffer[0], &TonDelayAverage, DataTable[REG_AVERAGE_ALLOWED_SPREAD]);
 		LOGIC_AveragingData(&LOGIC_TurnOnResultBuffer[0], &TonAverage, DataTable[REG_AVERAGE_ALLOWED_SPREAD]);
 	}
 
@@ -395,15 +395,15 @@ MeasurementSettings LOGIC_CacheMeasurementSettings()
 void LOGIC_TurnOnMeasurement()
 {
 	uint32_t DataRaw;
-	uint16_t TurnOn, TurnOnDelay;
+	uint16_t TurnOn, TurnDelay;
 
 	DataRaw = LL_HSTimers_Read();
 
-	TurnOnDelay = ((DataRaw >> 12) & 0x0FF0) | ((DataRaw >> 28) & 0x000F);
-	TurnOnDelay = TurnOnDelay * COUNTER_CLOCK_PERIOD_NS;
+	TurnDelay = ((DataRaw >> 12) & 0x0FF0) | ((DataRaw >> 28) & 0x000F);
+	TurnDelay = TurnDelay * COUNTER_CLOCK_PERIOD_NS;
 
-	if(TurnOnDelay < DataTable[REG_MEAS_TIME_LOW])
-		TurnOnDelay = 0;
+	if(TurnDelay < DataTable[REG_MEAS_TIME_LOW])
+		TurnDelay = 0;
 
 	TurnOn = (DataRaw & 0x00FF) | ((DataRaw >> 16) & 0x0F00);
 	TurnOn = TurnOn * COUNTER_CLOCK_PERIOD_NS;
@@ -413,17 +413,22 @@ void LOGIC_TurnOnMeasurement()
 
 	DataTable[190] = (DataRaw & 0x00FF) | ((DataRaw >> 16) & 0x0F00);
 
-	if(TurnOnDelay && TurnOn)
-		LOGIC_FineTuneTdelTon(&TurnOnDelay, &TurnOn);
+	if(TurnDelay && TurnOn)
+		LOGIC_FineTuneTdelTon(&TurnDelay, &TurnOn);
 
-
-
-	LOGIC_TurnOnDelayResultBuffer[CONTROL_AverageCounter] = TurnOnDelay;
+	LOGIC_TurnDelayResultBuffer[CONTROL_AverageCounter] = TurnDelay;
 	LOGIC_TurnOnResultBuffer[CONTROL_AverageCounter] = TurnOn;
+
+	// Сохранение результата в endpoint
+	CONTROL_Values_TurnDelay[CONTROL_AverageCounter] = TurnDelay;
+	CONTROL_Values_TurnDelayCounter = CONTROL_AverageCounter;
+
+	CONTROL_Values_TurnOn[CONTROL_AverageCounter] = TurnOn;
+	CONTROL_Values_TurnOnCounter = CONTROL_AverageCounter;
 }
 //-----------------------------------------------
 
-void LOGIC_FineTuneTdelTon(uint16_t* TurnOnDelay, uint16_t* TurnOn)
+void LOGIC_FineTuneTdelTon(uint16_t* TurnDelay, uint16_t* TurnOn)
 {
 	float Tdel_P2, Tdel_P1, Ton_P2, Ton_P1;
 	int16_t Tdel_P0, Ton_P0;
@@ -481,8 +486,8 @@ void LOGIC_FineTuneTdelTon(uint16_t* TurnOnDelay, uint16_t* TurnOn)
 	}
 
 
-	T = *TurnOnDelay;
-	*TurnOnDelay = T * T * Tdel_P2 + T * Tdel_P1 + Tdel_P0;
+	T = *TurnDelay;
+	*TurnDelay = T * T * Tdel_P2 + T * Tdel_P1 + Tdel_P0;
 
 	T = *TurnOn;
 	*TurnOn = T * T * Ton_P2 + T * Ton_P1 + Ton_P0;

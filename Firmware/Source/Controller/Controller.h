@@ -29,7 +29,11 @@ typedef struct __MeasurementSettings
 // Variables
 extern volatile Int64U CONTROL_TimeCounter;
 extern volatile Int16U CONTROL_Values_Current[PULSE_ARR_MAX_LENGTH];
-extern volatile Int16U CONTROL_Values_Counter;
+extern volatile Int16U CONTROL_Values_TurnDelay[TIME_ARR_MAX_LENGTH];
+extern volatile Int16U CONTROL_Values_TurnOn[TIME_ARR_MAX_LENGTH];
+extern volatile Int16U CONTROL_Values_CurrentCounter;
+extern volatile Int16U CONTROL_Values_TurnDelayCounter;
+extern volatile Int16U CONTROL_Values_TurnOnCounter;
 extern MeasurementSettings CachedMeasurementSettings;
 extern Int16U CONTROL_AverageCounter;
 
