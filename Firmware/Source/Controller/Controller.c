@@ -64,7 +64,13 @@ static Boolean CycleActive = FALSE;
 Int64U CONTROL_TimeCounterDelay = 0;
 MeasurementSettings CachedMeasurementSettings;
 volatile Int16U CONTROL_Values_Current[PULSE_ARR_MAX_LENGTH] = {0};
-volatile Int16U CONTROL_Values_Counter = 0;
+volatile Int16U CONTROL_Values_TurnDelay[TIME_ARR_MAX_LENGTH] = {0};
+volatile Int16U CONTROL_Values_TurnOn[TIME_ARR_MAX_LENGTH] = {0};
+volatile Int16U CONTROL_Values_CurrentCounter = 0;
+volatile Int16U CONTROL_Values_TurnDelayCounter = 0;
+volatile Int16U CONTROL_Values_TurnOnCounter = 0;
+Int16U CONTROL_AverageCounter = 0;
+Int64U CONTROL_AveragePeriodCounter = 0;
 
 // Forward functions
 //
@@ -89,10 +95,12 @@ void CONTROL_GateDriverCharge();
 void CONTROL_Init()
 {
 	// Переменные для конфигурации EndPoint
-	Int16U EPIndexes[EP_COUNT] = {EP_CURRENT};
-	Int16U EPSized[EP_COUNT] = {PULSE_ARR_MAX_LENGTH};
-	pInt16U EPCounters[EP_COUNT] = {(pInt16U)&CONTROL_Values_Counter};
-	pInt16U EPDatas[EP_COUNT] = {(pInt16U)CONTROL_Values_Current};
+	Int16U EPIndexes[EP_COUNT] = {EP_CURRENT, EP_TURN_DELAY, EP_TURN_ON};
+	Int16U EPSized[EP_COUNT] = {PULSE_ARR_MAX_LENGTH, TIME_ARR_MAX_LENGTH, TIME_ARR_MAX_LENGTH};
+	pInt16U EPCounters[EP_COUNT] = {(pInt16U)&CONTROL_Values_CurrentCounter, (pInt16U)&CONTROL_Values_TurnDelayCounter,
+									(pInt16U)&CONTROL_Values_TurnOnCounter};
+	pInt16U EPDatas[EP_COUNT] = {(pInt16U)CONTROL_Values_Current, (pInt16U)CONTROL_Values_TurnDelay,
+									(pInt16U)CONTROL_Values_TurnOn};
 	
 	// Конфигурация сервиса работы Data-table и EPROM
 	EPROMServiceConfig EPROMService = {(FUNC_EPROM_WriteValues)&NFLASH_WriteDT, (FUNC_EPROM_ReadValues)&NFLASH_ReadDT};
@@ -176,6 +184,7 @@ void CONTROL_ResetHardware(bool KeepPower)
 	LL_SyncOscilloscope(false);
 	
 	COMM_EnableSafetyInput(false);
+	COMM_PotSwitch(false);
 
 	LL_GateLatchReset();
 	LL_HSTimers_Reset();
@@ -397,6 +406,8 @@ void CONTROL_HandlePowerOff()
 
 void CONTROL_HandlePulseConfig()
 {
+	static uint64_t SlaveUpdateTimeout = 0;
+
 	if(CONTROL_State == DS_InProcess)
 	{
 		switch (SUB_State)
@@ -463,10 +474,13 @@ void CONTROL_HandlePulseConfig()
 
 			case SS_TOCU_PulseConfig:
 				{
-					if(LOGIC_CallCommandForSlaves(ACT_TOCU_PULSE_CONFIG))
-						CONTROL_SetDeviceState(DS_InProcess, SS_HardwareConfig);
-					else
-						CONTROL_SwitchToFault(DF_INTERFACE);
+					if(CONTROL_TimeCounter > CONTROL_AveragePeriodCounter)
+					{
+						if(LOGIC_CallCommandForSlaves(ACT_TOCU_PULSE_CONFIG))
+							CONTROL_SetDeviceState(DS_InProcess, SS_HardwareConfig);
+						else
+							CONTROL_SwitchToFault(DF_INTERFACE);
+					}
 				}
 				break;
 				
@@ -481,38 +495,71 @@ void CONTROL_HandlePulseConfig()
 					GateDriver_SetRiseRate(&CachedMeasurementSettings);
 
 					CONTROL_SetDeviceState(DS_InProcess, SS_StartPulse);
+
+					CONTROL_AverageCounter = 0;
 				}
 				break;
 
 			case SS_StartPulse:
 				{
-					DataTable[REG_PROBLEM] = LOGIC_Pulse();
-
-					if(DataTable[REG_PROBLEM])
-						CONTROL_SetDeviceState(DS_Fault, SS_None);
-					else
+					if(CONTROL_TimeCounter > CONTROL_AveragePeriodCounter)
 					{
-						CONTROL_TimeCounterDelay = CONTROL_TimeCounter + AFTER_PULSE_TIMEOUT;
-						CONTROL_SetDeviceState(DS_InProcess, SS_AfterPulseWaiting);
+						if(CONTROL_ForceSlavesStateUpdate())
+						{
+							if(LOGIC_AreSlavesInStateX(TOCUDS_Ready))
+							{
+								if(CONTROL_AverageCounter < DataTable[REG_AVERAGE_NUM])
+								{
+									DataTable[REG_PROBLEM] = LOGIC_Pulse();
+
+									CONTROL_AverageCounter++;
+									CONTROL_AveragePeriodCounter = CONTROL_TimeCounter + DataTable[REG_AVERAGE_PERIOD];
+
+									if(DataTable[REG_PROBLEM])
+										CONTROL_SetDeviceState(DS_Fault, SS_None);
+								}
+								else
+								{
+									LOGIC_TurnOnAveragingProcess();
+
+									CONTROL_TimeCounterDelay = CONTROL_TimeCounter + DataTable[REG_AFTER_MEASURE_DELAY];
+									CONTROL_SetDeviceState(DS_InProcess, SS_AfterPulseWaiting);
+								}
+							}
+							else
+							{
+								if(!LOGIC_AreSlavesInStateX(TOCUDS_InProcess))
+									CONTROL_SwitchToFault(DF_TOCU_WRONG_STATE);
+							}
+						}
+						else
+							CONTROL_SwitchToFault(DF_INTERFACE);
 					}
 				}
 				break;
 
 			case SS_AfterPulseWaiting:
 				{
-					if(CONTROL_ForceSlavesStateUpdate())
+					if(CONTROL_TimeCounter > CONTROL_TimeCounterDelay)
 					{
-						if(LOGIC_AreSlavesInStateX(TOCUDS_Ready))
+						if(CONTROL_TimeCounter >= SlaveUpdateTimeout)
 						{
-							CONTROL_SetDeviceState(DS_Ready, SS_None);
-							CONTROL_ResetHardware(true);
+							SlaveUpdateTimeout = CONTROL_TimeCounter + SLAVE_UPDATE_PERIOD;
+
+							if(CONTROL_ForceSlavesStateUpdate())
+							{
+								if(LOGIC_AreSlavesInStateX(TOCUDS_Ready))
+								{
+									CONTROL_SetDeviceState(DS_Ready, SS_None);
+									CONTROL_ResetHardware(true);
+								}
+								else
+									CONTROL_SwitchToFault(DF_TOCU_STATE_TIMEOUT);
+							}
+							else
+								CONTROL_SwitchToFault(DF_INTERFACE);
 						}
-						else
-							if(CONTROL_TimeCounter > CONTROL_TimeCounterDelay)
-								CONTROL_SwitchToFault(DF_TOCU_STATE_TIMEOUT);
 					}
-					else
-						CONTROL_SwitchToFault(DF_INTERFACE);
 				}
 				break;
 				

@@ -12,7 +12,7 @@
 #define	SCCI_TIMEOUT_TICKS		1000			// Таймаут протоколоа SCCI (мс)
 #define	BCCIM_TIMEOUT_TICKS		1000			// Таймаут протоколоа мастер BCCI (мс)
 #define EP_WRITE_COUNT			0				// Количество массивов для записи
-#define EP_COUNT				1				// Количество массивов для чтения
+#define EP_COUNT				3				// Количество массивов для чтения
 #define ENABLE_LOCKING			FALSE			// Защита паролем
 
 #define SLAVE_UPDATE_PERIOD		100				// Период опроса блоков-рабов (мс)
@@ -20,7 +20,6 @@
 #define LED_BLINK_PERIOD		500				// Период моргания светодиода на плате (мс)
 #define COMMUTATION_PAUSE		500				// Задержка на коммутацию (мс)
 #define APPLY_SETTINGS_TIMEOUT	5000			// Таймаут ожидания конфигурации блока (мс)
-#define AFTER_PULSE_TIMEOUT		10000			// Задержка после импульса (мс)
 
 #define GATE_CURRENT_THRESHOLD	0.1f			// Порог срабатывания компоратора тока (%)
 

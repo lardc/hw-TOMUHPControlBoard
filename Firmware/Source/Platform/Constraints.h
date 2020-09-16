@@ -67,6 +67,22 @@
 #define MEAS_TIME_LOW_MAX		1000	// нс
 #define MEAS_TIME_LOW_DEF		500		// нс
 
+#define AVERAGE_NUM_MIN			1		//
+#define AVERAGE_NUM_MAX			20		//
+#define AVERAGE_NUM_DEF			10		//
+
+#define ALLOWED_SPREAD_MIN		0		// нс
+#define ALLOWED_SPREAD_MAX		500		// нс
+#define ALLOWED_SPREAD_DEF		100		// нс
+
+#define AVERAGE_PERIOD_MIN		300		// мс
+#define AVERAGE_PERIOD_MAX		2000	// мс
+#define AVERAGE_PERIOD_DEF		500		// мс
+
+#define AFTER_MEASURE_DELAY_MIN	1000	// мс
+#define AFTER_MEASURE_DELAY_MAX	10000	// мс
+#define AFTER_MEASURE_DELAY_DEF	5000	// мс
+
 // Types
 //
 typedef struct __TableItemConstraint

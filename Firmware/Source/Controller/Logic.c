@@ -14,8 +14,10 @@
 
 // Definitions
 //
-#define TOCU1_CAN_NID		21
-#define TOCU1_BIT_MASK		0x3FF
+#define TOCU1_CAN_NID			21
+#define TOCU1_BIT_MASK			0x3FF
+//
+#define ITTERATIONS_OF_AVERAGING	3
 
 // Types
 //
@@ -37,6 +39,8 @@ typedef struct __NodeState
 const NodeBitmask NodeBitmaskArray[] = {{TOCU1_CAN_NID, TOCU1_BIT_MASK}};
 #define NODE_ARRAY_SIZE		(sizeof NodeBitmaskArray / sizeof NodeBitmaskArray[0])
 NodeState NodeArray[NODE_ARRAY_SIZE] = {0};
+Int16U LOGIC_TurnDelayResultBuffer[AVERAGE_NUM_MAX];
+Int16U LOGIC_TurnOnResultBuffer[AVERAGE_NUM_MAX];
 
 
 // Functions prototypes
@@ -44,6 +48,8 @@ NodeState NodeArray[NODE_ARRAY_SIZE] = {0};
 void LOGIC_TurnOnMeasurement();
 void LOGIC_AnodeCurrentTune(AnodeVoltageEnum AnodeVoltage, float *AnodeCurrent);
 void LOGIC_AreInterruptsActive(bool State);
+void LOGIC_FineTuneTdelTon(uint16_t* TurnDelay, uint16_t* TurnOn);
+void LOGIC_AveragingData(Int16U *Array, Int16U *MeanValue, Int16U AllowedSpread);
 //
 
 // Functions
@@ -281,13 +287,16 @@ uint16_t LOGIC_Pulse()
 		LL_SyncOscilloscope(true);
 		GateDriver_Sync(true);
 
-		DELAY_US(40);
+		DELAY_US(30);
 
 		// Завершение процесса измерения
 		GateDriver_Sync(false);
 		LL_SyncOscilloscope(false);
+
+		DELAY_US(10);
+
+		LL_GateLatchReset();
 		LL_SyncTOCU(false);
-		COMM_PotSwitch(false);
 
 		// Установка максимального уровня компаратора для збегания ложного срабатывания от шумов TOCU HP
 		GateDriver_SetForceCompThresholdMax();
@@ -298,10 +307,10 @@ uint16_t LOGIC_Pulse()
 	
 		// Сохранение оцифрованных значений в endpoint
 		MEASURE_ConvertRawArray(&LOGIC_OutputPulseRaw[0], &CONTROL_Values_Current[0], PULSE_ARR_MAX_LENGTH);
-		CONTROL_Values_Counter = PULSE_ARR_MAX_LENGTH;
+		CONTROL_Values_CurrentCounter = PULSE_ARR_MAX_LENGTH;
 	
 		// Обработка внештатных ситуаций
-		if (DataTable[REG_MEAS_CURRENT_VALUE] < DataTable[REG_ID_THRESHOLD])
+		if (DataTable[REG_MEAS_CURRENT_VALUE] < (CachedMeasurementSettings.AnodeCurrent * DataTable[REG_ID_THRESHOLD] / 100))
 		{
 			Problem = PROBLEM_NO_PWR;
 		}
@@ -326,6 +335,49 @@ uint16_t LOGIC_Pulse()
 }
 //-----------------------------------------------
 
+void LOGIC_TurnOnAveragingProcess()
+{
+	Int16U TonAverage = 0, TonDelayAverage = 0;
+
+	for(int i = 0; i < ITTERATIONS_OF_AVERAGING; i++)
+	{
+		LOGIC_AveragingData(&LOGIC_TurnDelayResultBuffer[0], &TonDelayAverage, DataTable[REG_AVERAGE_ALLOWED_SPREAD]);
+		LOGIC_AveragingData(&LOGIC_TurnOnResultBuffer[0], &TonAverage, DataTable[REG_AVERAGE_ALLOWED_SPREAD]);
+	}
+
+	DataTable[REG_MEAS_TIME_DELAY] = TonDelayAverage;
+	DataTable[REG_MEAS_TIME_ON] = TonAverage;
+}
+//-----------------------------------------------
+
+void LOGIC_AveragingData(Int16U *Array, Int16U *MeanValue, Int16U AllowedSpread)
+{
+	float Result = 0;
+	Int16U AverageCounter = 0;
+
+	if(*MeanValue == 0)
+	{
+		for(int i = 0; i < DataTable[REG_AVERAGE_NUM]; i++)
+			Result += *(Array + i);
+
+		*MeanValue = (Int16U)(Result / DataTable[REG_AVERAGE_NUM]);
+	}
+	else
+	{
+		for(int i = 0; i < DataTable[REG_AVERAGE_NUM]; i++)
+		{
+			if(((*MeanValue + AllowedSpread) >= *(Array + i)) && ((*MeanValue - AllowedSpread) <= *(Array + i)))
+			{
+				Result += *(Array + i);
+				AverageCounter++;
+			}
+		}
+
+		*MeanValue = (Int16U)(Result / AverageCounter);
+	}
+}
+//-----------------------------------------------
+
 MeasurementSettings LOGIC_CacheMeasurementSettings()
 {
 	MeasurementSettings result;
@@ -343,25 +395,102 @@ MeasurementSettings LOGIC_CacheMeasurementSettings()
 void LOGIC_TurnOnMeasurement()
 {
 	uint32_t DataRaw;
-	uint16_t TurnOn, TurnOnDelay;
+	uint16_t TurnOn, TurnDelay;
 
 	DataRaw = LL_HSTimers_Read();
 
-	TurnOn = ((DataRaw >> 12) & 0x0FF0) | ((DataRaw >> 28) & 0x000F);
+	TurnDelay = ((DataRaw >> 12) & 0x0FF0) | ((DataRaw >> 28) & 0x000F);
+	TurnDelay = TurnDelay * COUNTER_CLOCK_PERIOD_NS;
+
+	if(TurnDelay < DataTable[REG_MEAS_TIME_LOW])
+		TurnDelay = 0;
+
+	TurnOn = (DataRaw & 0x00FF) | ((DataRaw >> 16) & 0x0F00);
 	TurnOn = TurnOn * COUNTER_CLOCK_PERIOD_NS;
 
 	if(TurnOn < DataTable[REG_MEAS_TIME_LOW])
 		TurnOn = 0;
 
-	DataTable[REG_MEAS_TIME_ON] = TurnOn;
+	DataTable[190] = (DataRaw & 0x00FF) | ((DataRaw >> 16) & 0x0F00);
 
-	TurnOnDelay = (DataRaw & 0x00FF) | ((DataRaw >> 16) & 0x0F00);
-	TurnOnDelay = TurnOnDelay * COUNTER_CLOCK_PERIOD_NS;
+	if(TurnDelay && TurnOn)
+		LOGIC_FineTuneTdelTon(&TurnDelay, &TurnOn);
 
-	if(TurnOnDelay < DataTable[REG_MEAS_TIME_LOW])
-		TurnOnDelay = 0;
+	LOGIC_TurnDelayResultBuffer[CONTROL_AverageCounter] = TurnDelay;
+	LOGIC_TurnOnResultBuffer[CONTROL_AverageCounter] = TurnOn;
 
-	DataTable[REG_MEAS_TIME_DELAY] = TurnOnDelay;
+	// Сохранение результата в endpoint
+	CONTROL_Values_TurnDelay[CONTROL_AverageCounter] = TurnDelay;
+	CONTROL_Values_TurnDelayCounter = CONTROL_AverageCounter;
+
+	CONTROL_Values_TurnOn[CONTROL_AverageCounter] = TurnOn;
+	CONTROL_Values_TurnOnCounter = CONTROL_AverageCounter;
+}
+//-----------------------------------------------
+
+void LOGIC_FineTuneTdelTon(uint16_t* TurnDelay, uint16_t* TurnOn)
+{
+	float Tdel_P2, Tdel_P1, Ton_P2, Ton_P1;
+	int16_t Tdel_P0, Ton_P0;
+	uint16_t T;
+
+	switch(DataTable[REG_ANODE_VOLTAGE])
+	{
+		case TOU_600V:
+		{
+			Tdel_P2 = (float)((int16_t)DataTable[REG_T_DEL_600V_P2]) / 1000000;
+			Tdel_P1 = (float)DataTable[REG_T_DEL_600V_P1] / 1000;
+			Tdel_P0 = (int16_t)DataTable[REG_T_DEL_600V_P0];
+
+			Ton_P2 = (float)((int16_t)DataTable[REG_T_ON_600V_P2]) / 1000000;
+			Ton_P1 = (float)DataTable[REG_T_ON_600V_P1] / 1000;
+			Ton_P0 = (int16_t)DataTable[REG_T_ON_600V_P0];
+		}
+		break;
+
+		case TOU_1000V:
+		{
+			Tdel_P2 = (float)((int16_t)DataTable[REG_T_DEL_1000V_P2]) / 1000000;
+			Tdel_P1 = (float)DataTable[REG_T_DEL_1000V_P1] / 1000;
+			Tdel_P0 = (int16_t)DataTable[REG_T_DEL_1000V_P0];
+
+			Ton_P2 = (float)((int16_t)DataTable[REG_T_ON_1000V_P2]) / 1000000;
+			Ton_P1 = (float)DataTable[REG_T_ON_1000V_P1] / 1000;
+			Ton_P0 = (int16_t)DataTable[REG_T_ON_1000V_P0];
+		}
+		break;
+
+		case TOU_1500V:
+		{
+			Tdel_P2 = (float)((int16_t)DataTable[REG_T_DEL_1500V_P2]) / 1000000;
+			Tdel_P1 = (float)DataTable[REG_T_DEL_1500V_P1] / 1000;
+			Tdel_P0 = (int16_t)DataTable[REG_T_DEL_1500V_P0];
+
+			Ton_P2 = (float)((int16_t)DataTable[REG_T_ON_1500V_P2]) / 1000000;
+			Ton_P1 = (float)DataTable[REG_T_ON_1500V_P1] / 1000;
+			Ton_P0 = (int16_t)DataTable[REG_T_ON_1500V_P0];
+		}
+		break;
+
+		default:
+		{
+			Tdel_P2 = 0;
+			Tdel_P1 = 0;
+			Tdel_P0 = 0;
+
+			Ton_P2 = 0;
+			Ton_P1 = 0;
+			Ton_P0 = 0;
+		}
+			break;
+	}
+
+
+	T = *TurnDelay;
+	*TurnDelay = T * T * Tdel_P2 + T * Tdel_P1 + Tdel_P0;
+
+	T = *TurnOn;
+	*TurnOn = T * T * Ton_P2 + T * Ton_P1 + Ton_P0;
 }
 //-----------------------------------------------
 

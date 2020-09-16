@@ -100,6 +100,7 @@ void GateDriver_SetForceCompThresholdMax()
 {
 	LL_WriteDACx((DAC_RESOLUTION | DAC_CHANNEL_B), GPIO_CS_GD1, RISE_Edge);
 }
+//---------------------
 
 void GateDriver_SetFallRate(MeasurementSettings *Settings)
 {
