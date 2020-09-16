@@ -314,7 +314,7 @@ uint16_t LOGIC_Pulse()
 		{
 			Problem = PROBLEM_NO_PWR;
 		}
-		else if(!DataTable[REG_MEAS_TIME_DELAY] || !DataTable[REG_MEAS_TIME_ON])
+		else if(!LOGIC_TurnDelayResultBuffer[CONTROL_AverageCounter] || !LOGIC_TurnOnResultBuffer[CONTROL_AverageCounter])
 		{
 			Problem = PROBLEM_NO_POT;
 		}
@@ -411,8 +411,6 @@ void LOGIC_TurnOnMeasurement()
 	if(TurnOn < DataTable[REG_MEAS_TIME_LOW])
 		TurnOn = 0;
 
-	DataTable[190] = (DataRaw & 0x00FF) | ((DataRaw >> 16) & 0x0F00);
-
 	if(TurnDelay && TurnOn)
 		LOGIC_FineTuneTdelTon(&TurnDelay, &TurnOn);
 
@@ -421,10 +419,7 @@ void LOGIC_TurnOnMeasurement()
 
 	// Сохранение результата в endpoint
 	CONTROL_Values_TurnDelay[CONTROL_AverageCounter] = TurnDelay;
-	CONTROL_Values_TurnDelayCounter = CONTROL_AverageCounter;
-
 	CONTROL_Values_TurnOn[CONTROL_AverageCounter] = TurnOn;
-	CONTROL_Values_TurnOnCounter = CONTROL_AverageCounter;
 }
 //-----------------------------------------------
 

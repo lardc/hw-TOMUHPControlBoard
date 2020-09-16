@@ -513,6 +513,10 @@ void CONTROL_HandlePulseConfig()
 									DataTable[REG_PROBLEM] = LOGIC_Pulse();
 
 									CONTROL_AverageCounter++;
+
+									CONTROL_Values_TurnDelayCounter = CONTROL_AverageCounter;
+									CONTROL_Values_TurnOnCounter = CONTROL_AverageCounter;
+
 									CONTROL_AveragePeriodCounter = CONTROL_TimeCounter + DataTable[REG_AVERAGE_PERIOD];
 
 									if(DataTable[REG_PROBLEM])
