@@ -181,7 +181,6 @@ void CONTROL_ResetHardware(bool KeepPower)
 
 	LL_SyncTOCU(false);
 	LL_ExternalLED(false);
-	LL_SyncOscilloscope(false);
 	
 	COMM_EnableSafetyInput(false);
 	COMM_PotSwitch(false);
@@ -493,6 +492,7 @@ void CONTROL_HandlePulseConfig()
 					GateDriver_SetCurrent(CachedMeasurementSettings.GateCurrent);
 					GateDriver_SetFallRate(&CachedMeasurementSettings);
 					GateDriver_SetRiseRate(&CachedMeasurementSettings);
+					GateDriver_SetCompThreshold(CachedMeasurementSettings.GateCurrent * GATE_CURRENT_THRESHOLD);
 
 					CONTROL_SetDeviceState(DS_InProcess, SS_StartPulse);
 
@@ -512,6 +512,9 @@ void CONTROL_HandlePulseConfig()
 								{
 									DataTable[REG_PROBLEM] = LOGIC_Pulse();
 
+									// Зарядить GateDriver перед следующим импульсом
+									CONTROL_GateDriverCharge();
+
 									CONTROL_AverageCounter++;
 
 									CONTROL_Values_TurnDelayCounter = CONTROL_AverageCounter;
@@ -524,7 +527,7 @@ void CONTROL_HandlePulseConfig()
 								}
 								else
 								{
-									LOGIC_TurnOnAveragingProcess();
+									MEASURE_TurnOnAveragingProcess();
 
 									CONTROL_TimeCounterDelay = CONTROL_TimeCounter + DataTable[REG_AFTER_MEASURE_DELAY];
 									CONTROL_SetDeviceState(DS_InProcess, SS_AfterPulseWaiting);
@@ -662,5 +665,6 @@ void CONTROL_GateDriverCharge()
 	LL_PsBoard_PowerOutput(true);
 	DELAY_MS(DataTable[REG_GATE_TIME_CHARGE]);
 	LL_PsBoard_PowerOutput(false);
+	DELAY_MS(10);
 }
 //-----------------------------------------------

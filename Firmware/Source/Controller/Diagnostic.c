@@ -124,14 +124,6 @@ bool DIAG_HandleDiagnosticAction(uint16_t ActionID, uint16_t *pUserError)
 			}
 			break;
 
-		case ACT_DBG_OSC_SYNC:
-			{
-				LL_SyncOscilloscope(true);
-				DELAY_US(1000000);
-				LL_SyncOscilloscope(false);
-			}
-			break;
-
 		case ACT_DBG_TOSU_SWITCH:
 			{
 				COMM_TOSU(DataTable[REG_DBG]);

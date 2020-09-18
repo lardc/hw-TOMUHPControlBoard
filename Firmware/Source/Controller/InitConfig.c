@@ -40,7 +40,6 @@ void IO_Config()
 	GPIO_InitPushPullOutput(GPIO_LOAD);
 	GPIO_InitPushPullOutput(GPIO_CS);
 	GPIO_InitPushPullOutput(GPIO_IND);
-	GPIO_InitPushPullOutput(GPIO_SYNC);
 	GPIO_InitPushPullOutput(GPIO_SFTY_EN);
 	GPIO_InitPushPullOutput(GPIO_RLC);
 	GPIO_InitPushPullOutput(GPIO_RELAY);
@@ -66,8 +65,11 @@ void IO_Config()
 	GPIO_SetState(GPIO_PS_EN, false);
 
 	// Выход с открытым коллектором
+	GPIO_InitOpenDrainOutput(GPIO_SYNC, NoPull);
 	GPIO_InitOpenDrainOutput(GPIO_TRIG_RST, NoPull);
 	GPIO_SetState(GPIO_TRIG_RST, true);
+	GPIO_SetState(GPIO_SYNC, true);
+
 	
 	// Входы
 	GPIO_InitInput(GPIO_SFTY, NoPull);

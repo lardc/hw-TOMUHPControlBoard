@@ -19,7 +19,7 @@ void LL_PsBoard_PowerInput(bool State);
 void LL_HSTimers_Reset();
 uint32_t LL_HSTimers_Read();
 void LL_GateLatchReset();
-void LL_SyncOscilloscope(bool State);
+void LL_SyncOscilloscopeActivate(bool State);
 void LL_SyncTOCU(bool State);
 bool LL_IsOverflow90();
 bool LL_IsOverflow10();

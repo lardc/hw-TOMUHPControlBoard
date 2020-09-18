@@ -71,7 +71,7 @@ void LL_GateLatchReset()
 }
 //-----------------------------
 
-void LL_SyncOscilloscope(bool State)
+void LL_SyncOscilloscopeActivate(bool State)
 {
 	GPIO_SetState(GPIO_SYNC, State);
 }

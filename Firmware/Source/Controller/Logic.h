@@ -18,6 +18,5 @@ bool LOGIC_GetPressureState();
 void LOGIC_ConfigVoltageComparators(AnodeVoltageEnum AnodeVoltage);
 MeasurementSettings LOGIC_CacheMeasurementSettings();
 uint16_t LOGIC_Pulse();
-void LOGIC_TurnOnAveragingProcess();
 
 #endif // __LOGIC_H

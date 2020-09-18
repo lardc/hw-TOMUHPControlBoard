@@ -18,9 +18,8 @@
 #define ACT_DBG_RLC						18	// Проверка выхода RLC
 #define ACT_DBG_RELAY					19	// Проверка выхода RELAY
 #define ACT_DBG_SNC_TOCU				20	// Проверка выхода SNC_TOCU
-#define ACT_DBG_OSC_SYNC				21	// Проверка выхода SYNC
-#define ACT_DBG_TOSU_SWITCH				22	// Проверка коммутации TOSU
-#define ACT_DBG_POT_SWITCH				23	// Проверка управления PotSwitch
+#define ACT_DBG_TOSU_SWITCH				21	// Проверка коммутации TOSU
+#define ACT_DBG_POT_SWITCH				22	// Проверка управления PotSwitch
 
 #define ACT_DBG_U_REF_U10				24	// Проверка установки опорного напряжения для компаратора U10
 #define ACT_DBG_U_REF_U90				25	// Проверка установки опорного напряжения для компаратора U90
