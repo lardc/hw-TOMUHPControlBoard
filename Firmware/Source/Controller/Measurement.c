@@ -9,6 +9,7 @@
 #include "InitConfig.h"
 #include "Interrupts.h"
 #include "Delay.h"
+#include "FirCoefficients.h"
 
 // Macro
 //
@@ -16,8 +17,7 @@
 //
 #define MEASURE_POINTS_NUMBER		20		// Количество точек при единичном измерении
 //
-#define I_MAX_START_INDEX			75		// Начальный адрес в массиве тока для определения максимального значения
-#define I_MAX_STOP_INDEX			85		// Конечный адрес в массиве тока для определения максимального значения
+#define I_MAX_AVERAGE_POINTS		10		// Количество точек усреднения амплитуды тока
 //
 #define ITTERATIONS_OF_AVERAGING	3		// Количество иттераций усреднения
 
@@ -56,7 +56,7 @@ void MEASURE_SetUref90(uint16_t Voltage)
 
 void MEASURE_ConvertRawArray(volatile uint16_t* RawArray, volatile uint16_t* OutputArray, uint16_t DataLength)
 {
-	uint16_t i, Imax = 0;
+	uint16_t i, Imax = 0, ImaxArrayIndex = 0;
 	float tmp = 0;
 
 	float Offset = (float)((int16_t)DataTable[REG_I_DUT_OFFSET]);
@@ -73,14 +73,32 @@ void MEASURE_ConvertRawArray(volatile uint16_t* RawArray, volatile uint16_t* Out
 		tmp = ((float)RawArray[i] - Offset) * ADC_REF_MV / ADC_RESOLUTION * K;
 		tmp = tmp / ShuntRes;
 		tmp = tmp * tmp * P2 + tmp * P1 + P0;
-		OutputArray[i] = (tmp > 0) ? (uint16_t)tmp : 0;
+		RawArray[i] = (tmp > 0) ? (uint16_t)tmp : 0;
 
-		// Определение максимума тока
-		if((i >= I_MAX_START_INDEX) && (i < I_MAX_STOP_INDEX))
-			Imax += OutputArray[i];
+		// Фильтрация тока
+		OutputArray[i] = 0;
+
+		for(int j = 0; j < FIR_LENGTH - 1; j++)
+		{
+			if((i - j) >= 0)
+				OutputArray[i] += RawArray[i - j] * FIR_Coefficients[j];
+		}
+
+		// Определение индекса массива с максимальным значением тока
+		if(OutputArray[i] > Imax)
+		{
+			Imax = OutputArray[i];
+			ImaxArrayIndex = i;
+		}
 	}
 
-	DataTable[REG_MEAS_CURRENT_VALUE] = Imax / (I_MAX_STOP_INDEX - I_MAX_START_INDEX);
+	Imax = 0;
+
+	// Усреднение амплитуды тока
+	for(int i = (ImaxArrayIndex - I_MAX_AVERAGE_POINTS / 2); i < (ImaxArrayIndex + I_MAX_AVERAGE_POINTS / 2); i++)
+		Imax += OutputArray[i];
+
+	DataTable[REG_MEAS_CURRENT_VALUE] = Imax / I_MAX_AVERAGE_POINTS;
 }
 //---------------------
 
