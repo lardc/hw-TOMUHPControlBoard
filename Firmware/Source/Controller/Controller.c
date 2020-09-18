@@ -523,11 +523,16 @@ void CONTROL_HandlePulseConfig()
 									CONTROL_AveragePeriodCounter = CONTROL_TimeCounter + DataTable[REG_AVERAGE_PERIOD];
 
 									if(DataTable[REG_PROBLEM])
+									{
 										CONTROL_SetDeviceState(DS_Fault, SS_None);
+										DataTable[REG_OP_RESULT] = OPRESULT_FAIL;
+									}
 								}
 								else
 								{
 									MEASURE_TurnOnAveragingProcess();
+
+									DataTable[REG_OP_RESULT] = OPRESULT_OK;
 
 									CONTROL_TimeCounterDelay = CONTROL_TimeCounter + DataTable[REG_AFTER_MEASURE_DELAY];
 									CONTROL_SetDeviceState(DS_InProcess, SS_AfterPulseWaiting);
