@@ -1,4 +1,4 @@
-// Header
+п»ї// Header
 #include "Logic.h"
 // Includes
 #include "DataTable.h"
@@ -132,19 +132,19 @@ void LOGIC_AssignVItoSlaves(AnodeVoltageEnum AnodeVoltage, float AnodeCurrent)
 
 	MEASURE_AnodeCurrentTune(AnodeVoltage, &AnodeCurrent);
 
-	// Определение максимально допустимой битовой маски
+	// РћРїСЂРµРґРµР»РµРЅРёРµ РјР°РєСЃРёРјР°Р»СЊРЅРѕ РґРѕРїСѓСЃС‚РёРјРѕР№ Р±РёС‚РѕРІРѕР№ РјР°СЃРєРё
 	for(uint16_t i = 0; i < NODE_ARRAY_SIZE; ++i)
 		MaximumBitmask |= NodeBitmaskArray[i].SupportedBits;
 	
-	// Определение величины тока на бит при заданном напряжении
+	// РћРїСЂРµРґРµР»РµРЅРёРµ РІРµР»РёС‡РёРЅС‹ С‚РѕРєР° РЅР° Р±РёС‚ РїСЂРё Р·Р°РґР°РЅРЅРѕРј РЅР°РїСЂСЏР¶РµРЅРёРё
 	CurrentPerBit = (float)AnodeVoltage / DataTable[REG_TOCU_RES_PER_BIT];
 	
-	// Определение битовой маски для выбранного значения тока
+	// РћРїСЂРµРґРµР»РµРЅРёРµ Р±РёС‚РѕРІРѕР№ РјР°СЃРєРё РґР»СЏ РІС‹Р±СЂР°РЅРЅРѕРіРѕ Р·РЅР°С‡РµРЅРёСЏ С‚РѕРєР°
 	ActualBitmask = (uint16_t)(AnodeCurrent / CurrentPerBit);
 	if(ActualBitmask > MaximumBitmask)
 		ActualBitmask = MaximumBitmask;
 	
-	// Формирование уставки для блоков
+	// Р¤РѕСЂРјРёСЂРѕРІР°РЅРёРµ СѓСЃС‚Р°РІРєРё РґР»СЏ Р±Р»РѕРєРѕРІ
 	for(uint16_t i = 0; i < NODE_ARRAY_SIZE; ++i)
 	{
 		NodeArray[i].Voltage = AnodeVoltage;
@@ -213,12 +213,12 @@ uint16_t LOGIC_Pulse()
 {
 	uint16_t Problem = PROBLEM_NONE;
 
-	// Подача синхронизации на TOCU HP
+	// РџРѕРґР°С‡Р° СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё РЅР° TOCU HP
 	LL_SyncTOCU(true);
 
 	DELAY_US(30);
 	
-	// Проверка уровня тока до отпирания прибора
+	// РџСЂРѕРІРµСЂРєР° СѓСЂРѕРІРЅСЏ С‚РѕРєР° РґРѕ РѕС‚РїРёСЂР°РЅРёСЏ РїСЂРёР±РѕСЂР°
 	if(MEASURE_CheckAnodeCurrent())
 	{
 		LL_SyncTOCU(false);
@@ -226,25 +226,25 @@ uint16_t LOGIC_Pulse()
 	}
 	else
 	{
-		// Запуск оцифровки
+		// Р—Р°РїСѓСЃРє РѕС†РёС„СЂРѕРІРєРё
 		DMA_ChannelEnable(DMA_ADC_DUT_I_CHANNEL, true);
 		TIM_Start(TIM6);
 
 		LOGIC_AreInterruptsActive(false);
 
-		// Сброс системы счёта
+		// РЎР±СЂРѕСЃ СЃРёСЃС‚РµРјС‹ СЃС‡С‘С‚Р°
 		LL_GateLatchReset();
 		LL_HSTimers_Reset();
 		Overflow90 = false;
 		Overflow10 = false;
 
-		// Запуск тока управления
+		// Р—Р°РїСѓСЃРє С‚РѕРєР° СѓРїСЂР°РІР»РµРЅРёСЏ
 		LL_SyncOscilloscopeActivate(true);
 		GateDriver_Sync(true);
 
 		DELAY_US(30);
 
-		// Завершение процесса измерения
+		// Р—Р°РІРµСЂС€РµРЅРёРµ РїСЂРѕС†РµСЃСЃР° РёР·РјРµСЂРµРЅРёСЏ
 		LL_SyncOscilloscopeActivate(false);
 		GateDriver_Sync(false);
 
@@ -256,11 +256,11 @@ uint16_t LOGIC_Pulse()
 
 		MEASURE_TurnOnMeasurement();
 	
-		// Сохранение оцифрованных значений в endpoint
+		// РЎРѕС…СЂР°РЅРµРЅРёРµ РѕС†РёС„СЂРѕРІР°РЅРЅС‹С… Р·РЅР°С‡РµРЅРёР№ РІ endpoint
 		MEASURE_ConvertRawArray(&LOGIC_OutputPulseRaw[0], &CONTROL_Values_Current[0], PULSE_ARR_MAX_LENGTH);
 		CONTROL_Values_CurrentCounter = PULSE_ARR_MAX_LENGTH;
 	
-		// Обработка внештатных ситуаций
+		// РћР±СЂР°Р±РѕС‚РєР° РІРЅРµС€С‚Р°С‚РЅС‹С… СЃРёС‚СѓР°С†РёР№
 		if (DataTable[REG_MEAS_CURRENT_VALUE] < (CachedMeasurementSettings.AnodeCurrent * DataTable[REG_ID_THRESHOLD] / 100))
 		{
 			Problem = PROBLEM_NO_PWR;

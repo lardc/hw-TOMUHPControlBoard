@@ -1,4 +1,4 @@
-// Header
+п»ї// Header
 #include "GateDriver.h"
 // Includes
 #include "Board.h"
@@ -29,7 +29,7 @@ uint16_t GateDriver_ItoDAC(float GateCurrent)
 	K = (float)DataTable[REG_GATE_I_SET_K] / 1000;
 	Offset = (float)((int16_t)DataTable[REG_GATE_I_SET_OFFSET]);
 
-	// Тонкая подстройка
+	// РўРѕРЅРєР°СЏ РїРѕРґСЃС‚СЂРѕР№РєР°
 	P2 = ((float) ((int16_t)DataTable[REG_GATE_I_SET_P2])) / 1000000;
 	P1 = (float) DataTable[REG_GATE_I_SET_P1] / 1000;
 	P0 = ((float)(int16_t) DataTable[REG_GATE_I_SET_P0]);
@@ -51,24 +51,24 @@ uint16_t GateDriver_IrefToDAC(float GateCurrentThreshold)
 
 	ShuntRes_Ohm = (float)DataTable[REG_GATE_CURRENT_SHUNT] / 1000;
 
-	// Компенсация изменения порога задания от скорости нарастания тока (Kc = от 1 до 1.25)
+	// РљРѕРјРїРµРЅСЃР°С†РёСЏ РёР·РјРµРЅРµРЅРёСЏ РїРѕСЂРѕРіР° Р·Р°РґР°РЅРёСЏ РѕС‚ СЃРєРѕСЂРѕСЃС‚Рё РЅР°СЂР°СЃС‚Р°РЅРёСЏ С‚РѕРєР° (Kc = РѕС‚ 1 РґРѕ 1.25)
 	Kc = 1 - RealGateCurrentRiseRate / DataTable[REG_GATE_CURRENT] * (float)DataTable[REG_GATE_I_REF_COMPENSATION] / 1000;
 	GateCurrentThreshold = GateCurrentThreshold * Kc;
 
-	// Тонкая подстройка уровня компаратора
+	// РўРѕРЅРєР°СЏ РїРѕРґСЃС‚СЂРѕР№РєР° СѓСЂРѕРІРЅСЏ РєРѕРјРїР°СЂР°С‚РѕСЂР°
 	P2 = ((float)(int16_t)DataTable[REG_GATE_COMP_THRE_P2]) / 1000000;
 	P1 = (float) DataTable[REG_GATE_COMP_THRE_P1] / 1000;
 	P0 = (int16_t)DataTable[REG_GATE_COMP_THRE_P0];
 
 	GateCurrentThreshold = GateCurrentThreshold * GateCurrentThreshold * P2 + GateCurrentThreshold * P1 + P0;
 
-	// Грубая подстройка уровня компаратора
+	// Р“СЂСѓР±Р°СЏ РїРѕРґСЃС‚СЂРѕР№РєР° СѓСЂРѕРІРЅСЏ РєРѕРјРїР°СЂР°С‚РѕСЂР°
 	K = (float)DataTable[REG_GATE_I_REF_K] / 1000;
 	Offset = (int16_t)DataTable[REG_GATE_I_REF_OFFSET];
 
 	GateCurrentThreshold = GateCurrentThreshold * K + Offset;
 
-	// Пересчет в значение ЦАП
+	// РџРµСЂРµСЃС‡РµС‚ РІ Р·РЅР°С‡РµРЅРёРµ Р¦РђРџ
 	result = (uint16_t)(GateCurrentThreshold * ShuntRes_Ohm * DAC_RESOLUTION / DAC_REF_MV);
 
 	return (result > DAC_RESOLUTION) ? DAC_RESOLUTION : result;
@@ -125,7 +125,7 @@ void GateDriver_SetRiseRate(MeasurementSettings *Settings)
 	float FrontTime, FrontTimeMin, GateCurrentRiseRate, GateCurrentRiseRate2, P2, P1, P0;
 	uint16_t Data;
 
-	// Ограчичение минимальной длительности фронта тока
+	// РћРіСЂР°С‡РёС‡РµРЅРёРµ РјРёРЅРёРјР°Р»СЊРЅРѕР№ РґР»РёС‚РµР»СЊРЅРѕСЃС‚Рё С„СЂРѕРЅС‚Р° С‚РѕРєР°
 	FrontTime = Settings->GateCurrent / Settings->GateCurrentRiseRate;
 	FrontTimeMin = (float)DataTable[REG_GATE_EDGE_TIME_MIN] / 10;
 
@@ -134,11 +134,11 @@ void GateDriver_SetRiseRate(MeasurementSettings *Settings)
 	else
 		GateCurrentRiseRate = Settings->GateCurrentRiseRate;
 
-	// Сохранение фактической скорости нарастания тока
+	// РЎРѕС…СЂР°РЅРµРЅРёРµ С„Р°РєС‚РёС‡РµСЃРєРѕР№ СЃРєРѕСЂРѕСЃС‚Рё РЅР°СЂР°СЃС‚Р°РЅРёСЏ С‚РѕРєР°
 	if(GateCurrentRiseRate > 0)
 		RealGateCurrentRiseRate = GateCurrentRiseRate;
 
-	// Тонкая подстройка скорости нарастания тока
+	// РўРѕРЅРєР°СЏ РїРѕРґСЃС‚СЂРѕР№РєР° СЃРєРѕСЂРѕСЃС‚Рё РЅР°СЂР°СЃС‚Р°РЅРёСЏ С‚РѕРєР°
 	P2 = (float)((int16_t)DataTable[REG_GATE_I_RISE_RATE_P2]) / 1000000;
 	P1 = (float)DataTable[REG_GATE_I_RISE_RATE_P1] / 1000;
 	P0 = (int16_t)DataTable[REG_GATE_I_RISE_RATE_P0];

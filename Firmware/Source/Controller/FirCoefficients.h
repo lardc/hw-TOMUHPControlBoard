@@ -1,4 +1,4 @@
-#ifndef FIRCOEFFICIENTS_H_
+﻿#ifndef FIRCOEFFICIENTS_H_
 #define FIRCOEFFICIENTS_H_
 
 // Defines

@@ -1,4 +1,4 @@
-#include "InitConfig.h"
+п»ї#include "InitConfig.h"
 //
 #include "SysConfig.h"
 #include "Measurement.h"
@@ -26,15 +26,15 @@ void EI_Config()
 
 void IO_Config()
 {
-	// Включение тактирования портов
+	// Р’РєР»СЋС‡РµРЅРёРµ С‚Р°РєС‚РёСЂРѕРІР°РЅРёСЏ РїРѕСЂС‚РѕРІ
 	RCC_GPIO_Clk_EN(PORTA);
 	RCC_GPIO_Clk_EN(PORTB);
 	RCC_GPIO_Clk_EN(PORTC);
 	
-	// Аналоговые входы
+	// РђРЅР°Р»РѕРіРѕРІС‹Рµ РІС…РѕРґС‹
 	GPIO_InitAnalog(GPIO_ANLG_I_DUT);
 	
-	// Выходы
+	// Р’С‹С…РѕРґС‹
 	GPIO_InitPushPullOutput(GPIO_FAN);
 	GPIO_InitPushPullOutput(GPIO_M_RESET);
 	GPIO_InitPushPullOutput(GPIO_LOAD);
@@ -64,20 +64,20 @@ void IO_Config()
 	GPIO_SetState(GPIO_LOAD, true);
 	GPIO_SetState(GPIO_PS_EN, false);
 
-	// Выход с открытым коллектором
+	// Р’С‹С…РѕРґ СЃ РѕС‚РєСЂС‹С‚С‹Рј РєРѕР»Р»РµРєС‚РѕСЂРѕРј
 	GPIO_InitOpenDrainOutput(GPIO_SYNC, NoPull);
 	GPIO_InitOpenDrainOutput(GPIO_TRIG_RST, NoPull);
 	GPIO_SetState(GPIO_TRIG_RST, true);
 	GPIO_SetState(GPIO_SYNC, true);
 
 	
-	// Входы
+	// Р’С…РѕРґС‹
 	GPIO_InitInput(GPIO_SFTY, NoPull);
 	GPIO_InitInput(GPIO_OVERFLOW90, NoPull);
 	GPIO_InitInput(GPIO_OVERFLOW10, NoPull);
 	GPIO_InitInput(GPIO_PRESSURE, NoPull);
 	
-	// Альтернативные функции
+	// РђР»СЊС‚РµСЂРЅР°С‚РёРІРЅС‹Рµ С„СѓРЅРєС†РёРё
 	GPIO_InitAltFunction(GPIO_ALT_CAN_RX, AltFn_9);
 	GPIO_InitAltFunction(GPIO_ALT_CAN_TX, AltFn_9);
 	GPIO_InitAltFunction(GPIO_ALT_UART_RX, AltFn_7);
@@ -124,7 +124,7 @@ void DMA_Config()
 {
 	DMA_Clk_Enable(DMA1_ClkEN);
 
-	// DMA для АЦП тока на DUT
+	// DMA РґР»СЏ РђР¦Рџ С‚РѕРєР° РЅР° DUT
 	DMA_Reset(DMA_ADC_DUT_I_CHANNEL);
 	DMAChannelX_Config(DMA_ADC_DUT_I_CHANNEL, DMA_MEM2MEM_DIS, DMA_LvlPriority_LOW, DMA_MSIZE_16BIT, DMA_PSIZE_16BIT,
 							DMA_MINC_EN, DMA_PINC_DIS, DMA_CIRCMODE_DIS, DMA_READ_FROM_PERIPH);

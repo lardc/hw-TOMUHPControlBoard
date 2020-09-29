@@ -1,4 +1,4 @@
-// Header
+п»ї// Header
 #include "Controller.h"
 // Includes
 #include "SysConfig.h"
@@ -94,7 +94,7 @@ void CONTROL_GateDriverCharge();
 //
 void CONTROL_Init()
 {
-	// Переменные для конфигурации EndPoint
+	// РџРµСЂРµРјРµРЅРЅС‹Рµ РґР»СЏ РєРѕРЅС„РёРіСѓСЂР°С†РёРё EndPoint
 	Int16U EPIndexes[EP_COUNT] = {EP_CURRENT, EP_TURN_DELAY, EP_TURN_ON};
 	Int16U EPSized[EP_COUNT] = {PULSE_ARR_MAX_LENGTH, TIME_ARR_MAX_LENGTH, TIME_ARR_MAX_LENGTH};
 	pInt16U EPCounters[EP_COUNT] = {(pInt16U)&CONTROL_Values_CurrentCounter, (pInt16U)&CONTROL_Values_TurnDelayCounter,
@@ -102,17 +102,17 @@ void CONTROL_Init()
 	pInt16U EPDatas[EP_COUNT] = {(pInt16U)CONTROL_Values_Current, (pInt16U)CONTROL_Values_TurnDelay,
 									(pInt16U)CONTROL_Values_TurnOn};
 	
-	// Конфигурация сервиса работы Data-table и EPROM
+	// РљРѕРЅС„РёРіСѓСЂР°С†РёСЏ СЃРµСЂРІРёСЃР° СЂР°Р±РѕС‚С‹ Data-table Рё EPROM
 	EPROMServiceConfig EPROMService = {(FUNC_EPROM_WriteValues)&NFLASH_WriteDT, (FUNC_EPROM_ReadValues)&NFLASH_ReadDT};
-	// Инициализация data table
+	// РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ data table
 	DT_Init(EPROMService, FALSE);
-	// Инициализация device profile
+	// РРЅРёС†РёР°Р»РёР·Р°С†РёСЏ device profile
 	DEVPROFILE_Init(&CONTROL_DispatchAction, &CycleActive);
 	DEVPROFILE_InitEPService(EPIndexes, EPSized, EPCounters, EPDatas);
-	// Сброс значений
+	// РЎР±СЂРѕСЃ Р·РЅР°С‡РµРЅРёР№
 	DEVPROFILE_ResetControlSection();
 
-	// Ожидание запуска TOCU
+	// РћР¶РёРґР°РЅРёРµ Р·Р°РїСѓСЃРєР° TOCU
 	uint64_t CONTROL_TOCUPowerUpTimer = CONTROL_TimeCounter + TIME_TOCU_POWER_UP;
 	while(CONTROL_TimeCounter < CONTROL_TOCUPowerUpTimer){}
 	CONTROL_WatchDogUpdate();
@@ -189,23 +189,23 @@ void CONTROL_ResetHardware(bool KeepPower)
 	LL_HSTimers_Reset();
 	LL_HSTimers_Read();
 
-	// Установка максимального уровня компаратора для избежания ложного срабатывания от шумов TOCU HP
+	// РЈСЃС‚Р°РЅРѕРІРєР° РјР°РєСЃРёРјР°Р»СЊРЅРѕРіРѕ СѓСЂРѕРІРЅСЏ РєРѕРјРїР°СЂР°С‚РѕСЂР° РґР»СЏ РёР·Р±РµР¶Р°РЅРёСЏ Р»РѕР¶РЅРѕРіРѕ СЃСЂР°Р±Р°С‚С‹РІР°РЅРёСЏ РѕС‚ С€СѓРјРѕРІ TOCU HP
 	GateDriver_SetForceCompThresholdMax();
 }
 //-----------------------------------------------
 
 void CONTROL_Idle()
 {
-	// Обработка мастер-запросов по интерфейсу
+	// РћР±СЂР°Р±РѕС‚РєР° РјР°СЃС‚РµСЂ-Р·Р°РїСЂРѕСЃРѕРІ РїРѕ РёРЅС‚РµСЂС„РµР№СЃСѓ
 	DEVPROFILE_ProcessRequests();
 	
-	// Считывание состояний блоков-рабов
+	// РЎС‡РёС‚С‹РІР°РЅРёРµ СЃРѕСЃС‚РѕСЏРЅРёР№ Р±Р»РѕРєРѕРІ-СЂР°Р±РѕРІ
 	CONTROL_SlavesStateUpdate();
 	
 	CONTROL_MonitorSafety();
 	CONTROL_MonitorPressure();
 	
-	// Обработка логики мастер-команд
+	// РћР±СЂР°Р±РѕС‚РєР° Р»РѕРіРёРєРё РјР°СЃС‚РµСЂ-РєРѕРјР°РЅРґ
 	CONTROL_HandlePowerOn();
 	CONTROL_HandlePowerOff();
 	CONTROL_HandlePulseConfig();
@@ -451,10 +451,10 @@ void CONTROL_HandlePulseConfig()
 				
 			case SS_ConfigCommutation:
 				{
-					// Зарядить GateDriver
+					// Р—Р°СЂСЏРґРёС‚СЊ GateDriver
 					CONTROL_GateDriverCharge();
 
-					// Настройка системы коммутации
+					// РќР°СЃС‚СЂРѕР№РєР° СЃРёСЃС‚РµРјС‹ РєРѕРјРјСѓС‚Р°С†РёРё
 					COMM_TOSU(CachedMeasurementSettings.AnodeVoltage);
 					COMM_InternalCommutation(true);
 					COMM_PotSwitch(true);
@@ -485,10 +485,10 @@ void CONTROL_HandlePulseConfig()
 				
 			case SS_HardwareConfig:
 				{
-					// Настройка компараторов напряжения
+					// РќР°СЃС‚СЂРѕР№РєР° РєРѕРјРїР°СЂР°С‚РѕСЂРѕРІ РЅР°РїСЂСЏР¶РµРЅРёСЏ
 					LOGIC_ConfigVoltageComparators(CachedMeasurementSettings.AnodeVoltage);
 
-					// Настройка параметров цепи управления
+					// РќР°СЃС‚СЂРѕР№РєР° РїР°СЂР°РјРµС‚СЂРѕРІ С†РµРїРё СѓРїСЂР°РІР»РµРЅРёСЏ
 					GateDriver_SetCurrent(CachedMeasurementSettings.GateCurrent);
 					GateDriver_SetFallRate(&CachedMeasurementSettings);
 					GateDriver_SetRiseRate(&CachedMeasurementSettings);
@@ -512,7 +512,7 @@ void CONTROL_HandlePulseConfig()
 								{
 									DataTable[REG_PROBLEM] = LOGIC_Pulse();
 
-									// Зарядить GateDriver перед следующим импульсом
+									// Р—Р°СЂСЏРґРёС‚СЊ GateDriver РїРµСЂРµРґ СЃР»РµРґСѓСЋС‰РёРј РёРјРїСѓР»СЊСЃРѕРј
 									CONTROL_GateDriverCharge();
 
 									CONTROL_AverageCounter++;
@@ -644,11 +644,11 @@ void CONTROL_UnitFan()
 	static uint32_t IncrementCounter = 0;
 	static uint64_t FanOnTimeout = 0;
 
-	// Увеличение счётчика в простое
+	// РЈРІРµР»РёС‡РµРЅРёРµ СЃС‡С‘С‚С‡РёРєР° РІ РїСЂРѕСЃС‚РѕРµ
 	if (CONTROL_State != DS_InProcess)
 		IncrementCounter++;
 
-	// Включение вентилятора
+	// Р’РєР»СЋС‡РµРЅРёРµ РІРµРЅС‚РёР»СЏС‚РѕСЂР°
 	if ((IncrementCounter > ((uint32_t)DataTable[REG_FAN_OPERATE_PERIOD] * 1000)) || (CONTROL_State == DS_InProcess))
 	{
 		IncrementCounter = 0;
@@ -656,7 +656,7 @@ void CONTROL_UnitFan()
 		LL_UnitFan(true);
 	}
 
-	// Отключение вентилятора
+	// РћС‚РєР»СЋС‡РµРЅРёРµ РІРµРЅС‚РёР»СЏС‚РѕСЂР°
 	if (FanOnTimeout && (CONTROL_TimeCounter > FanOnTimeout))
 	{
 		FanOnTimeout = 0;

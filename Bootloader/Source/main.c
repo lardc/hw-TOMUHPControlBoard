@@ -1,4 +1,4 @@
-// Include
+п»ї// Include
 //
 #include "Global.h"
 #include "Controller.h"
@@ -60,12 +60,12 @@ void SysClk_Config()
 
 void IO_Config()
 {
-	// Включение тактирования портов
+	// Р’РєР»СЋС‡РµРЅРёРµ С‚Р°РєС‚РёСЂРѕРІР°РЅРёСЏ РїРѕСЂС‚РѕРІ
 	RCC_GPIO_Clk_EN(PORTA);
 	RCC_GPIO_Clk_EN(PORTB);
 	RCC_GPIO_Clk_EN(PORTC);
 
-	// Выходы
+	// Р’С‹С…РѕРґС‹
 	GPIO_Config(GPIOC, Pin_13, Output, PushPull, HighSpeed, NoPull);	// PC13(LED)
 	GPIO_Config(GPIOC, Pin_14, Output, PushPull, HighSpeed, NoPull);	// PC14(Sync_GD)
 	GPIO_Config(GPIOB, Pin_12, Output, PushPull, HighSpeed, NoPull);	// PB12(CS_GD1)
@@ -75,7 +75,7 @@ void IO_Config()
 	GPIO_Bit_Set(GPIOB, Pin_12);
 	GPIO_Bit_Set(GPIOB, Pin_14);
 
-	// Альтернативные функции портов
+	// РђР»СЊС‚РµСЂРЅР°С‚РёРІРЅС‹Рµ С„СѓРЅРєС†РёРё РїРѕСЂС‚РѕРІ
 	GPIO_Config(GPIOA, Pin_9, AltFn, PushPull, HighSpeed, NoPull);		// PA9(USART1 TX)
 	GPIO_AltFn(GPIOA, Pin_9, AltFn_7);
 
@@ -102,8 +102,8 @@ void SPI2_Config()
 	SPI_SetSyncPolarity(SPI2, RISE_Edge);
 	SPI_WriteByte(SPI2, 0);
 
-	// Уровень срабатывания компаратора тока управления выставляем высоким,
-	// чтобы исключить ложные срабатывания при запуске блока
+	// РЈСЂРѕРІРµРЅСЊ СЃСЂР°Р±Р°С‚С‹РІР°РЅРёСЏ РєРѕРјРїР°СЂР°С‚РѕСЂР° С‚РѕРєР° СѓРїСЂР°РІР»РµРЅРёСЏ РІС‹СЃС‚Р°РІР»СЏРµРј РІС‹СЃРѕРєРёРј,
+	// С‡С‚РѕР±С‹ РёСЃРєР»СЋС‡РёС‚СЊ Р»РѕР¶РЅС‹Рµ СЃСЂР°Р±Р°С‚С‹РІР°РЅРёСЏ РїСЂРё Р·Р°РїСѓСЃРєРµ Р±Р»РѕРєР°
 	GPIO_Bit_Rst(GPIOB, Pin_12);
 	SPI_WriteByte(SPI2, DAC_RESOLUTION | DAC_CHANNEL_B);
 	GPIO_Bit_Set(GPIOB, Pin_12);

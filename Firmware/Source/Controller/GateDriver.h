@@ -1,4 +1,4 @@
-#ifndef __GATEDRIVER_H
+﻿#ifndef __GATEDRIVER_H
 #define __GATEDRIVER_H
 
 // Includes

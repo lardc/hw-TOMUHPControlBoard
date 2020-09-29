@@ -1,4 +1,4 @@
-#ifndef __COMMUTATION_H
+﻿#ifndef __COMMUTATION_H
 #define __COMMUTATION_H
 
 #include "stdinc.h"

@@ -1,4 +1,4 @@
-// -----------------------------------------
+Ôªø// -----------------------------------------
 // Global definitions
 // ----------------------------------------
 
@@ -15,73 +15,73 @@
 #define NO						0
 #define YES						1
 
-#define DUT_VOLTAGE_MIN			500		// ¬
-#define DUT_VOLTAGE_MAX			1500	// ¬
-#define DUT_VOLTAGE_DEF			500		// ¬
+#define DUT_VOLTAGE_MIN			500		// –í
+#define DUT_VOLTAGE_MAX			1500	// –í
+#define DUT_VOLTAGE_DEF			500		// –í
 
-#define DUT_CURRENT_MIN			100		// ¿ x10
-#define DUT_CURRENT_MAX			1000	// ¿ x10
-#define DUT_CURRENT_DEF			100		// ¿ x10
+#define DUT_CURRENT_MIN			100		// –ê x10
+#define DUT_CURRENT_MAX			1000	// –ê x10
+#define DUT_CURRENT_DEF			100		// –ê x10
 
-#define GATE_CURRENT_MIN		1000	// ÏA
-#define GATE_CURRENT_MAX		20000	// ÏA
-#define GATE_CURRENT_DEF		1000	// ÏA
+#define GATE_CURRENT_MIN		1000	// –ºA
+#define GATE_CURRENT_MAX		20000	// –ºA
+#define GATE_CURRENT_DEF		1000	// –ºA
 
-#define GATE_FRONT_MIN			0		// ÏÍÒ ı10
-#define GATE_FRONT_MAX			20		// ÏÍÒ ı10
-#define GATE_FRONT_DEF			10		// ÏÍÒ ı10
+#define GATE_FRONT_MIN			0		// –º–∫—Å —Ö10
+#define GATE_FRONT_MAX			20		// –º–∫—Å —Ö10
+#define GATE_FRONT_DEF			10		// –º–∫—Å —Ö10
 
-#define GATE_I_RATE_MIN			1000	// Ï¿/ÏÍÒ
-#define GATE_I_RATE_MAX			10000	// Ï¿/ÏÍÒ
-#define GATE_I_RATE_DEF			5000	// Ï¿/ÏÍÒ
+#define GATE_I_RATE_MIN			1000	// –º–ê/–º–∫—Å
+#define GATE_I_RATE_MAX			10000	// –º–ê/–º–∫—Å
+#define GATE_I_RATE_DEF			5000	// –º–ê/–º–∫—Å
 
-#define GATE_TIME_CHRG_MIN		100		// ÏÒ
-#define GATE_TIME_CHRG_MAX		1000	// ÏÒ
-#define GATE_TIME_CHRG_DEF		500		// ÏÒ
+#define GATE_TIME_CHRG_MIN		100		// –º—Å
+#define GATE_TIME_CHRG_MAX		1000	// –º—Å
+#define GATE_TIME_CHRG_DEF		500		// –º—Å
 
-#define CURRENT_SHUNT_MIN		1		// ÏŒÏ ı10
-#define CURRENT_SHUNT_MAX		10000	// ÏŒÏ ı10
-#define CURRENT_SHUNT_DEF		1000	// ÏŒÏ ı10
+#define CURRENT_SHUNT_MIN		1		// –º–û–º —Ö10
+#define CURRENT_SHUNT_MAX		10000	// –º–û–º —Ö10
+#define CURRENT_SHUNT_DEF		1000	// –º–û–º —Ö10
 
 #define GAIN_COEFFICIENT_MIN	1
 #define GAIN_COEFFICIENT_MAX	50000
 #define GAIN_COEFFICIENT_DEF	1000
 
-#define TOCU_CHRG_TIMEOUT_MIN	1000	// ÏÒ
-#define TOCU_CHRG_TIMEOUT_MAX	60000	// ÏÒ
-#define TOCU_CHRG_TIMEOUT_DEF	10000	// ÏÒ
+#define TOCU_CHRG_TIMEOUT_MIN	1000	// –º—Å
+#define TOCU_CHRG_TIMEOUT_MAX	60000	// –º—Å
+#define TOCU_CHRG_TIMEOUT_DEF	10000	// –º—Å
 
-#define TOCU_RES_PER_BIT_MIN	1		// ŒÏ
-#define TOCU_RES_PER_BIT_MAX	10000	// ŒÏ
-#define TOCU_RES_PER_BIT_DEF	1000	// ŒÏ
+#define TOCU_RES_PER_BIT_MIN	1		// –û–º
+#define TOCU_RES_PER_BIT_MAX	10000	// –û–º
+#define TOCU_RES_PER_BIT_DEF	1000	// –û–º
 
-#define DAC_VOLTAGE_MIN			0		// Ï¬
-#define DAC_VOLTAGE_MAX			5000	// Ï¬
-#define DAC_VOLTAGE_DEF			100		// Ï¬
+#define DAC_VOLTAGE_MIN			0		// –º–í
+#define DAC_VOLTAGE_MAX			5000	// –º–í
+#define DAC_VOLTAGE_DEF			100		// –º–í
 
 #define ID_THRESHOLD_MIN		0		// %
 #define ID_THRESHOLD_MAX		80		// %
 #define ID_THRESHOLD_DEF		50		// %
 
-#define MEAS_TIME_LOW_MIN		0		// ÌÒ
-#define MEAS_TIME_LOW_MAX		1000	// ÌÒ
-#define MEAS_TIME_LOW_DEF		500		// ÌÒ
+#define MEAS_TIME_LOW_MIN		0		// –Ω—Å
+#define MEAS_TIME_LOW_MAX		1000	// –Ω—Å
+#define MEAS_TIME_LOW_DEF		500		// –Ω—Å
 
 #define AVERAGE_NUM_MIN			1		//
 #define AVERAGE_NUM_MAX			20		//
 #define AVERAGE_NUM_DEF			10		//
 
-#define ALLOWED_SPREAD_MIN		0		// ÌÒ
-#define ALLOWED_SPREAD_MAX		500		// ÌÒ
-#define ALLOWED_SPREAD_DEF		100		// ÌÒ
+#define ALLOWED_SPREAD_MIN		0		// –Ω—Å
+#define ALLOWED_SPREAD_MAX		500		// –Ω—Å
+#define ALLOWED_SPREAD_DEF		100		// –Ω—Å
 
-#define AVERAGE_PERIOD_MIN		300		// ÏÒ
-#define AVERAGE_PERIOD_MAX		2000	// ÏÒ
-#define AVERAGE_PERIOD_DEF		500		// ÏÒ
+#define AVERAGE_PERIOD_MIN		300		// –º—Å
+#define AVERAGE_PERIOD_MAX		2000	// –º—Å
+#define AVERAGE_PERIOD_DEF		500		// –º—Å
 
-#define AFTER_MEASURE_DELAY_MIN	1000	// ÏÒ
-#define AFTER_MEASURE_DELAY_MAX	10000	// ÏÒ
-#define AFTER_MEASURE_DELAY_DEF	5000	// ÏÒ
+#define AFTER_MEASURE_DELAY_MIN	1000	// –º—Å
+#define AFTER_MEASURE_DELAY_MAX	10000	// –º—Å
+#define AFTER_MEASURE_DELAY_DEF	5000	// –º—Å
 
 // Types
 //

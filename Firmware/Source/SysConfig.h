@@ -1,4 +1,4 @@
-#ifndef __SYSCONFIG_H
+п»ї#ifndef __SYSCONFIG_H
 #define __SYSCONFIG_H
 
 #include "stdinc.h"
@@ -10,18 +10,18 @@
 //-----------------------------------------------
 
 // System clock
-#define SYSCLK							70000000	// Тактовая частота системной шины процессора
-#define QUARTZ_FREQUENCY				20000000	// Частота кварца
+#define SYSCLK							70000000	// РўР°РєС‚РѕРІР°СЏ С‡Р°СЃС‚РѕС‚Р° СЃРёСЃС‚РµРјРЅРѕР№ С€РёРЅС‹ РїСЂРѕС†РµСЃСЃРѕСЂР°
+#define QUARTZ_FREQUENCY				20000000	// Р§Р°СЃС‚РѕС‚Р° РєРІР°СЂС†Р°
 // ----------------------------------------------
 
 // USART
-#define USART_BAUDRATE					115200		// Скорость USART
-#define USART_FIFOlen					32			// Длина FIFO USART
+#define USART_BAUDRATE					115200		// РЎРєРѕСЂРѕСЃС‚СЊ USART
+#define USART_FIFOlen					32			// Р”Р»РёРЅР° FIFO USART
 // ----------------------------------------------
 
 // Timers
-#define TIMER3_uS						1000		// Период работы таймера общего назначения
-#define TIMER6_uS						0.3f		// Период работы таймера тактирования АЦП
+#define TIMER3_uS						1000		// РџРµСЂРёРѕРґ СЂР°Р±РѕС‚С‹ С‚Р°Р№РјРµСЂР° РѕР±С‰РµРіРѕ РЅР°Р·РЅР°С‡РµРЅРёСЏ
+#define TIMER6_uS						0.3f		// РџРµСЂРёРѕРґ СЂР°Р±РѕС‚С‹ С‚Р°Р№РјРµСЂР° С‚Р°РєС‚РёСЂРѕРІР°РЅРёСЏ РђР¦Рџ
 // ----------------------------------------------
 
 // SPI
@@ -32,16 +32,16 @@
 // ----------------------------------------------
 
 // ADC
-#define DMA_ADC_DUT_I_CHANNEL			DMA1_Channel1	// Канал DMA для АЦП тока
-#define ADC1_CURRENT_CHANNEL			2				// АЦП1 номер канала тока
+#define DMA_ADC_DUT_I_CHANNEL			DMA1_Channel1	// РљР°РЅР°Р» DMA РґР»СЏ РђР¦Рџ С‚РѕРєР°
+#define ADC1_CURRENT_CHANNEL			2				// РђР¦Рџ1 РЅРѕРјРµСЂ РєР°РЅР°Р»Р° С‚РѕРєР°
 // ----------------------------------------------
 
 // CAN
-#define CAN_BAUDRATE					1000000		// Битрейт CAN
+#define CAN_BAUDRATE					1000000		// Р‘РёС‚СЂРµР№С‚ CAN
 // ----------------------------------------------
 
 // External time counter
-#define COUNTER_CLOCK_PERIOD_NS			10				// Период тактового сигнала внешнего счетчика, нс
+#define COUNTER_CLOCK_PERIOD_NS			10				// РџРµСЂРёРѕРґ С‚Р°РєС‚РѕРІРѕРіРѕ СЃРёРіРЅР°Р»Р° РІРЅРµС€РЅРµРіРѕ СЃС‡РµС‚С‡РёРєР°, РЅСЃ
 
 
 #endif // __SYSCONFIG_H

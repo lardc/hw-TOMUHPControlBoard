@@ -1,4 +1,4 @@
-// Include
+п»ї// Include
 #include "Interrupts.h"
 //
 #include <InitConfig.h>
@@ -80,7 +80,7 @@ void TIM3_IRQHandler()
 			LED_BlinkTimeCounter = CONTROL_TimeCounter;
 		}
 
-		// Алгоритм работы вентилятора
+		// РђР»РіРѕСЂРёС‚Рј СЂР°Р±РѕС‚С‹ РІРµРЅС‚РёР»СЏС‚РѕСЂР°
 		CONTROL_UnitFan();
 
 		TIM_StatusClear(TIM3);

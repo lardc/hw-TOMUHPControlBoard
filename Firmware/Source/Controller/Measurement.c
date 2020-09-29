@@ -1,4 +1,4 @@
-// Header
+п»ї// Header
 #include "Measurement.h"
 // Includes
 #include "LowLevel.h"
@@ -15,11 +15,11 @@
 //
 #define ABS(a)	(((a) < 0) ? -(a) : (a))
 //
-#define MEASURE_POINTS_NUMBER		20		// Количество точек при единичном измерении
+#define MEASURE_POINTS_NUMBER		20		// РљРѕР»РёС‡РµСЃС‚РІРѕ С‚РѕС‡РµРє РїСЂРё РµРґРёРЅРёС‡РЅРѕРј РёР·РјРµСЂРµРЅРёРё
 //
-#define I_MAX_AVERAGE_POINTS		10		// Количество точек усреднения амплитуды тока
+#define I_MAX_AVERAGE_POINTS		10		// РљРѕР»РёС‡РµСЃС‚РІРѕ С‚РѕС‡РµРє СѓСЃСЂРµРґРЅРµРЅРёСЏ Р°РјРїР»РёС‚СѓРґС‹ С‚РѕРєР°
 //
-#define ITTERATIONS_OF_AVERAGING	3		// Количество иттераций усреднения
+#define ITTERATIONS_OF_AVERAGING	3		// РљРѕР»РёС‡РµСЃС‚РІРѕ РёС‚С‚РµСЂР°С†РёР№ СѓСЃСЂРµРґРЅРµРЅРёСЏ
 
 // Variables
 volatile uint16_t LOGIC_OutputPulseRaw[PULSE_ARR_MAX_LENGTH];
@@ -75,7 +75,7 @@ void MEASURE_ConvertRawArray(volatile uint16_t* RawArray, volatile uint16_t* Out
 		tmp = tmp * tmp * P2 + tmp * P1 + P0;
 		RawArray[i] = (tmp > 0) ? (uint16_t)tmp : 0;
 
-		// Фильтрация тока
+		// Р¤РёР»СЊС‚СЂР°С†РёСЏ С‚РѕРєР°
 		OutputArray[i] = 0;
 
 		for(int j = 0; j < FIR_LENGTH - 1; j++)
@@ -84,7 +84,7 @@ void MEASURE_ConvertRawArray(volatile uint16_t* RawArray, volatile uint16_t* Out
 				OutputArray[i] += RawArray[i - j] * FIR_Coefficients[j];
 		}
 
-		// Определение индекса массива с максимальным значением тока
+		// РћРїСЂРµРґРµР»РµРЅРёРµ РёРЅРґРµРєСЃР° РјР°СЃСЃРёРІР° СЃ РјР°РєСЃРёРјР°Р»СЊРЅС‹Рј Р·РЅР°С‡РµРЅРёРµРј С‚РѕРєР°
 		if(OutputArray[i] > Imax)
 		{
 			Imax = OutputArray[i];
@@ -94,7 +94,7 @@ void MEASURE_ConvertRawArray(volatile uint16_t* RawArray, volatile uint16_t* Out
 
 	Imax = 0;
 
-	// Усреднение амплитуды тока
+	// РЈСЃСЂРµРґРЅРµРЅРёРµ Р°РјРїР»РёС‚СѓРґС‹ С‚РѕРєР°
 	for(int i = (ImaxArrayIndex - I_MAX_AVERAGE_POINTS / 2); i < (ImaxArrayIndex + I_MAX_AVERAGE_POINTS / 2); i++)
 		Imax += OutputArray[i];
 
@@ -107,7 +107,7 @@ bool MEASURE_CheckAnodeCurrent()
 	uint16_t AnodeCurrent = 0, AnodeCurrentRaw = 0;
 	float AlowedError = 0;
 
-	// Запуск процесса оцифровки тока
+	// Р—Р°РїСѓСЃРє РїСЂРѕС†РµСЃСЃР° РѕС†РёС„СЂРѕРІРєРё С‚РѕРєР°
 	DMA_ChannelReload(DMA_ADC_DUT_I_CHANNEL, MEASURE_POINTS_NUMBER);
 	DMA_ChannelEnable(DMA_ADC_DUT_I_CHANNEL, true);
 	TIM_Start(TIM6);
@@ -117,7 +117,7 @@ bool MEASURE_CheckAnodeCurrent()
 	DMA_ChannelReload(DMA_ADC_DUT_I_CHANNEL, PULSE_ARR_MAX_LENGTH);
 	DMA_ChannelEnable(DMA_ADC_DUT_I_CHANNEL, true);
 
-	// Усреднение результата измерения
+	// РЈСЃСЂРµРґРЅРµРЅРёРµ СЂРµР·СѓР»СЊС‚Р°С‚Р° РёР·РјРµСЂРµРЅРёСЏ
 	for(int i = 0; i < MEASURE_POINTS_NUMBER; i++)
 		AnodeCurrentRaw += LOGIC_OutputPulseRaw[i];
 	AnodeCurrentRaw = (float)AnodeCurrentRaw / MEASURE_POINTS_NUMBER;
@@ -157,7 +157,7 @@ void MEASURE_TurnOnMeasurement()
 	MEASURE_TurnDelayResultBuffer[CONTROL_AverageCounter] = TurnDelay;
 	MEASURE_TurnOnResultBuffer[CONTROL_AverageCounter] = TurnOn;
 
-	// Сохранение результата в endpoint
+	// РЎРѕС…СЂР°РЅРµРЅРёРµ СЂРµР·СѓР»СЊС‚Р°С‚Р° РІ endpoint
 	CONTROL_Values_TurnDelay[CONTROL_AverageCounter] = TurnDelay;
 	CONTROL_Values_TurnOn[CONTROL_AverageCounter] = TurnOn;
 }

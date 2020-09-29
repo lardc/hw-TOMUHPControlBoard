@@ -1,4 +1,4 @@
-// Header
+﻿// Header
 #include "Commutation.h"
 // Includes
 #include "LowLevel.h"
