@@ -1,4 +1,4 @@
-// Header
+п»ї// Header
 #include "Logic.h"
 // Includes
 #include "DataTable.h"
@@ -9,11 +9,13 @@
 #include "Delay.h"
 #include "Interrupts.h"
 #include "GateDriver.h"
+#include "InitConfig.h"
 
 // Definitions
 //
-#define TOCU1_CAN_NID		1
-#define TOCU1_BIT_MASK		0x3FF
+#define TOCU1_CAN_NID			21
+#define TOCU1_BIT_MASK			0x3FF
+//
 
 // Types
 //
@@ -36,6 +38,12 @@ const NodeBitmask NodeBitmaskArray[] = {{TOCU1_CAN_NID, TOCU1_BIT_MASK}};
 #define NODE_ARRAY_SIZE		(sizeof NodeBitmaskArray / sizeof NodeBitmaskArray[0])
 NodeState NodeArray[NODE_ARRAY_SIZE] = {0};
 
+
+// Functions prototypes
+//
+void LOGIC_AreInterruptsActive(bool State);
+//
+
 // Functions
 //
 bool LOGIC_ReadSlavesState()
@@ -54,7 +62,7 @@ bool LOGIC_ReadSlavesState()
 				NodeArray[i].OpResult = OpResult;
 				result = true;
 			}
-		
+
 		if(!result)
 			return false;
 	}
@@ -66,7 +74,7 @@ bool LOGIC_ReadSlavesState()
 bool LOGIC_WriteSlavesConfig()
 {
 	bool result;
-	
+
 	for(uint16_t i = 0; i < NODE_ARRAY_SIZE; ++i)
 	{
 		result = false;
@@ -121,20 +129,22 @@ void LOGIC_AssignVItoSlaves(AnodeVoltageEnum AnodeVoltage, float AnodeCurrent)
 {
 	float CurrentPerBit;
 	uint16_t ActualBitmask = 0, MaximumBitmask = 0;
-	
-	// Определение максимально допустимой битовой маски
+
+	MEASURE_AnodeCurrentTune(AnodeVoltage, &AnodeCurrent);
+
+	// РћРїСЂРµРґРµР»РµРЅРёРµ РјР°РєСЃРёРјР°Р»СЊРЅРѕ РґРѕРїСѓСЃС‚РёРјРѕР№ Р±РёС‚РѕРІРѕР№ РјР°СЃРєРё
 	for(uint16_t i = 0; i < NODE_ARRAY_SIZE; ++i)
 		MaximumBitmask |= NodeBitmaskArray[i].SupportedBits;
 	
-	// Определение величины тока на бит при заданном напряжении
+	// РћРїСЂРµРґРµР»РµРЅРёРµ РІРµР»РёС‡РёРЅС‹ С‚РѕРєР° РЅР° Р±РёС‚ РїСЂРё Р·Р°РґР°РЅРЅРѕРј РЅР°РїСЂСЏР¶РµРЅРёРё
 	CurrentPerBit = (float)AnodeVoltage / DataTable[REG_TOCU_RES_PER_BIT];
 	
-	// Определение битовой маски для выбранного значения тока
+	// РћРїСЂРµРґРµР»РµРЅРёРµ Р±РёС‚РѕРІРѕР№ РјР°СЃРєРё РґР»СЏ РІС‹Р±СЂР°РЅРЅРѕРіРѕ Р·РЅР°С‡РµРЅРёСЏ С‚РѕРєР°
 	ActualBitmask = (uint16_t)(AnodeCurrent / CurrentPerBit);
 	if(ActualBitmask > MaximumBitmask)
 		ActualBitmask = MaximumBitmask;
 	
-	// Формирование уставки для блоков
+	// Р¤РѕСЂРјРёСЂРѕРІР°РЅРёРµ СѓСЃС‚Р°РІРєРё РґР»СЏ Р±Р»РѕРєРѕРІ
 	for(uint16_t i = 0; i < NODE_ARRAY_SIZE; ++i)
 	{
 		NodeArray[i].Voltage = AnodeVoltage;
@@ -146,7 +156,7 @@ void LOGIC_AssignVItoSlaves(AnodeVoltageEnum AnodeVoltage, float AnodeCurrent)
 bool LOGIC_IsAnodeVRegCorrect()
 {
 	uint16_t v = DataTable[REG_ANODE_VOLTAGE];
-	return (v == TOU_500V) || (v == TOU_1000V) || (v == TOU_1500V);
+	return (v == TOU_600V) || (v == TOU_1000V) || (v == TOU_1500V);
 }
 //-----------------------------------------------
 
@@ -178,19 +188,19 @@ void LOGIC_ConfigVoltageComparators(AnodeVoltageEnum AnodeVoltage)
 {
 	switch (AnodeVoltage)
 	{
-		case TOU_500V:
-			MEASURE_SetUref10(DataTable[REG_VCOMP10_500]);
-			MEASURE_SetUref90(DataTable[REG_VCOMP90_500]);
+		case TOU_600V:
+			MEASURE_SetUref10(DataTable[REG_VCOMP10_600V]);
+			MEASURE_SetUref90(DataTable[REG_VCOMP90_600V]);
 			break;
 			
 		case TOU_1000V:
-			MEASURE_SetUref10(DataTable[REG_VCOMP10_1000]);
-			MEASURE_SetUref90(DataTable[REG_VCOMP90_1000]);
+			MEASURE_SetUref10(DataTable[REG_VCOMP10_1000V]);
+			MEASURE_SetUref90(DataTable[REG_VCOMP90_1000V]);
 			break;
 			
 		case TOU_1500V:
-			MEASURE_SetUref10(DataTable[REG_VCOMP10_1500]);
-			MEASURE_SetUref90(DataTable[REG_VCOMP90_1500]);
+			MEASURE_SetUref10(DataTable[REG_VCOMP10_1500V]);
+			MEASURE_SetUref90(DataTable[REG_VCOMP90_1500V]);
 			break;
 			
 		default:
@@ -201,43 +211,78 @@ void LOGIC_ConfigVoltageComparators(AnodeVoltageEnum AnodeVoltage)
 
 uint16_t LOGIC_Pulse()
 {
-	// Включение подачи напряжения
+	uint16_t Problem = PROBLEM_NONE;
+
+	// РџРѕРґР°С‡Р° СЃРёРЅС…СЂРѕРЅРёР·Р°С†РёРё РЅР° TOCU HP
 	LL_SyncTOCU(true);
-	DELAY_US(10);
+
+	DELAY_US(30);
 	
-	// Проверка уровня тока до отпирания прибора
-	if(MEASURE_ReadCurrent() > DataTable[MAX_ANODE_CURRENT])
-		return PROBLEM_SHORT;
+	// РџСЂРѕРІРµСЂРєР° СѓСЂРѕРІРЅСЏ С‚РѕРєР° РґРѕ РѕС‚РїРёСЂР°РЅРёСЏ РїСЂРёР±РѕСЂР°
+	if(MEASURE_CheckAnodeCurrent())
+	{
+		LL_SyncTOCU(false);
+		Problem = PROBLEM_SHORT;
+	}
+	else
+	{
+		// Р—Р°РїСѓСЃРє РѕС†РёС„СЂРѕРІРєРё
+		DMA_ChannelEnable(DMA_ADC_DUT_I_CHANNEL, true);
+		TIM_Start(TIM6);
+
+		LOGIC_AreInterruptsActive(false);
+
+		// РЎР±СЂРѕСЃ СЃРёСЃС‚РµРјС‹ СЃС‡С‘С‚Р°
+		LL_GateLatchReset();
+		LL_HSTimers_Reset();
+		Overflow90 = false;
+		Overflow10 = false;
+
+		// Р—Р°РїСѓСЃРє С‚РѕРєР° СѓРїСЂР°РІР»РµРЅРёСЏ
+		LL_SyncOscilloscopeActivate(true);
+		GateDriver_Sync(true);
+
+		DELAY_US(30);
+
+		// Р—Р°РІРµСЂС€РµРЅРёРµ РїСЂРѕС†РµСЃСЃР° РёР·РјРµСЂРµРЅРёСЏ
+		LL_SyncOscilloscopeActivate(false);
+		GateDriver_Sync(false);
+
+		DELAY_US(10);
+
+		LL_SyncTOCU(false);
+
+		LOGIC_AreInterruptsActive(true);
+
+		MEASURE_TurnOnMeasurement();
 	
-	// Сброс системы счёта
-	LL_HSTimers_Reset();
-	LL_GateLatchReset();
-	Overflow90 = false;
-	Overflow10 = false;
+		// РЎРѕС…СЂР°РЅРµРЅРёРµ РѕС†РёС„СЂРѕРІР°РЅРЅС‹С… Р·РЅР°С‡РµРЅРёР№ РІ endpoint
+		MEASURE_ConvertRawArray(&LOGIC_OutputPulseRaw[0], &CONTROL_Values_Current[0], PULSE_ARR_MAX_LENGTH);
+		CONTROL_Values_CurrentCounter = PULSE_ARR_MAX_LENGTH;
 	
-	// Запуск оцифровки
-	DMA_ChannelReload(DMA_ADC_DUT_I_CHANNEL, PULSE_ARR_MAX_LENGTH);
-	DMA_ChannelEnable(DMA_ADC_DUT_I_CHANNEL, true);
-	DMAOperation = true;
-	TIM_Start(TIM6);
-	
-	// Запуск тока управления
-	LL_SyncOscilloscope(true);
-	GateDriver_Sync(true);
-	DELAY_US(100);
-	
-	// Считывание данных счётчиков
-	
-	// Отключение синхронизация
-	LL_SyncOscilloscope(false);
-	GateDriver_Sync(false);
-	LL_SyncTOCU(false);
-	
-	// Сброс системы счёта
-	LL_HSTimers_Reset();
-	LL_GateLatchReset();
-	
-	return PROBLEM_NONE;
+		// РћР±СЂР°Р±РѕС‚РєР° РІРЅРµС€С‚Р°С‚РЅС‹С… СЃРёС‚СѓР°С†РёР№
+		if (DataTable[REG_MEAS_CURRENT_VALUE] < (CachedMeasurementSettings.AnodeCurrent * DataTable[REG_ID_THRESHOLD] / 100))
+		{
+			Problem = PROBLEM_NO_PWR;
+		}
+		else if(!MEASURE_TurnDelayResultBuffer[CONTROL_AverageCounter] || !MEASURE_TurnOnResultBuffer[CONTROL_AverageCounter])
+		{
+			Problem = PROBLEM_NO_POT;
+		}
+		else if(Overflow90)
+		{
+			Problem = PROBLEM_OVERFLOW90;
+		}
+		else if(Overflow10)
+		{
+			Problem = PROBLEM_OVERFLOW10;
+		}
+	}
+
+	if(DataTable[REG_MUTE_PROBLEM])
+		return PROBLEM_NONE;
+	else
+		return Problem;
 }
 //-----------------------------------------------
 
@@ -247,10 +292,18 @@ MeasurementSettings LOGIC_CacheMeasurementSettings()
 	
 	result.AnodeVoltage = DataTable[REG_ANODE_VOLTAGE];
 	result.AnodeCurrent = (float)DataTable[REG_ANODE_CURRENT];
-	result.GateCurrent = (float)DataTable[REG_GATE_CURRENT] / 10;
-	result.GateCurrentRiseRate = (float)DataTable[REG_GATE_CURRENT_RISE_RATE] / 10;
-	result.GateCurrentFallRate = (float)DataTable[REG_GD_CURRENT_FALL_RATE] / 10;
+	result.GateCurrent = (float)DataTable[REG_GATE_CURRENT];
+	result.GateCurrentRiseRate = (float)DataTable[REG_GATE_CURRENT_RISE_RATE];
+	result.GateCurrentFallRate = (float)DataTable[REG_GATE_I_FALL_RATE];
 	
 	return result;
+}
+//-----------------------------------------------
+
+void LOGIC_AreInterruptsActive(bool State)
+{
+	NCAN_FIFOInterrupt(State);
+	USART_Recieve_Interupt(USART1, 0, State);
+	TIM_Interupt(TIM3, 0, State);
 }
 //-----------------------------------------------

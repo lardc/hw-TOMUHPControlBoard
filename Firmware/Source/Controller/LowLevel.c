@@ -1,4 +1,4 @@
-// Header
+﻿// Header
 #include "LowLevel.h"
 
 // Include
@@ -48,17 +48,18 @@ uint32_t LL_HSTimers_Read()
 {
 	uint32_t Data;
 
+	SPI_SetSyncPolarity(SPI1, RISE_Edge);
+
 	GPIO_SetState(GPIO_LOAD, false);
 	DELAY_US(1);
 	GPIO_SetState(GPIO_LOAD, true);
 
 	GPIO_SetState(GPIO_CS, false);
-	Data = SPI_ReadByte(SPI1);
-	Data |= (uint32_t)SPI_ReadByte(SPI1) << 8;
-	Data |= (uint32_t)SPI_ReadByte(SPI1) << 16;
+	Data = SPI_ReadByte(SPI1) << 16;
+	Data |= SPI_ReadByte(SPI1);
 	GPIO_SetState(GPIO_CS, true);
 
-	return Data;
+	return (Data);
 }
 //---------------------------
 
@@ -70,7 +71,7 @@ void LL_GateLatchReset()
 }
 //-----------------------------
 
-void LL_SyncOscilloscope(bool State)
+void LL_SyncOscilloscopeActivate(bool State)
 {
 	GPIO_SetState(GPIO_SYNC, State);
 }
@@ -94,15 +95,17 @@ bool LL_IsOverflow10()
 }
 //-----------------------------
 
-void LL_WriteDACx(uint16_t Data, GPIO_PortPinSetting CS_SYNC)
+void LL_WriteDACx(uint16_t Data, GPIO_PortPinSetting CS_SYNC, SPI_SyncPolarityEnum Polarity)
 {
+	SPI_SetSyncPolarity(SPI2, Polarity);
+
 	GPIO_SetState(CS_SYNC, false);
 	SPI_WriteByte(SPI2, Data);
 	GPIO_SetState(CS_SYNC, true);
 	DELAY_US(1);
 
 	GPIO_SetState(GPIO_LDAC, false);
-	DELAY_US(1);
+	DELAY_US(5);
 	GPIO_SetState(GPIO_LDAC, true);
 	DELAY_US(1);
 }

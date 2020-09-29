@@ -1,4 +1,4 @@
-#ifndef __INITCONFIG_H
+﻿#ifndef __INITCONFIG_H
 #define __INITCONFIG_H
 
 #include "Board.h"
@@ -11,8 +11,6 @@ void IO_Config();
 void CAN_Config();
 void UART_Config();
 void ADC_Config();
-void ADC_SwitchToSingleMeasurement();
-void ADC_SwitchToDMA();
 void DMA_Config();
 void Timer3_Config();
 void Timer6_Config();

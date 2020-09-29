@@ -1,4 +1,4 @@
-#ifndef __INTERRUPTS_H
+﻿#ifndef __INTERRUPTS_H
 #define __INTERRUPTS_H
 
 #include "stdinc.h"
@@ -7,6 +7,5 @@
 //
 extern volatile bool Overflow90;
 extern volatile bool Overflow10;
-extern volatile bool DMAOperation;
 
 #endif // __INTERRUPTS_H

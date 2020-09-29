@@ -1,9 +1,11 @@
-#ifndef __LOWLEVEL_H
+﻿#ifndef __LOWLEVEL_H
 #define __LOWLEVEL_H
 
 // Include
 #include "stdinc.h"
 #include "Board.h"
+
+extern uint16_t SPI_Data;
 
 // Defines
 #define DAC_CHANNEL_B		BIT15
@@ -17,10 +19,10 @@ void LL_PsBoard_PowerInput(bool State);
 void LL_HSTimers_Reset();
 uint32_t LL_HSTimers_Read();
 void LL_GateLatchReset();
-void LL_SyncOscilloscope(bool State);
+void LL_SyncOscilloscopeActivate(bool State);
 void LL_SyncTOCU(bool State);
 bool LL_IsOverflow90();
 bool LL_IsOverflow10();
-void LL_WriteDACx(uint16_t Data, GPIO_PortPinSetting CS_SYNC);
+void LL_WriteDACx(uint16_t Data, GPIO_PortPinSetting CS_SYNC, SPI_SyncPolarityEnum Polarity);
 
 #endif //__LOWLEVEL_H

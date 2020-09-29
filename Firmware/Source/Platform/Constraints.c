@@ -1,4 +1,4 @@
-// -----------------------------------------
+﻿// -----------------------------------------
 // Global definitions
 // ----------------------------------------
 
@@ -10,58 +10,58 @@
 const TableItemConstraint NVConstraint[DATA_TABLE_NV_SIZE] =
 {
 	{CURRENT_SHUNT_MIN, CURRENT_SHUNT_MAX, CURRENT_SHUNT_DEF},					// 0
-	{GAIN_COEFFICIENT_MIN, GAIN_COEFFICIENT_MAX, GAIN_COEFFICIENT_DEF},			// 1
-	{0, INT16U_MAX, 0},													 		// 2
-	{0, INT16U_MAX, 0},															// 3
-	{GAIN_COEFFICIENT_MIN, GAIN_COEFFICIENT_MAX, GAIN_COEFFICIENT_DEF},			// 4
-	{0, INT16U_MAX, 0},															// 5
-	{TOCU_CHRG_TIMEOUT_MIN, TOCU_CHRG_TIMEOUT_MAX, TOCU_CHRG_TIMEOUT_DEF},		// 6
-	{TOCU_RES_PER_BIT_MIN, TOCU_RES_PER_BIT_MAX, TOCU_RES_PER_BIT_DEF},			// 7
-	{NO, YES, NO},																// 8
-	{NO, YES, NO},																// 9
-	{DAC_VOLTAGE_MIN, DAC_VOLTAGE_MAX, DAC_VOLTAGE_DEF},						// 10
-	{DAC_VOLTAGE_MIN, DAC_VOLTAGE_MAX, DAC_VOLTAGE_DEF},						// 11
-	{DAC_VOLTAGE_MIN, DAC_VOLTAGE_MAX, DAC_VOLTAGE_DEF},						// 12
-	{DAC_VOLTAGE_MIN, DAC_VOLTAGE_MAX, DAC_VOLTAGE_DEF},						// 13
-	{DAC_VOLTAGE_MIN, DAC_VOLTAGE_MAX, DAC_VOLTAGE_DEF},						// 14
-	{DAC_VOLTAGE_MIN, DAC_VOLTAGE_MAX, DAC_VOLTAGE_DEF},						// 15
-	{DUT_CURRENT_MIN, DUT_CURRENT_MAX, 0},										// 16
-	{0, 0, 0},																	// 17
-	{0, 0, 0},																	// 18
-	{0, 0, 0},																	// 19
-	{CURRENT_SHUNT_MIN, CURRENT_SHUNT_MAX, CURRENT_SHUNT_DEF},					// 20
-	{GAIN_COEFFICIENT_MIN, GAIN_COEFFICIENT_MAX, GAIN_COEFFICIENT_DEF},			// 21
+	{CURRENT_SHUNT_MIN, CURRENT_SHUNT_MAX, CURRENT_SHUNT_DEF},					// 1
+	{TOCU_CHRG_TIMEOUT_MIN, TOCU_CHRG_TIMEOUT_MAX, TOCU_CHRG_TIMEOUT_DEF},		// 2
+	{TOCU_RES_PER_BIT_MIN, TOCU_RES_PER_BIT_MAX, TOCU_RES_PER_BIT_DEF},			// 3
+	{ID_THRESHOLD_MIN, ID_THRESHOLD_MAX, ID_THRESHOLD_DEF},						// 4
+	{MEAS_TIME_LOW_MIN, MEAS_TIME_LOW_MAX, MEAS_TIME_LOW_DEF},					// 5
+	{0, INT16U_MAX, 0},															// 6
+	{0, INT16U_MAX, 0},															// 7
+	{GATE_I_RATE_MIN, GATE_I_RATE_MAX, GATE_I_RATE_DEF},						// 8
+	{GATE_FRONT_MIN, GATE_FRONT_MAX, GATE_FRONT_DEF},							// 9
+	{GATE_TIME_CHRG_MIN, GATE_TIME_CHRG_MAX, GATE_TIME_CHRG_DEF},				// 10
+	{NO, YES, NO},																// 11
+	{NO, YES, NO},																// 12
+	{NO, YES, NO},																// 13
+	{NO, YES, NO},																// 14
+	{GAIN_COEFFICIENT_MIN, GAIN_COEFFICIENT_MAX, GAIN_COEFFICIENT_DEF},			// 15
+	{0, INT16U_MAX, 0},															// 16
+	{0, INT16U_MAX, 0},															// 17
+	{GAIN_COEFFICIENT_MIN, GAIN_COEFFICIENT_MAX, GAIN_COEFFICIENT_DEF},			// 18
+	{0, INT16U_MAX, 0},															// 19
+	{GAIN_COEFFICIENT_MIN, GAIN_COEFFICIENT_MAX, GAIN_COEFFICIENT_DEF},			// 20
+	{0, INT16U_MAX, 0},															// 21
 	{0, INT16U_MAX, 0},															// 22
-	{GATE_I_RATE_MIN, GATE_I_RATE_MAX, GATE_I_RATE_DEF},						// 23
-	{GAIN_COEFFICIENT_MIN, GAIN_COEFFICIENT_MAX, GAIN_COEFFICIENT_DEF},			// 24
+	{GAIN_COEFFICIENT_MIN, GAIN_COEFFICIENT_MAX, GAIN_COEFFICIENT_DEF},			// 23
+	{0, INT16U_MAX, 0},															// 24
 	{GAIN_COEFFICIENT_MIN, GAIN_COEFFICIENT_MAX, GAIN_COEFFICIENT_DEF},			// 25
-	{0, 0, 0},																	// 26
-	{0, 0, 0},																	// 27
-	{0, 0, 0},																	// 28
-	{0, 0, 0},																	// 29
-	{0, 0, 0},																	// 30
-	{0, 0, 0},																	// 31
-	{0, 0, 0},																	// 32
-	{0, 0, 0},																	// 33
-	{0, 0, 0},																	// 34
-	{0, 0, 0},																	// 35
-	{0, 0, 0},																	// 36
-	{0, 0, 0},																	// 37
-	{0, 0, 0},																	// 38
-	{0, 0, 0},																	// 39
-	{0, 0, 0},																	// 40
-	{0, 0, 0},																	// 41
-	{0, 0, 0},																	// 42
-	{0, 0, 0},																	// 43
-	{0, 0, 0},																	// 44
-	{0, 0, 0},																	// 45
-	{0, 0, 0},																	// 46
-	{0, 0, 0},																	// 47
-	{0, 0, 0},																	// 48
-	{0, 0, 0},																	// 49
-	{0, 0, 0},																	// 50
-	{0, 0, 0},																	// 51
-	{0, 0, 0},																	// 52
+	{0, INT16U_MAX, 0},															// 26
+	{0, INT16U_MAX, 0},															// 27
+	{GAIN_COEFFICIENT_MIN, GAIN_COEFFICIENT_MAX, GAIN_COEFFICIENT_DEF},			// 28
+	{0, INT16U_MAX, 0},															// 29
+	{DAC_VOLTAGE_MIN, DAC_VOLTAGE_MAX, DAC_VOLTAGE_DEF},						// 30
+	{DAC_VOLTAGE_MIN, DAC_VOLTAGE_MAX, DAC_VOLTAGE_DEF},						// 31
+	{DAC_VOLTAGE_MIN, DAC_VOLTAGE_MAX, DAC_VOLTAGE_DEF},						// 32
+	{DAC_VOLTAGE_MIN, DAC_VOLTAGE_MAX, DAC_VOLTAGE_DEF},						// 33
+	{DAC_VOLTAGE_MIN, DAC_VOLTAGE_MAX, DAC_VOLTAGE_DEF},						// 34
+	{DAC_VOLTAGE_MIN, DAC_VOLTAGE_MAX, DAC_VOLTAGE_DEF},						// 35
+	{0, INT16U_MAX, 0},															// 36
+	{GAIN_COEFFICIENT_MIN, GAIN_COEFFICIENT_MAX, GAIN_COEFFICIENT_DEF},			// 37
+	{0, INT16U_MAX, 0},															// 38
+	{0, INT16U_MAX, 0},															// 39
+	{GAIN_COEFFICIENT_MIN, GAIN_COEFFICIENT_MAX, GAIN_COEFFICIENT_DEF},			// 40
+	{0, INT16U_MAX, 0},															// 41
+	{0, INT16U_MAX, 0},															// 42
+	{GAIN_COEFFICIENT_MIN, GAIN_COEFFICIENT_MAX, GAIN_COEFFICIENT_DEF},			// 43
+	{0, INT16U_MAX, 0},															// 44
+	{GAIN_COEFFICIENT_MIN, GAIN_COEFFICIENT_MAX, GAIN_COEFFICIENT_DEF},			// 45
+	{0, INT16U_MAX, 0},															// 46
+	{0, INT16U_MAX, 0},															// 47
+	{GAIN_COEFFICIENT_MIN, GAIN_COEFFICIENT_MAX, GAIN_COEFFICIENT_DEF},			// 48
+	{0, INT16U_MAX, 0},															// 49
+	{GAIN_COEFFICIENT_MIN, GAIN_COEFFICIENT_MAX, GAIN_COEFFICIENT_DEF},			// 50
+	{0, INT16U_MAX, 0},															// 51
+	{0, INT16U_MAX, 0},															// 52
 	{0, 0, 0},																	// 53
 	{0, 0, 0},																	// 54
 	{0, 0, 0},																	// 55
@@ -69,32 +69,32 @@ const TableItemConstraint NVConstraint[DATA_TABLE_NV_SIZE] =
 	{0, 0, 0},																	// 57
 	{0, 0, 0},																	// 58
 	{0, 0, 0},																	// 59
-	{0, 0, 0},																	// 60
-	{0, 0, 0},																	// 61
-	{0, 0, 0},																	// 62
-	{0, 0, 0},															 		// 63
-	{0, 0, 0},																	// 64
-	{0, 0, 0},																	// 65
-	{0, 0, 0},																	// 66
-	{0, 0, 0}, 																	// 67
-	{0, 0, 0},																	// 68
+	{0, INT16U_MAX, 0},															// 60
+	{GAIN_COEFFICIENT_MIN, GAIN_COEFFICIENT_MAX, GAIN_COEFFICIENT_DEF},			// 61
+	{0, INT16U_MAX, 0},															// 62
+	{0, INT16U_MAX, 0},															// 63
+	{GAIN_COEFFICIENT_MIN, GAIN_COEFFICIENT_MAX, GAIN_COEFFICIENT_DEF},			// 64
+	{0, INT16U_MAX, 0},															// 65
+	{0, INT16U_MAX, 0},															// 66
+	{GAIN_COEFFICIENT_MIN, GAIN_COEFFICIENT_MAX, GAIN_COEFFICIENT_DEF},			// 67
+	{0, INT16U_MAX, 0},															// 68
 	{0, 0, 0},																	// 69
-	{0, 0, 0},																	// 70
-	{0, 0, 0},																 	// 71
-	{0, 0, 0},																	// 72
-	{0, 0, 0},																 	// 73
-	{0, 0, 0},																	// 74
-	{0, 0, 0},																	// 75
-	{0, 0, 0},																	// 76
-	{0, 0, 0},																	// 77
-	{0, 0, 0},																	// 78
+	{0, INT16U_MAX, 0},															// 70
+	{GAIN_COEFFICIENT_MIN, GAIN_COEFFICIENT_MAX, GAIN_COEFFICIENT_DEF},			// 71
+	{0, INT16U_MAX, 0},															// 72
+	{0, INT16U_MAX, 0},															// 73
+	{GAIN_COEFFICIENT_MIN, GAIN_COEFFICIENT_MAX, GAIN_COEFFICIENT_DEF},			// 74
+	{0, INT16U_MAX, 0},															// 75
+	{0, INT16U_MAX, 0},															// 76
+	{GAIN_COEFFICIENT_MIN, GAIN_COEFFICIENT_MAX, GAIN_COEFFICIENT_DEF},			// 77
+	{0, INT16U_MAX, 0},															// 78
 	{0, 0, 0},																	// 79
-	{0, 0, 0},																	// 80
-	{0, 0, 0},																 	// 81
-	{0, 0, 0},																 	// 82
+	{AVERAGE_NUM_MIN, AVERAGE_NUM_MAX, AVERAGE_NUM_DEF},						// 80
+	{ALLOWED_SPREAD_MIN, ALLOWED_SPREAD_MAX, ALLOWED_SPREAD_DEF},			 	// 81
+	{AVERAGE_PERIOD_MIN, AVERAGE_PERIOD_MAX, AVERAGE_PERIOD_DEF},			 	// 82
 	{0, 0, 0},																	// 83
 	{0, 0, 0},																 	// 84
-	{0, 0, 0},																	// 85
+	{AFTER_MEASURE_DELAY_MIN, AFTER_MEASURE_DELAY_MAX, AFTER_MEASURE_DELAY_DEF},// 85
 	{0, 0, 0},																	// 86
 	{0, 0, 0},																	// 87
 	{0, 0, 0},																	// 88

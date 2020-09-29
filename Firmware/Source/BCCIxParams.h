@@ -1,4 +1,4 @@
-// -----------------------------------------
+п»ї// -----------------------------------------
 // Parameters of BCCI interface
 // ----------------------------------------
 
@@ -8,21 +8,26 @@
 #include "xCCIParams.h"
 
 
-// Маска поля функции
+// РњР°СЃРєР° РїРѕР»СЏ С„СѓРЅРєС†РёРё
 //
 #define CAN_FUNC_MASK				0x000003FF
 
-// Конфигурация Slave
+// РљРѕРЅС„РёРіСѓСЂР°С†РёСЏ Slave
 //
-#define CAN_SALVE_NID				11				// Node ID устройства
-#define CAN_SLAVE_NID_MASK			0x0003FC00		// Маска Slave node ID
-#define CAN_SLAVE_NID_MPY			10				// Смещение адреса Slave
+#define CAN_SLAVE_NID				11				// Node ID СѓСЃС‚СЂРѕР№СЃС‚РІР°
+#define CAN_SLAVE_NID_MASK			0x0003FC00		// РњР°СЃРєР° Slave node ID
+#define CAN_SLAVE_NID_MPY			10				// РЎРјРµС‰РµРЅРёРµ Р°РґСЂРµСЃР° Slave
 
-// Конфигурация Master
+// РљРѕРЅС„РёРіСѓСЂР°С†РёСЏ Master
 //
-#define CAN_MASTER_NID				20				// Node ID устройства
-#define CAN_MASTER_NID_MASK			0x03FC0000		// Маска Master node ID
-#define CAN_MASTER_NID_MPY			18				// Смещение адреса Master
+#define CAN_MASTER_NID				20				// Node ID СѓСЃС‚СЂРѕР№СЃС‚РІР°
+#define CAN_MASTER_NID_MASK			0x03FC0000		// РњР°СЃРєР° Master node ID
+#define CAN_MASTER_NID_MPY			18				// РЎРјРµС‰РµРЅРёРµ Р°РґСЂРµСЃР° Master
+
+// CAN С„РёР»СЊС‚СЂ
+//
+#define CAN_SLAVE_FILTER_ID				(CAN_SLAVE_NID << CAN_SLAVE_NID_MPY)
+#define CAN_MASTER_FILTER_ID			(CAN_MASTER_NID << CAN_MASTER_NID_MPY)
 
 
 #endif // __BCCI_PARAMS_H

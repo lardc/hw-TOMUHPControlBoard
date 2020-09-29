@@ -1,4 +1,4 @@
-// Header
+﻿// Header
 #include "Diagnostic.h"
 
 // Includes
@@ -10,6 +10,7 @@
 #include "Measurement.h"
 #include "Commutation.h"
 #include "BCCIMHighLevel.h"
+#include "Controller.h"
 
 // Functions
 bool DIAG_HandleDiagnosticAction(uint16_t ActionID, uint16_t *pUserError)
@@ -18,25 +19,28 @@ bool DIAG_HandleDiagnosticAction(uint16_t ActionID, uint16_t *pUserError)
 	{
 		case ACT_DBG_GD_I_SET:
 			{
-				GateDriver_SetCurrent(DataTable[REG_DBG]);
+				CachedMeasurementSettings.GateCurrent = (float)DataTable[REG_DBG] / 10;
+				GateDriver_SetCurrent(CachedMeasurementSettings.GateCurrent);
 			}
 			break;
 
 		case ACT_DBG_GD_TRIG_THRESHOLD:
 			{
-				GateDriver_SetCompThreshold(DataTable[REG_DBG]);
+				GateDriver_SetCompThreshold(((float)DataTable[REG_DBG] / 10) * GATE_CURRENT_THRESHOLD);
 			}
 			break;
 
 		case ACT_DBG_GD_I_RISE_RATE:
 			{
-				GateDriver_SetRiseRate(DataTable[REG_DBG]);
+				CachedMeasurementSettings.GateCurrentRiseRate = (float)DataTable[REG_DBG] / 10;
+				GateDriver_SetRiseRate(&CachedMeasurementSettings);
 			}
 			break;
 
 		case ACT_DBG_GD_I_FALL_RATE:
 			{
-				GateDriver_SetFallRate(DataTable[REG_DBG]);
+				CachedMeasurementSettings.GateCurrentFallRate = (float)DataTable[REG_DBG] / 10;
+				GateDriver_SetFallRate(&CachedMeasurementSettings);
 			}
 			break;
 
@@ -50,9 +54,7 @@ bool DIAG_HandleDiagnosticAction(uint16_t ActionID, uint16_t *pUserError)
 
 		case ACT_DBG_PS_EN:
 			{
-				LL_PsBoard_PowerOutput(true);
-				DELAY_US(1000000);
-				LL_PsBoard_PowerOutput(false);
+				LL_PsBoard_PowerOutput(DataTable[REG_DBG] ? true : false);
 			}
 			break;
 
@@ -74,17 +76,13 @@ bool DIAG_HandleDiagnosticAction(uint16_t ActionID, uint16_t *pUserError)
 
 		case ACT_DBG_RLC:
 			{
-				COMM_InternalCommutation(true);
-				DELAY_US(1000000);
-				COMM_InternalCommutation(false);
+				COMM_InternalCommutation(DataTable[REG_DBG] ? true : false);
 			}
 			break;
 
 		case ACT_DBG_RELAY:
 			{
-				LL_PsBoard_PowerInput(true);
-				DELAY_US(1000000);
-				LL_PsBoard_PowerInput(false);
+				LL_PsBoard_PowerInput(DataTable[REG_DBG] ? true : false);
 			}
 			break;
 
@@ -103,7 +101,7 @@ bool DIAG_HandleDiagnosticAction(uint16_t ActionID, uint16_t *pUserError)
 		case ACT_DBG_SNC_TOCU:
 			{
 				LL_SyncTOCU(true);
-				DELAY_US(1000000);
+				DELAY_US(100);
 				LL_SyncTOCU(false);
 			}
 			break;
@@ -126,11 +124,21 @@ bool DIAG_HandleDiagnosticAction(uint16_t ActionID, uint16_t *pUserError)
 			}
 			break;
 
-		case ACT_DBG_OSC_SYNC:
+		case ACT_DBG_TOSU_SWITCH:
 			{
-				LL_SyncOscilloscope(true);
-				DELAY_US(1000000);
-				LL_SyncOscilloscope(false);
+				COMM_TOSU(DataTable[REG_DBG]);
+			}
+			break;
+
+		case ACT_DBG_POT_SWITCH:
+			{
+				COMM_PotSwitch(DataTable[REG_DBG]);
+			}
+			break;
+
+		case ACT_DBG_READ_PRESSURE:
+			{
+				DataTable[REG_DBG] = COMM_IsPressureTrig();
 			}
 			break;
 

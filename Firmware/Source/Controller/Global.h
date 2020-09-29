@@ -1,4 +1,4 @@
-// -----------------------------------------
+п»ї// -----------------------------------------
 // Global definitions
 // ----------------------------------------
 
@@ -9,23 +9,24 @@
 #include "stdinc.h"
 #include "SysConfig.h"
 
-#define	SCCI_TIMEOUT_TICKS		1000			// Таймаут протоколоа SCCI (мс)
-#define	BCCIM_TIMEOUT_TICKS		1000			// Таймаут протоколоа мастер BCCI (мс)
-#define EP_WRITE_COUNT			0				// Количество массивов для записи
-#define EP_COUNT				1				// Количество массивов для чтения
-#define ENABLE_LOCKING			FALSE			// Защита паролем
+#define	SCCI_TIMEOUT_TICKS		1000			// РўР°Р№РјР°СѓС‚ РїСЂРѕС‚РѕРєРѕР»РѕР° SCCI (РјСЃ)
+#define	BCCIM_TIMEOUT_TICKS		1000			// РўР°Р№РјР°СѓС‚ РїСЂРѕС‚РѕРєРѕР»РѕР° РјР°СЃС‚РµСЂ BCCI (РјСЃ)
+#define EP_WRITE_COUNT			0				// РљРѕР»РёС‡РµСЃС‚РІРѕ РјР°СЃСЃРёРІРѕРІ РґР»СЏ Р·Р°РїРёСЃРё
+#define EP_COUNT				3				// РљРѕР»РёС‡РµСЃС‚РІРѕ РјР°СЃСЃРёРІРѕРІ РґР»СЏ С‡С‚РµРЅРёСЏ
+#define ENABLE_LOCKING			FALSE			// Р—Р°С‰РёС‚Р° РїР°СЂРѕР»РµРј
 
-#define SLAVE_UPDATE_PERIOD		100				// Период опроса блоков-рабов (мс)
-#define PRESSURE_FAULT_DELAY	100				// Задержка срабатывания аварии по давлению (мс)
-#define LED_BLINK_PERIOD		500				// Период моргания светодиода на плате (мс)
-#define COMMUTATION_PAUSE		200				// Задержка на коммутацию (мс)
+#define SLAVE_UPDATE_PERIOD		100				// РџРµСЂРёРѕРґ РѕРїСЂРѕСЃР° Р±Р»РѕРєРѕРІ-СЂР°Р±РѕРІ (РјСЃ)
+#define PRESSURE_FAULT_DELAY	100				// Р—Р°РґРµСЂР¶РєР° СЃСЂР°Р±Р°С‚С‹РІР°РЅРёСЏ Р°РІР°СЂРёРё РїРѕ РґР°РІР»РµРЅРёСЋ (РјСЃ)
+#define LED_BLINK_PERIOD		500				// РџРµСЂРёРѕРґ РјРѕСЂРіР°РЅРёСЏ СЃРІРµС‚РѕРґРёРѕРґР° РЅР° РїР»Р°С‚Рµ (РјСЃ)
+#define COMMUTATION_PAUSE		500				// Р—Р°РґРµСЂР¶РєР° РЅР° РєРѕРјРјСѓС‚Р°С†РёСЋ (РјСЃ)
+#define APPLY_SETTINGS_TIMEOUT	5000			// РўР°Р№РјР°СѓС‚ РѕР¶РёРґР°РЅРёСЏ РєРѕРЅС„РёРіСѓСЂР°С†РёРё Р±Р»РѕРєР° (РјСЃ)
 
-#define GATE_CURRENT_THRESHOLD	0.1f			// Порог срабатывания компоратора тока (%)
+#define GATE_CURRENT_THRESHOLD	0.1f			// РџРѕСЂРѕРі СЃСЂР°Р±Р°С‚С‹РІР°РЅРёСЏ РєРѕРјРїРѕСЂР°С‚РѕСЂР° С‚РѕРєР° (%)
 
 #define ADC_RESOLUTION			4095
-#define ADC_REF_MV				3000			// Опорное напряжение АЦП (мВ)
+#define ADC_REF_MV				3000			// РћРїРѕСЂРЅРѕРµ РЅР°РїСЂСЏР¶РµРЅРёРµ РђР¦Рџ (РјР’)
 
 #define DAC_RESOLUTION			4095
-#define DAC_REF_MV				5000			// Опорное напряжение ЦАП (мВ)
+#define DAC_REF_MV				5000			// РћРїРѕСЂРЅРѕРµ РЅР°РїСЂСЏР¶РµРЅРёРµ Р¦РђРџ (РјР’)
 
 #endif //  __GLOBAL_H

@@ -1,4 +1,4 @@
-// -----------------------------------------
+﻿// -----------------------------------------
 // Board parameters
 // ----------------------------------------
 
@@ -15,6 +15,7 @@
 #include "ZwTIM.h"
 #include "ZwIWDG.h"
 #include "ZwNFLASH.h"
+#include "ZwSPI.h"
 
 
 // Definitions

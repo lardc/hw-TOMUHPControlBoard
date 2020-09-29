@@ -1,7 +1,8 @@
-#include "InitConfig.h"
+ï»¿#include "InitConfig.h"
 //
 #include "SysConfig.h"
 #include "Measurement.h"
+#include "BCCIxParams.h"
 
 // Functions
 //
@@ -25,21 +26,20 @@ void EI_Config()
 
 void IO_Config()
 {
-	// Âêëþ÷åíèå òàêòèðîâàíèÿ ïîðòîâ
+	// Ð’ÐºÐ»ÑŽÑ‡ÐµÐ½Ð¸Ðµ Ñ‚Ð°ÐºÑ‚Ð¸Ñ€Ð¾Ð²Ð°Ð½Ð¸Ñ Ð¿Ð¾Ñ€Ñ‚Ð¾Ð²
 	RCC_GPIO_Clk_EN(PORTA);
 	RCC_GPIO_Clk_EN(PORTB);
 	RCC_GPIO_Clk_EN(PORTC);
 	
-	// Àíàëîãîâûå âõîäû
+	// ÐÐ½Ð°Ð»Ð¾Ð³Ð¾Ð²Ñ‹Ðµ Ð²Ñ…Ð¾Ð´Ñ‹
 	GPIO_InitAnalog(GPIO_ANLG_I_DUT);
 	
-	// Âûõîäû
+	// Ð’Ñ‹Ñ…Ð¾Ð´Ñ‹
 	GPIO_InitPushPullOutput(GPIO_FAN);
 	GPIO_InitPushPullOutput(GPIO_M_RESET);
 	GPIO_InitPushPullOutput(GPIO_LOAD);
 	GPIO_InitPushPullOutput(GPIO_CS);
 	GPIO_InitPushPullOutput(GPIO_IND);
-	GPIO_InitPushPullOutput(GPIO_SYNC);
 	GPIO_InitPushPullOutput(GPIO_SFTY_EN);
 	GPIO_InitPushPullOutput(GPIO_RLC);
 	GPIO_InitPushPullOutput(GPIO_RELAY);
@@ -61,18 +61,23 @@ void IO_Config()
 	GPIO_SetState(GPIO_CS_DAC, true);
 	GPIO_SetState(GPIO_LDAC, true);
 	GPIO_SetState(GPIO_M_RESET, true);
+	GPIO_SetState(GPIO_LOAD, true);
+	GPIO_SetState(GPIO_PS_EN, false);
 
-	// Âûõîä ñ îòêðûòûì êîëëåêòîðîì
+	// Ð’Ñ‹Ñ…Ð¾Ð´ Ñ Ð¾Ñ‚ÐºÑ€Ñ‹Ñ‚Ñ‹Ð¼ ÐºÐ¾Ð»Ð»ÐµÐºÑ‚Ð¾Ñ€Ð¾Ð¼
+	GPIO_InitOpenDrainOutput(GPIO_SYNC, NoPull);
 	GPIO_InitOpenDrainOutput(GPIO_TRIG_RST, NoPull);
 	GPIO_SetState(GPIO_TRIG_RST, true);
+	GPIO_SetState(GPIO_SYNC, true);
+
 	
-	// Âõîäû
+	// Ð’Ñ…Ð¾Ð´Ñ‹
 	GPIO_InitInput(GPIO_SFTY, NoPull);
 	GPIO_InitInput(GPIO_OVERFLOW90, NoPull);
 	GPIO_InitInput(GPIO_OVERFLOW10, NoPull);
 	GPIO_InitInput(GPIO_PRESSURE, NoPull);
 	
-	// Àëüòåðíàòèâíûå ôóíêöèè
+	// ÐÐ»ÑŒÑ‚ÐµÑ€Ð½Ð°Ñ‚Ð¸Ð²Ð½Ñ‹Ðµ Ñ„ÑƒÐ½ÐºÑ†Ð¸Ð¸
 	GPIO_InitAltFunction(GPIO_ALT_CAN_RX, AltFn_9);
 	GPIO_InitAltFunction(GPIO_ALT_CAN_TX, AltFn_9);
 	GPIO_InitAltFunction(GPIO_ALT_UART_RX, AltFn_7);
@@ -89,7 +94,8 @@ void CAN_Config()
 	RCC_CAN_Clk_EN(CAN_1_ClkEN);
 	NCAN_Init(SYSCLK, CAN_BAUDRATE, FALSE);
 	NCAN_FIFOInterrupt(TRUE);
-	NCAN_FilterInit(0, 0, 0); // Ôèëüòð 0 ïðîïóñêàåò âñå ñîîáùåíèÿ
+	NCAN_FilterInit(0, CAN_SLAVE_FILTER_ID, CAN_SLAVE_NID_MASK);
+	NCAN_FilterInit(1, CAN_MASTER_FILTER_ID, CAN_MASTER_NID_MASK);
 }
 //------------------------------------------------------------------------------
 
@@ -103,35 +109,14 @@ void UART_Config()
 void ADC_Config()
 {
 	RCC_ADC_Clk_EN(ADC_12_ClkEN);
-
 	ADC_Calibration(ADC1);
-	ADC_Enable(ADC1);
-	ADC_SoftTrigConfig(ADC1);
-
-	// Êîíôèãóðàöèÿ è îòêëþ÷åíèå DMA
-	ADC_DMAConfig(ADC1);
-	ADC_DMAConfig(ADC2);
-	ADC_DMAEnable(ADC1, false);
-	ADC_DMAEnable(ADC2, false);
-}
-//------------------------------------------------------------------------------
-
-void ADC_SwitchToSingleMeasurement()
-{
-	ADC_SoftTrigConfig(ADC1);
-	ADC_DMAEnable(ADC1, false);
-}
-//------------------------------------------------------------------------------
-
-void ADC_SwitchToDMA()
-{
 	ADC_TrigConfig(ADC1, ADC12_TIM6_TRGO, RISE);
-
 	ADC_ChannelSeqReset(ADC1);
 	ADC_ChannelSet_Sequence(ADC1, ADC1_CURRENT_CHANNEL, 1);
 	ADC_ChannelSeqLen(ADC1, 1);
-
-	ADC_DMAEnable(ADC1, true);
+	ADC_DMAConfig(ADC1);
+	ADC_Enable(ADC1);
+	ADC_SamplingStart(ADC1);
 }
 //------------------------------------------------------------------------------
 
@@ -139,12 +124,13 @@ void DMA_Config()
 {
 	DMA_Clk_Enable(DMA1_ClkEN);
 
-	// DMA äëÿ ÀÖÏ òîêà íà DUT
+	// DMA Ð´Ð»Ñ ÐÐ¦ÐŸ Ñ‚Ð¾ÐºÐ° Ð½Ð° DUT
 	DMA_Reset(DMA_ADC_DUT_I_CHANNEL);
-	DMA_Interrupt(DMA_ADC_DUT_I_CHANNEL, DMA_TRANSFER_COMPLETE, 0, true);
-	DMAChannelX_DataConfig(DMA_ADC_DUT_I_CHANNEL, (uint32_t)LOGIC_OutputPulseRaw, (uint32_t)(&ADC1->DR), PULSE_ARR_MAX_LENGTH);
 	DMAChannelX_Config(DMA_ADC_DUT_I_CHANNEL, DMA_MEM2MEM_DIS, DMA_LvlPriority_LOW, DMA_MSIZE_16BIT, DMA_PSIZE_16BIT,
-						DMA_MINC_EN, DMA_PINC_DIS, DMA_CIRCMODE_DIS, DMA_READ_FROM_PERIPH, 0);
+							DMA_MINC_EN, DMA_PINC_DIS, DMA_CIRCMODE_DIS, DMA_READ_FROM_PERIPH);
+	DMAChannelX_DataConfig(DMA_ADC_DUT_I_CHANNEL, (uint32_t)(&LOGIC_OutputPulseRaw[0]), (uint32_t)(&ADC1->DR), PULSE_ARR_MAX_LENGTH);
+	DMA_Interrupt(DMA_ADC_DUT_I_CHANNEL, DMA_TRANSFER_COMPLETE, 0, true);
+	DMA_ChannelEnable(DMA_ADC_DUT_I_CHANNEL, true);
 }
 //------------------------------------------------------------------------------
 
@@ -176,6 +162,6 @@ void SPI_Config()
 void WatchDog_Config()
 {
 	IWDG_Config();
-	IWDG_ConfigureFastUpdate();
+	IWDG_ConfigureSlowUpdate();
 }
 //------------------------------------------------------------------------------

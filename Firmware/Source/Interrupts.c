@@ -1,4 +1,4 @@
-// Include
+﻿// Include
 #include "Interrupts.h"
 //
 #include <InitConfig.h>
@@ -15,7 +15,6 @@
 volatile Int64U LED_BlinkTimeCounter = 0;
 volatile bool Overflow90 = false;
 volatile bool Overflow10 = false;
-volatile bool DMAOperation = false;
 
 // Functions
 //
@@ -44,8 +43,6 @@ void DMA1_Channel1_IRQHandler()
 	if(DMA_IsTransferComplete(DMA1, DMA_ISR_TCIF1))
 	{
 		TIM_Stop(TIM6);
-		TIM_Reset(TIM6);
-		DMAOperation = false;
 		DMA_TransferCompleteReset(DMA1, DMA_IFCR_CTCIF1);
 	}
 }
@@ -82,6 +79,10 @@ void TIM3_IRQHandler()
 			LL_ToggleLED();
 			LED_BlinkTimeCounter = CONTROL_TimeCounter;
 		}
+
+		// Алгоритм работы вентилятора
+		CONTROL_UnitFan();
+
 		TIM_StatusClear(TIM3);
 	}
 }

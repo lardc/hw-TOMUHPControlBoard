@@ -1,11 +1,17 @@
-// Include
+п»ї// Include
 //
 #include "Global.h"
 #include "Controller.h"
 #include "Interrupts.h"
 #include "SysConfig.h"
 #include "BoardConfig.h"
+#include "BCCIxParams.h"
+#include "Delay.h"
 
+// Defines
+#define DAC_RESOLUTION		4095
+#define SPI2_BAUDRATE_BITS	0x5
+#define DAC_CHANNEL_B		BIT15
 
 // Forward functions
 //
@@ -15,6 +21,7 @@ void CAN_Config();
 void UART_Config();
 void Timer2_Config();
 void WatchDog_Config();
+void SPI2_Config();
 
 
 // Functions
@@ -30,6 +37,7 @@ int main()
 	IO_Config();
 	CAN_Config();
 	UART_Config();
+	SPI2_Config();
 	Timer2_Config();
 	WatchDog_Config();
 
@@ -52,17 +60,22 @@ void SysClk_Config()
 
 void IO_Config()
 {
-	// Включение тактирования портов
+	// Р’РєР»СЋС‡РµРЅРёРµ С‚Р°РєС‚РёСЂРѕРІР°РЅРёСЏ РїРѕСЂС‚РѕРІ
 	RCC_GPIO_Clk_EN(PORTA);
 	RCC_GPIO_Clk_EN(PORTB);
 	RCC_GPIO_Clk_EN(PORTC);
 
-	// Выходы
+	// Р’С‹С…РѕРґС‹
 	GPIO_Config(GPIOC, Pin_13, Output, PushPull, HighSpeed, NoPull);	// PC13(LED)
-	GPIO_Bit_Rst(GPIOC, Pin_14);
 	GPIO_Config(GPIOC, Pin_14, Output, PushPull, HighSpeed, NoPull);	// PC14(Sync_GD)
+	GPIO_Config(GPIOB, Pin_12, Output, PushPull, HighSpeed, NoPull);	// PB12(CS_GD1)
+	GPIO_Config(GPIOB, Pin_14, Output, PushPull, HighSpeed, NoPull);	// PB14(LDAC)
 
-	// Альтернативные функции портов
+	GPIO_Bit_Rst(GPIOC, Pin_14);
+	GPIO_Bit_Set(GPIOB, Pin_12);
+	GPIO_Bit_Set(GPIOB, Pin_14);
+
+	// РђР»СЊС‚РµСЂРЅР°С‚РёРІРЅС‹Рµ С„СѓРЅРєС†РёРё РїРѕСЂС‚РѕРІ
 	GPIO_Config(GPIOA, Pin_9, AltFn, PushPull, HighSpeed, NoPull);		// PA9(USART1 TX)
 	GPIO_AltFn(GPIOA, Pin_9, AltFn_7);
 
@@ -74,15 +87,38 @@ void IO_Config()
 
 	GPIO_Config(GPIOA, Pin_12, AltFn, PushPull, HighSpeed, NoPull);		// PA12(CAN TX)
 	GPIO_AltFn(GPIOA, Pin_12, AltFn_9);
+
+	GPIO_Config(GPIOB, Pin_15, AltFn, PushPull, HighSpeed, NoPull);		// PB15(DOUT)
+	GPIO_AltFn(GPIOB, Pin_15, AltFn_5);
+
+	GPIO_Config(GPIOB, Pin_13, AltFn, PushPull, HighSpeed, NoPull);		// PB13(SCK)
+	GPIO_AltFn(GPIOB, Pin_13, AltFn_5);
 }
 //--------------------------------------------
+
+void SPI2_Config()
+{
+	SPI_Init(SPI2, SPI2_BAUDRATE_BITS, false);
+	SPI_SetSyncPolarity(SPI2, RISE_Edge);
+	SPI_WriteByte(SPI2, 0);
+
+	// РЈСЂРѕРІРµРЅСЊ СЃСЂР°Р±Р°С‚С‹РІР°РЅРёСЏ РєРѕРјРїР°СЂР°С‚РѕСЂР° С‚РѕРєР° СѓРїСЂР°РІР»РµРЅРёСЏ РІС‹СЃС‚Р°РІР»СЏРµРј РІС‹СЃРѕРєРёРј,
+	// С‡С‚РѕР±С‹ РёСЃРєР»СЋС‡РёС‚СЊ Р»РѕР¶РЅС‹Рµ СЃСЂР°Р±Р°С‚С‹РІР°РЅРёСЏ РїСЂРё Р·Р°РїСѓСЃРєРµ Р±Р»РѕРєР°
+	GPIO_Bit_Rst(GPIOB, Pin_12);
+	SPI_WriteByte(SPI2, DAC_RESOLUTION | DAC_CHANNEL_B);
+	GPIO_Bit_Set(GPIOB, Pin_12);
+	DELAY_US(1);
+	GPIO_Bit_Rst(GPIOB, Pin_14);
+	DELAY_US(5);
+	GPIO_Bit_Set(GPIOB, Pin_14);
+}
 
 void CAN_Config()
 {
 	RCC_CAN_Clk_EN(CAN_1_ClkEN);
 	NCAN_Init(SYSCLK, CAN_BAUDRATE, FALSE);
 	NCAN_FIFOInterrupt(TRUE);
-	NCAN_FilterInit(0, 0, 0);		// Фильтр 0 пропускает все сообщения
+	NCAN_FilterInit(0, CAN_SLAVE_FILTER_ID, CAN_SLAVE_NID_MASK);
 }
 //--------------------------------------------
 
@@ -105,6 +141,6 @@ void Timer2_Config()
 void WatchDog_Config()
 {
 	IWDG_Config();
-	IWDG_ConfigureFastUpdate();
+	IWDG_ConfigureSlowUpdate();
 }
 //--------------------------------------------
