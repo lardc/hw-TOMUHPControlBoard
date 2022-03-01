@@ -15,9 +15,9 @@
 #define NO						0
 #define YES						1
 
-#define DUT_VOLTAGE_MIN			500		// В
+#define DUT_VOLTAGE_MIN			600		// В
 #define DUT_VOLTAGE_MAX			1500	// В
-#define DUT_VOLTAGE_DEF			500		// В
+#define DUT_VOLTAGE_DEF			600		// В
 
 #define DUT_CURRENT_MIN			100		// А x10
 #define DUT_CURRENT_MAX			1000	// А x10
