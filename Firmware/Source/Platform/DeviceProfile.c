@@ -160,6 +160,8 @@ static Boolean DEVPROFILE_Validate16(Int16U Address, Int16U Data)
 
 static Boolean DEVPROFILE_DispatchAction(Int16U ActionID, pInt16U UserError)
 {
+	static Int32U MemoryPointer = 0;
+
 	switch(ActionID)
 	{
 		case ACT_SAVE_TO_ROM:
@@ -188,6 +190,15 @@ static Boolean DEVPROFILE_DispatchAction(Int16U ActionID, pInt16U UserError)
 			break;
 		case ACT_BOOT_LOADER_REQUEST:
 			BOOT_LOADER_VARIABLE = BOOT_LOADER_REQUEST;
+			break;
+
+		case ACT_READ_SYMBOL:
+			DataTable[REG_MEM_SYMBOL] = *(pInt16U)(MemoryPointer++);
+			break;
+
+		case ACT_SELECT_MEM_LABEL:
+			MemoryPointer = 0x3D8000;
+
 			break;
 		default:
 			return (ControllerDispatchFunction) ? ControllerDispatchFunction(ActionID, UserError) : FALSE;

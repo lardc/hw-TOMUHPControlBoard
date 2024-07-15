@@ -45,6 +45,12 @@
 #define ACT_RESTORE_FROM_ROM			201	// Восстановление данных из FLASH
 #define ACT_RESET_TO_DEFAULT			202	// Сброс DataTable в состояние по умолчанию
 
+#define ACT_READ_SYMBOL					330	// Выполнить чтение символа из памяти
+#define ACT_SELECT_MEM_LABEL			331	// Переместить указатель считывания в область метки
+
+#define ACT_FLASH_SAVE					332	// Flash save fault data
+#define ACT_FLASH_ERASE					334	// Flash erase data sector
+
 #define ACT_BOOT_LOADER_REQUEST			320	// Перезапуск процессора с целью перепрограммирования
 // -----------------------------------------------
 
@@ -204,6 +210,8 @@
 // 258 - 259
 #define REG_FWINFO_STR_LEN				260	// Length of the information string record
 #define REG_FWINFO_STR_BEGIN			261	// Begining of the information string record
+
+#define REG_MEM_SYMBOL					299	// Считанный по адресу памяти символ
 
 // Массивы
 #define EP_CURRENT						1	// Массив значений тока

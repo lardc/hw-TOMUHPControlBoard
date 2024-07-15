@@ -12,6 +12,7 @@
 #include "Constraints.h"
 #include "Delay.h"
 #include "BCCIxParams.h"
+#include "SaveToFlash.h"
 
 // Defines
 //
@@ -90,6 +91,7 @@ void CONTROL_HandlePowerOn();
 void CONTROL_HandlePowerOff();
 void CONTROL_HandlePulseConfig();
 void CONTROL_GateDriverCharge();
+void CONTROL_InitStoragePointers();
 
 // Functions
 //
@@ -113,6 +115,8 @@ void CONTROL_Init()
 	DEVPROFILE_InitEPService(EPIndexes, EPSized, EPCounters, EPDatas);
 	// Сброс значений
 	DEVPROFILE_ResetControlSection();
+
+	CONTROL_InitStoragePointers();
 
 	// Ожидание запуска TOCU
 	uint64_t CONTROL_TOCUPowerUpTimer = CONTROL_TimeCounter + TIME_TOCU_POWER_UP;
@@ -216,6 +220,12 @@ void CONTROL_Idle()
 }
 //-----------------------------------------------
 
+void CONTROL_InitStoragePointers()
+{
+	STF_AssignPointer(1, (Int32U)&DataTable[REG_GATE_CURRENT_SHUNT]);
+	STF_AssignPointer(2, (Int32U)CONTROL_Values_Current);
+}
+
 static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 {
 	*pUserError = ERR_NONE;
@@ -304,6 +314,14 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 			
 		case ACT_WARNING_CLEAR:
 			DataTable[REG_WARNING] = 0;
+			break;
+
+		case ACT_FLASH_SAVE:
+			STF_SaveFaultData();
+			break;
+
+		case ACT_FLASH_ERASE:
+			STF_EraseDataSector();
 			break;
 
 		default:
