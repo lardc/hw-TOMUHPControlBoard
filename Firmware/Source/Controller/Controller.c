@@ -317,6 +317,10 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 			break;
 
 		case ACT_FLASH_SAVE:
+			for (Int16U i = 0; i < PULSE_ARR_MAX_LENGTH; ++i)
+			{
+				CONTROL_Values_Current[i] = i;
+			}
 			STF_SaveFaultData();
 			break;
 

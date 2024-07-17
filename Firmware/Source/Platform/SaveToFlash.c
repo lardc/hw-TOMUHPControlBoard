@@ -7,7 +7,6 @@
 #include "StorageDescription.h"
 #include "Global.h"
 
-#define FLASH_SECTOR_MASK	SECTORH|SECTORG|SECTORF|SECTORE
 #define FLASH_START_ADDR	0x08010000
 #define FLASH_END_ADDR		0x0801F799
 
@@ -35,8 +34,10 @@ void STF_SaveFaultData()
 
 void STF_Save()
 {
-	Int32U ShiftedAddress = STF_ShiftStorageEnd();
+	//Int32U ShiftedAddress = STF_ShiftStorageEnd();
+	Int32U ShiftedAddress = FLASH_START_ADDR;
 	Int16U MaxDataLength = 0;
+	Int16U Description[MAX_DESCRIPTION_LEN];
 
 	Int16U i;
 	for (i = 0; i < StorageSize; ++i)
@@ -45,6 +46,7 @@ void STF_Save()
 	if (ShiftedAddress + MaxDataLength >= FLASH_END_ADDR)
 		return;
 
+	NFLASH_Unlock();
 	for(i = 0; i < StorageSize; i++)
 	{
 		Int16U DescriptionLength = StrLen(StorageDescription[i].Description);
@@ -52,17 +54,19 @@ void STF_Save()
 		DescriptionHeader[1] = DescriptionLength;
 
 		// Запись заголовка описания
-		NFLASH_WriteArray16(ShiftedAddress, (pInt16U)DescriptionHeader, 2);
+		NFLASH_WriteArray16(ShiftedAddress, DescriptionHeader, 2);
 		ShiftedAddress += 2;
 
 		// Запись описания
-		NFLASH_WriteArray16(ShiftedAddress, (pInt16U)StorageDescription[i].Description, DescriptionLength);
+		Int16U j;
+		for (j = 0; j < DescriptionLength; ++j)
+			Description[j] = StorageDescription[i].Description[j];
+		NFLASH_WriteArray16(ShiftedAddress, Description, DescriptionLength);
 		ShiftedAddress += DescriptionLength;
 
 		// Запись заголовка данных
 		Int16U DataHeader[2] = {StorageDescription[i].Type, StorageDescription[i].Length};
-		NFLASH_WriteArray16(ShiftedAddress,
-				(pInt16U)DataHeader, 2);
+		NFLASH_WriteArray16(ShiftedAddress, DataHeader, 2);
 		ShiftedAddress += 2;
 
 		// Запись данных при наличии указателя
@@ -70,8 +74,7 @@ void STF_Save()
 		{
 			Int16U DataWriteLength = StorageDescription[i].Length * STF_GetTypeLength(StorageDescription[i].Type);
 
-			NFLASH_WriteArray16(ShiftedAddress,
-						(pInt16U)TablePointers[i], DataWriteLength);
+			NFLASH_WriteArray16(ShiftedAddress, (pInt16U)TablePointers[i], DataWriteLength);
 			ShiftedAddress += DataWriteLength;
 		}
 	}

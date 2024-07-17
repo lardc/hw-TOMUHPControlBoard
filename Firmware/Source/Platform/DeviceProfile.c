@@ -14,6 +14,7 @@
 #include "ZwNCAN.h"
 #include "ZwSCI.h"
 #include "BCCIMHighLevel.h"
+#include "ZwNFLASH.h"
 
 // Types
 //
@@ -193,11 +194,11 @@ static Boolean DEVPROFILE_DispatchAction(Int16U ActionID, pInt16U UserError)
 			break;
 
 		case ACT_READ_SYMBOL:
-			DataTable[REG_MEM_SYMBOL] = *(pInt16U)(MemoryPointer++);
+			DataTable[REG_MEM_SYMBOL] = NFLASH_ReadWord16(MemoryPointer++);
 			break;
 
 		case ACT_SELECT_MEM_LABEL:
-			MemoryPointer = 0x3D8000;
+			MemoryPointer = 0x08010000;
 
 			break;
 		default:
