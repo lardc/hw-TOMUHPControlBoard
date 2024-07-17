@@ -194,7 +194,8 @@ static Boolean DEVPROFILE_DispatchAction(Int16U ActionID, pInt16U UserError)
 			break;
 
 		case ACT_READ_SYMBOL:
-			DataTable[REG_MEM_SYMBOL] = NFLASH_ReadWord16(MemoryPointer++);
+			DataTable[REG_MEM_SYMBOL] = NFLASH_ReadWord16(MemoryPointer);
+			MemoryPointer += 2;
 			break;
 
 		case ACT_SELECT_MEM_LABEL:

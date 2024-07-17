@@ -222,8 +222,8 @@ void CONTROL_Idle()
 
 void CONTROL_InitStoragePointers()
 {
-	STF_AssignPointer(1, (Int32U)&DataTable[REG_GATE_CURRENT_SHUNT]);
-	STF_AssignPointer(2, (Int32U)CONTROL_Values_Current);
+	STF_AssignPointer(0, (Int32U)&DataTable[REG_GATE_CURRENT_SHUNT]);
+	STF_AssignPointer(1, (Int32U)CONTROL_Values_Current);
 }
 
 static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)

@@ -34,14 +34,13 @@ void STF_SaveFaultData()
 
 void STF_Save()
 {
-	//Int32U ShiftedAddress = STF_ShiftStorageEnd();
-	Int32U ShiftedAddress = FLASH_START_ADDR;
+	Int32U ShiftedAddress = STF_ShiftStorageEnd();
 	Int16U MaxDataLength = 0;
 	Int16U Description[MAX_DESCRIPTION_LEN];
 
 	Int16U i;
 	for (i = 0; i < StorageSize; ++i)
-		MaxDataLength += StorageDescription[i].Length * STF_GetTypeLength(StorageDescription[i].Type) + 4 + StrLen(StorageDescription[i].Description);
+		MaxDataLength += StorageDescription[i].Length * STF_GetTypeLength(StorageDescription[i].Type) * 2 + 8 + StrLen(StorageDescription[i].Description) * 2;
 
 	if (ShiftedAddress + MaxDataLength >= FLASH_END_ADDR)
 		return;
@@ -55,19 +54,19 @@ void STF_Save()
 
 		// Запись заголовка описания
 		NFLASH_WriteArray16(ShiftedAddress, DescriptionHeader, 2);
-		ShiftedAddress += 2;
+		ShiftedAddress += 4;
 
 		// Запись описания
 		Int16U j;
 		for (j = 0; j < DescriptionLength; ++j)
 			Description[j] = StorageDescription[i].Description[j];
 		NFLASH_WriteArray16(ShiftedAddress, Description, DescriptionLength);
-		ShiftedAddress += DescriptionLength;
+		ShiftedAddress += DescriptionLength * 2;
 
 		// Запись заголовка данных
 		Int16U DataHeader[2] = {StorageDescription[i].Type, StorageDescription[i].Length};
 		NFLASH_WriteArray16(ShiftedAddress, DataHeader, 2);
-		ShiftedAddress += 2;
+		ShiftedAddress += 4;
 
 		// Запись данных при наличии указателя
 		if(TablePointers[i])
@@ -75,7 +74,7 @@ void STF_Save()
 			Int16U DataWriteLength = StorageDescription[i].Length * STF_GetTypeLength(StorageDescription[i].Type);
 
 			NFLASH_WriteArray16(ShiftedAddress, (pInt16U)TablePointers[i], DataWriteLength);
-			ShiftedAddress += DataWriteLength;
+			ShiftedAddress += DataWriteLength * 2;
 		}
 	}
 }
@@ -98,10 +97,10 @@ Int32U STF_ShiftStorageEnd()
 			break;
 
 		Int16U TypeLength = STF_GetTypeLength(CurrentType);
-		++StoragePointer;
+		StoragePointer += 2;
 
 		Int16U Length = NFLASH_ReadWord16(StoragePointer) * (Int16U)TypeLength;
-		StoragePointer += Length + 1;
+		StoragePointer += (Length + 1) * 2;
 	}
 	return StoragePointer;
 }
