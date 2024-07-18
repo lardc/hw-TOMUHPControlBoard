@@ -321,7 +321,7 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 			{
 				CONTROL_Values_Current[i] = i;
 			}
-			STF_SaveFaultData();
+			STF_SaveDiagData();
 			break;
 
 		case ACT_FLASH_ERASE:

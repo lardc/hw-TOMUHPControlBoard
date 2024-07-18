@@ -7,13 +7,9 @@
 #include "StorageDescription.h"
 #include "Global.h"
 
-#define FLASH_START_ADDR	0x08010000
-#define FLASH_END_ADDR		0x0801F799
-
 // Forward functions
 Int16U STF_StartAddressShift(Int16U Index);
 Int16U STF_GetTypeLength(DataType CurrentType);
-void STF_Save();
 Int32U STF_ShiftStorageEnd();
 Int16U StrLen(const char* string);
 
@@ -26,13 +22,7 @@ void STF_AssignPointer(Int16U Index, Int32U Pointer)
 }
 // ----------------------------------------
 
-void STF_SaveFaultData()
-{
-	STF_Save();
-}
-// ----------------------------------------
-
-void STF_Save()
+void STF_SaveDiagData()
 {
 	Int32U ShiftedAddress = STF_ShiftStorageEnd();
 	Int16U MaxDataLength = 0;
@@ -42,7 +32,7 @@ void STF_Save()
 	for (i = 0; i < StorageSize; ++i)
 		MaxDataLength += StorageDescription[i].Length * STF_GetTypeLength(StorageDescription[i].Type) * 2 + 8 + StrLen(StorageDescription[i].Description) * 2;
 
-	if (ShiftedAddress + MaxDataLength >= FLASH_END_ADDR)
+	if (ShiftedAddress + MaxDataLength >= FLASH_DIAG_END_ADDR)
 		return;
 
 	NFLASH_Unlock();
@@ -88,7 +78,7 @@ Int16U STF_GetTypeLength(DataType CurrentType)
 
 Int32U STF_ShiftStorageEnd()
 {
-	Int32U StoragePointer = FLASH_START_ADDR;
+	Int32U StoragePointer = FLASH_DIAG_START_ADDR;
 	while (NFLASH_ReadWord16(StoragePointer) != 0xFFFF)
 	{
 		Int16U CurrentType = NFLASH_ReadWord16(StoragePointer);
@@ -108,7 +98,7 @@ Int32U STF_ShiftStorageEnd()
 
 void STF_EraseDataSector()
 {
-	NFLASH_ErasePages(FLASH_START_ADDR, FLASH_END_ADDR);
+	NFLASH_ErasePages(FLASH_DIAG_START_ADDR, FLASH_DIAG_END_ADDR);
 }
 // ----------------------------------------
 

@@ -3,6 +3,7 @@
 
 // Include
 #include "stdinc.h"
+#include "SaveToFlashConfig.h"
 
 // Definition
 #define MAX_DESCRIPTION_LEN			64
@@ -29,7 +30,7 @@ typedef struct __RecordDescription
 
 // Functions
 void STF_AssignPointer(Int16U Index, Int32U Pointer);
-void STF_SaveFaultData();
+void STF_SaveDiagData();
 void STF_EraseDataSector();
 
 #endif // __SAVE_TO_FLASH_H
