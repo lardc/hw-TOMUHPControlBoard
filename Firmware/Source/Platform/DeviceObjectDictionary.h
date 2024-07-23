@@ -51,6 +51,9 @@
 #define ACT_FLASH_SAVE					332	// Flash save fault data
 #define ACT_FLASH_ERASE					333	// Flash erase data sector
 
+#define ACT_SELECT_COUNTER_LABEL		334	// Перемещение указателя в область счетчиков
+#define ACT_COUNTER_SAVE				335	// Сохранение наработки счетчиков во флеш
+
 #define ACT_BOOT_LOADER_REQUEST			320	// Перезапуск процессора с целью перепрограммирования
 // -----------------------------------------------
 

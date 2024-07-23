@@ -15,6 +15,7 @@
 #include "ZwSCI.h"
 #include "BCCIMHighLevel.h"
 #include "ZwNFLASH.h"
+#include "SaveToFlashConfig.h"
 
 // Types
 //
@@ -199,9 +200,13 @@ static Boolean DEVPROFILE_DispatchAction(Int16U ActionID, pInt16U UserError)
 			break;
 
 		case ACT_SELECT_MEM_LABEL:
-			MemoryPointer = 0x08010000;
-
+			MemoryPointer = FLASH_DIAG_START_ADDR;
 			break;
+
+		case ACT_SELECT_COUNTER_LABEL:
+			MemoryPointer = FLASH_CYCLE_START_ADDR;
+			break;
+
 		default:
 			return (ControllerDispatchFunction) ? ControllerDispatchFunction(ActionID, UserError) : FALSE;
 	}

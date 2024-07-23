@@ -328,6 +328,10 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 			STF_EraseDataSector();
 			break;
 
+		case ACT_COUNTER_SAVE:
+			STF_SaveCounterData();
+			break;
+
 		default:
 			return DIAG_HandleDiagnosticAction(ActionID, pUserError);
 	}

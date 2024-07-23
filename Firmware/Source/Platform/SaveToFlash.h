@@ -28,9 +28,19 @@ typedef struct __RecordDescription
 	Int16U Length;
 } RecordDescription;
 
+typedef struct __CounterData
+{
+	Int32U Value;
+	Int32U Address;
+} CounterData;
+
 // Functions
 void STF_AssignPointer(Int16U Index, Int32U Pointer);
+void STF_AssignCounterPointer(Int16U Index, Int32U Pointer);
 void STF_SaveDiagData();
+void STF_SaveCounterData();
 void STF_EraseDataSector();
+void STF_EraseCounterDataSector();
+void STF_LoadCounters();
 
 #endif // __SAVE_TO_FLASH_H
