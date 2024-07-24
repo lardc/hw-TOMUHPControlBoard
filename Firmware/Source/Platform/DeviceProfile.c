@@ -16,6 +16,7 @@
 #include "BCCIMHighLevel.h"
 #include "ZwNFLASH.h"
 #include "SaveToFlashConfig.h"
+#include "SaveToFlash.h"
 
 // Types
 //
@@ -203,7 +204,13 @@ static Boolean DEVPROFILE_DispatchAction(Int16U ActionID, pInt16U UserError)
 			MemoryPointer = FLASH_DIAG_START_ADDR;
 			break;
 
+		case ACT_READ_COUNTER_SYMBOL:
+			DataTable[REG_MEM_SYMBOL] = STF_ReadCounter();
+			MemoryPointer += 2;
+			break;
+
 		case ACT_SELECT_COUNTER_LABEL:
+			STF_ResetStateMachine();
 			MemoryPointer = FLASH_CYCLE_START_ADDR;
 			break;
 

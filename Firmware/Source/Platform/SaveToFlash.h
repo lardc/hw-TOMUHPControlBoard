@@ -35,6 +35,8 @@ typedef struct __CounterData
 } CounterData;
 
 // Functions
+Int16U STF_ReadCounter();
+void STF_ResetStateMachine();
 void STF_AssignPointer(Int16U Index, Int32U Pointer);
 void STF_AssignCounterPointer(Int16U Index, Int32U Pointer);
 void STF_SaveDiagData();

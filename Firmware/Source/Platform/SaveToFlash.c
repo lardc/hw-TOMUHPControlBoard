@@ -7,6 +7,81 @@
 #include "StorageDescription.h"
 #include "Global.h"
 
+typedef enum __ReadCountersStateMachine
+{
+	RCSM_DescriptionType = 0,
+	RCSM_DescriptionLength,
+	RCSM_Description,
+	RCSM_DataType,
+	RCSM_DataLength,
+	RCSM_Data
+} ReadCountersStateMachine;
+
+ReadCountersStateMachine CurrentState = RCSM_DescriptionType;
+Int16U LineNumber;
+Int16U DataPosition;
+Int32U FlashPosition;
+
+void STF_ResetStateMachine()
+{
+	CurrentState = RCSM_DescriptionType;
+	LineNumber = 0;
+	DataPosition = 0;
+	FlashPosition = FLASH_CYCLE_START_ADDR;
+}
+
+Int16U STF_ReadCounter()
+{
+	Int16U RetVal = 0;
+	switch(CurrentState)
+	{
+		case RCSM_DescriptionType:
+			RetVal = DT_Char;
+			CurrentState = RCSM_DescriptionLength;
+			DataPosition++;
+			break;
+
+		case RCSM_DescriptionLength:
+			RetVal = StorageDescription[LineNumber].Length;
+			CurrentState = RCSM_Description;
+			break;
+
+		case RCSM_Description:
+			RetVal = StorageDescription[LineNumber].Description[DataPosition++];
+			if (RetVal == '\0')
+			{
+				CurrentState = RCSM_DataType;
+				DataPosition = 0;
+			}
+			break;
+
+		case RCSM_DataType:
+			RetVal = StorageDescription[LineNumber].Type;
+			CurrentState = RCSM_DataLength;
+			break;
+
+		case RCSM_DataLength:
+			RetVal = StorageDescription[LineNumber].Length;
+			CurrentState = RCSM_Data;
+			break;
+
+		case RCSM_Data:
+			RetVal = NFLASH_ReadWord16(FlashPosition);
+			FlashPosition += 2;
+			DataPosition++;
+
+			if (DataPosition >= 2)
+			{
+				CurrentState = RCSM_DescriptionType;
+				DataPosition = 0;
+				LineNumber++;
+			}
+			break;
+	}
+
+	return RetVal;
+}
+
 // Forward functions
 Int16U STF_StartAddressShift(Int16U Index);
 Int16U STF_GetTypeLength(DataType CurrentType);
@@ -141,6 +216,7 @@ Int32U STF_ShiftCounterStorageEnd()
 				return StoragePointer - CounterStorageSize * 4;
 		}
 	}
+	return StoragePointer;
 }
 // ----------------------------------------
 
