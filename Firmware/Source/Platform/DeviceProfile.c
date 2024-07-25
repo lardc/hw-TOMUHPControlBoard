@@ -211,7 +211,7 @@ static Boolean DEVPROFILE_DispatchAction(Int16U ActionID, pInt16U UserError)
 
 		case ACT_SELECT_COUNTER_LABEL:
 			STF_ResetStateMachine();
-			MemoryPointer = FLASH_CYCLE_START_ADDR;
+			MemoryPointer = FLASH_COUNTER_START_ADDR;
 			break;
 
 		default:

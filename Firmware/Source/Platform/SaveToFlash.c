@@ -27,7 +27,7 @@ void STF_ResetStateMachine()
 	CurrentState = RCSM_DescriptionType;
 	LineNumber = 0;
 	DataPosition = 0;
-	FlashPosition = FLASH_CYCLE_START_ADDR;
+	FlashPosition = FLASH_COUNTER_START_ADDR;
 }
 
 Int16U STF_ReadCounter()
@@ -196,14 +196,14 @@ Int32U STF_ShiftStorageEnd()
 
 Int32U STF_ShiftCounterStorageEnd()
 {
-	Int32U StoragePointer = FLASH_CYCLE_START_ADDR;
-	Int32U Value;
-	for (Int32U i = 0 ; i < FLASH_CYCLE_END_ADDR; ++i)
+	Int32U StoragePointer = FLASH_COUNTER_START_ADDR;
+	Int16U MaxValuesCounter = 0;
+
+	for (Int32U i = 0 ; i < FLASH_COUNTER_END_ADDR; ++i)
 	{
 		for (Int16U j = 0; j < CounterStorageSize; ++j)
 		{
-			Value = 0;
-			Int16U MaxValues = 0;
+			Int32U Value = 0;
 			for (Int16U k = 0; k < 2; ++k)
 			{
 				Value += NFLASH_ReadWord16(StoragePointer);
@@ -211,8 +211,9 @@ Int32U STF_ShiftCounterStorageEnd()
 			}
 
 			if (Value == 0xFFFFFFFF)
-				MaxValues++;
-			if (MaxValues >= CounterStorageSize)
+				MaxValuesCounter++;
+
+			if (MaxValuesCounter >= CounterStorageSize)
 				return StoragePointer - CounterStorageSize * 4;
 		}
 	}
@@ -228,7 +229,7 @@ void STF_EraseDataSector()
 
 void STF_EraseCounterSector()
 {
-	NFLASH_ErasePages(FLASH_CYCLE_START_ADDR, FLASH_CYCLE_END_ADDR);
+	NFLASH_ErasePages(FLASH_COUNTER_START_ADDR, FLASH_COUNTER_END_ADDR);
 }
 // ----------------------------------------
 
