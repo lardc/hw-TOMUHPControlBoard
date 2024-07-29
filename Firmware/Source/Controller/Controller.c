@@ -316,7 +316,7 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 			DataTable[REG_WARNING] = 0;
 			break;
 
-		case ACT_FLASH_SAVE:
+		case ACT_FLASH_DIAG_SAVE:
 			for (Int16U i = 0; i < PULSE_ARR_MAX_LENGTH; ++i)
 			{
 				CONTROL_Values_Current[i] = i;
@@ -324,11 +324,11 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 			STF_SaveDiagData();
 			break;
 
-		case ACT_FLASH_ERASE:
+		case ACT_FLASH_DIAG_ERASE:
 			STF_EraseDataSector();
 			break;
 
-		case ACT_COUNTER_SAVE:
+		case ACT_FLASH_CNT_SAVE:
 			STF_SaveCounterData();
 			break;
 

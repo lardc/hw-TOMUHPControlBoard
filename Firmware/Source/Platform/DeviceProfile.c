@@ -195,21 +195,20 @@ static Boolean DEVPROFILE_DispatchAction(Int16U ActionID, pInt16U UserError)
 			BOOT_LOADER_VARIABLE = BOOT_LOADER_REQUEST;
 			break;
 
-		case ACT_READ_SYMBOL:
+		case ACT_FLASH_DIAG_READ_SYMBOL:
 			DataTable[REG_MEM_SYMBOL] = NFLASH_ReadWord16(MemoryPointer);
 			MemoryPointer += 2;
 			break;
 
-		case ACT_SELECT_MEM_LABEL:
+		case ACT_FLASH_DIAG_INIT_READ:
 			MemoryPointer = FLASH_DIAG_START_ADDR;
 			break;
 
-		case ACT_READ_COUNTER_SYMBOL:
+		case ACT_FLASH_CNT_READ_SYMBOL:
 			DataTable[REG_MEM_SYMBOL] = STF_ReadCounter();
-			MemoryPointer += 2;
 			break;
 
-		case ACT_SELECT_COUNTER_LABEL:
+		case ACT_FLASH_CNT_INIT_READ:
 			STF_ResetStateMachine();
 			MemoryPointer = FLASH_COUNTER_START_ADDR;
 			break;

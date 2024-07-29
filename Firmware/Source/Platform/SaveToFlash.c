@@ -44,15 +44,13 @@ Int16U STF_ReadCounter()
 		case RCSM_DescriptionLength:
 			RetVal = StorageDescription[LineNumber].Length;
 			CurrentState = RCSM_Description;
+			DataPosition = 0;
 			break;
 
 		case RCSM_Description:
 			RetVal = StorageDescription[LineNumber].Description[DataPosition++];
 			if (RetVal == '\0')
-			{
 				CurrentState = RCSM_DataType;
-				DataPosition = 0;
-			}
 			break;
 
 		case RCSM_DataType:
@@ -63,6 +61,7 @@ Int16U STF_ReadCounter()
 		case RCSM_DataLength:
 			RetVal = StorageDescription[LineNumber].Length;
 			CurrentState = RCSM_Data;
+			DataPosition = 0;
 			break;
 
 		case RCSM_Data:
@@ -73,7 +72,6 @@ Int16U STF_ReadCounter()
 			if (DataPosition >= 2)
 			{
 				CurrentState = RCSM_DescriptionType;
-				DataPosition = 0;
 				LineNumber++;
 			}
 			break;
@@ -87,6 +85,7 @@ Int16U STF_StartAddressShift(Int16U Index);
 Int16U STF_GetTypeLength(DataType CurrentType);
 Int32U STF_ShiftStorageEnd();
 Int32U STF_ShiftCounterStorageEnd();
+Int32U ReadWord32(Int32U Address);
 Int16U StrLen(const char* string);
 
 // Functions
@@ -203,12 +202,8 @@ Int32U STF_ShiftCounterStorageEnd()
 	{
 		for (Int16U j = 0; j < CounterStorageSize; ++j)
 		{
-			Int32U Value = 0;
-			for (Int16U k = 0; k < 2; ++k)
-			{
-				Value += NFLASH_ReadWord16(StoragePointer);
-				StoragePointer += 2;
-			}
+			Int32U Value = ReadWord32(StoragePointer);
+			StoragePointer += 4;
 
 			if (Value == 0xFFFFFFFF)
 				MaxValuesCounter++;
@@ -233,7 +228,7 @@ void STF_EraseCounterSector()
 }
 // ----------------------------------------
 
-void LoadCounters()
+void STF_LoadCounters()
 {
 	Int32U StoragePointer = STF_ShiftCounterStorageEnd();
 	StoragePointer -= CounterStorageSize * STF_GetTypeLength(DT_Int32U);
@@ -246,8 +241,15 @@ void LoadCounters()
 			Value += NFLASH_ReadWord16(StoragePointer);
 			StoragePointer += 2;
 		}
-		CounterTablePointers[i] = (CounterData){Value, CounterTablePointers[i].Address};
+		CounterTablePointers[i].Value = Value;
 	}
+}
+
+Int32U ReadWord32(Int32U Address)
+{
+	Int16U Word1 = NFLASH_ReadWord16(Address);
+	Int16U Word2 = NFLASH_ReadWord16(Address + 2);
+	return ((Int32U)Word1 << 16) | Word2;
 }
 
 Int16U StrLen(const char* string)

@@ -45,15 +45,15 @@
 #define ACT_RESTORE_FROM_ROM			201	// Восстановление данных из FLASH
 #define ACT_RESET_TO_DEFAULT			202	// Сброс DataTable в состояние по умолчанию
 
-#define ACT_READ_SYMBOL					330	// Выполнить чтение символа из памяти
-#define ACT_SELECT_MEM_LABEL			331	// Переместить указатель считывания в область метки
+#define ACT_FLASH_DIAG_READ_SYMBOL		330	// Выполнить чтение символа из памяти
+#define ACT_FLASH_DIAG_INIT_READ		331	// Переместить указатель считывания в область метки
 
-#define ACT_FLASH_SAVE					332	// Flash save fault data
-#define ACT_FLASH_ERASE					333	// Flash erase data sector
+#define ACT_FLASH_DIAG_SAVE				332	// Flash save fault data
+#define ACT_FLASH_DIAG_ERASE			333	// Flash erase data sector
 
-#define ACT_SELECT_COUNTER_LABEL		334	// Перемещение указателя в область счетчиков
-#define ACT_READ_COUNTER_SYMBOL			335	// Считывания символа в области счетчиков
-#define ACT_COUNTER_SAVE				336	// Сохранение наработки счетчиков во флеш
+#define ACT_FLASH_CNT_INIT_READ			334	// Перемещение указателя в область счетчиков
+#define ACT_FLASH_CNT_READ_SYMBOL		335	// Считывания символа в области счетчиков
+#define ACT_FLASH_CNT_SAVE				336	// Сохранение наработки счетчиков во флеш
 
 #define ACT_BOOT_LOADER_REQUEST			320	// Перезапуск процессора с целью перепрограммирования
 // -----------------------------------------------
