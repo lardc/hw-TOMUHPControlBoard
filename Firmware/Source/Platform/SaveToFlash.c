@@ -239,7 +239,7 @@ void STF_EraseDataSector()
 }
 // ----------------------------------------
 
-void STF_EraseCounterSector()
+void STF_EraseCounterDataSector()
 {
 	NFLASH_ErasePages(FLASH_COUNTER_START_ADDR, FLASH_COUNTER_END_ADDR);
 }
