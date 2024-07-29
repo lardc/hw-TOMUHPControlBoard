@@ -42,24 +42,24 @@ Int16U STF_ReadCounter()
 			break;
 
 		case RCSM_DescriptionLength:
-			RetVal = StorageDescription[LineNumber].Length;
+			RetVal = CounterStorageDescription[LineNumber].Length;
 			CurrentState = RCSM_Description;
 			DataPosition = 0;
 			break;
 
 		case RCSM_Description:
-			RetVal = StorageDescription[LineNumber].Description[DataPosition++];
+			RetVal = CounterStorageDescription[LineNumber].Description[DataPosition++];
 			if (RetVal == '\0')
 				CurrentState = RCSM_DataType;
 			break;
 
 		case RCSM_DataType:
-			RetVal = StorageDescription[LineNumber].Type;
+			RetVal = CounterStorageDescription[LineNumber].Type;
 			CurrentState = RCSM_DataLength;
 			break;
 
 		case RCSM_DataLength:
-			RetVal = StorageDescription[LineNumber].Length;
+			RetVal = CounterStorageDescription[LineNumber].Length;
 			CurrentState = RCSM_Data;
 			DataPosition = 0;
 			break;
