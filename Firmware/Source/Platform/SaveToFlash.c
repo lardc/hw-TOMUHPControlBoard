@@ -155,24 +155,21 @@ void STF_SaveCounterData()
 {
 	Int32U ShiftedAddress = STF_ShiftCounterStorageEnd();
 
+	// Проверка на то, изменились ли данные с момента последней записи
+	Int16U i;
+	for (i = 0; i < CounterStorageSize; ++i)
+	{
+		if (CounterTablePointers[i].Value != *(pInt32U)CounterTablePointers[i].Address)
+			break;
+	}
+	if (i == CounterStorageSize)
+		return;
+
 	// Проверка на свободное место в памяти
 	if (ShiftedAddress + CounterStorageSize * 4 > FLASH_COUNTER_END_ADDR)
 	{
 		STF_EraseCounterDataSector();
 	}
-
-	// Проверка на то, изменились ли данные с момента последней записи
-	Int16U i;
-	ShiftedAddress -= CounterStorageSize * 4;
-	for (i = 0; i < CounterStorageSize; ++i)
-	{
-		if (CounterTablePointers[i].Value != NFLASH_ReadWord32(ShiftedAddress))
-			break;
-		ShiftedAddress += 4;
-	}
-	
-	if (i == CounterStorageSize)
-		return;
 
 	NFLASH_Unlock();
 
@@ -248,16 +245,12 @@ void STF_EraseCounterDataSector()
 void STF_LoadCounters()
 {
 	Int32U StoragePointer = STF_ShiftCounterStorageEnd();
-	StoragePointer -= CounterStorageSize * STF_GetTypeLength(DT_Int32U);
+	StoragePointer -= CounterStorageSize * STF_GetTypeLength(DT_Int32U) * 2;
 	Int32U Value;
 	for (Int16U i = 0; i < CounterStorageSize; ++i)
 	{
-		Value = 0;
-		for (Int16U j = 0; j < 2; ++j)
-		{
-			Value += NFLASH_ReadWord16(StoragePointer);
-			StoragePointer += 2;
-		}
+		Value = NFLASH_ReadWord32(StoragePointer);
+		StoragePointer += 4;
 		CounterTablePointers[i].Value = Value;
 	}
 }
