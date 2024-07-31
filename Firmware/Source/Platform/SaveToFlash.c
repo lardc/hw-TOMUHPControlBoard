@@ -244,14 +244,11 @@ void STF_EraseCounterDataSector()
 
 void STF_LoadCounters()
 {
-	Int32U StoragePointer = STF_ShiftCounterStorageEnd();
-	StoragePointer -= CounterStorageSize * STF_GetTypeLength(DT_Int32U) * 2;
-	Int32U Value;
+	Int32U StoragePointer = STF_ShiftCounterStorageEnd() - CounterStorageSize * 4;
 	for (Int16U i = 0; i < CounterStorageSize; ++i)
 	{
-		Value = NFLASH_ReadWord32(StoragePointer);
+		CounterTablePointers[i].Value = NFLASH_ReadWord32(StoragePointer);
 		StoragePointer += 4;
-		CounterTablePointers[i].Value = Value;
 	}
 }
 
