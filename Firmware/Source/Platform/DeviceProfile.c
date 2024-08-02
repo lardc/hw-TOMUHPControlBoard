@@ -210,7 +210,6 @@ static Boolean DEVPROFILE_DispatchAction(Int16U ActionID, pInt16U UserError)
 
 		case ACT_FLASH_CNT_INIT_READ:
 			STF_ResetStateMachine();
-			MemoryPointer = FLASH_COUNTER_START_ADDR;
 			break;
 
 		default:

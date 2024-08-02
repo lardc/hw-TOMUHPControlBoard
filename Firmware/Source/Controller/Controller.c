@@ -74,6 +74,12 @@ volatile Int16U CONTROL_Values_TurnOnCounter = 0;
 Int16U CONTROL_AverageCounter = 0;
 Int64U CONTROL_AveragePeriodCounter = 0;
 
+Int32U CONTROL_Counter1 = 11;
+Int32U CONTROL_Counter2 = 22;
+Int32U CONTROL_Counter3 = 33;
+Int32U CONTROL_Counter4 = 44;
+Int32U CONTROL_Counter5 = 55;
+
 // Forward functions
 //
 static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError);
@@ -92,6 +98,7 @@ void CONTROL_HandlePowerOff();
 void CONTROL_HandlePulseConfig();
 void CONTROL_GateDriverCharge();
 void CONTROL_InitStoragePointers();
+void CONTROL_InitCounterPointers();
 
 // Functions
 //
@@ -117,6 +124,7 @@ void CONTROL_Init()
 	DEVPROFILE_ResetControlSection();
 
 	CONTROL_InitStoragePointers();
+	CONTROL_InitCounterPointers();
 
 	// Ожидание запуска TOCU
 	uint64_t CONTROL_TOCUPowerUpTimer = CONTROL_TimeCounter + TIME_TOCU_POWER_UP;
@@ -226,6 +234,15 @@ void CONTROL_InitStoragePointers()
 	STF_AssignPointer(1, (Int32U)CONTROL_Values_Current);
 }
 
+void CONTROL_InitCounterPointers()
+{
+	STF_AssignCounterPointer(0, (Int32U)&CONTROL_Counter1);
+	STF_AssignCounterPointer(1, (Int32U)&CONTROL_Counter2);
+	STF_AssignCounterPointer(2, (Int32U)&CONTROL_Counter3);
+	STF_AssignCounterPointer(3, (Int32U)&CONTROL_Counter4);
+	STF_AssignCounterPointer(4, (Int32U)&CONTROL_Counter5);
+}
+
 static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 {
 	*pUserError = ERR_NONE;
@@ -330,6 +347,18 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 
 		case ACT_FLASH_CNT_SAVE:
 			STF_SaveCounterData();
+			break;
+
+		case 337:
+			CONTROL_Counter1++;
+			CONTROL_Counter2++;
+			CONTROL_Counter3++;
+			CONTROL_Counter4++;
+			CONTROL_Counter5++;
+			break;
+
+		case 338:
+			STF_EraseCounterDataSector();
 			break;
 
 		default:

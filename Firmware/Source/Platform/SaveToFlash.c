@@ -7,6 +7,8 @@
 #include "StorageDescription.h"
 #include "Global.h"
 
+Int16U StrLen(const char* string);
+
 typedef enum __ReadCountersStateMachine
 {
 	RCSM_DescriptionType = 0,
@@ -39,17 +41,19 @@ Int16U STF_ReadCounter()
 			RetVal = DT_Char;
 			CurrentState = RCSM_DescriptionLength;
 			DataPosition++;
+			if (LineNumber == CounterStorageSize)
+				LineNumber = 0;
 			break;
 
 		case RCSM_DescriptionLength:
-			RetVal = CounterStorageDescription[LineNumber].Length;
+			RetVal = StrLen(CounterStorageDescription[LineNumber].Description);
 			CurrentState = RCSM_Description;
 			DataPosition = 0;
 			break;
 
 		case RCSM_Description:
 			RetVal = CounterStorageDescription[LineNumber].Description[DataPosition++];
-			if (RetVal == '\0')
+			if (CounterStorageDescription[LineNumber].Description[DataPosition] == '\0')
 				CurrentState = RCSM_DataType;
 			break;
 
@@ -85,7 +89,7 @@ Int16U STF_StartAddressShift(Int16U Index);
 Int16U STF_GetTypeLength(DataType CurrentType);
 Int32U STF_ShiftStorageEnd();
 Int32U STF_ShiftCounterStorageEnd();
-Int16U StrLen(const char* string);
+Int32U STF_ReadCounter32(Int32U Address);
 
 // Functions
 //
@@ -169,13 +173,14 @@ void STF_SaveCounterData()
 	if (ShiftedAddress + CounterStorageSize * 4 > FLASH_COUNTER_END_ADDR)
 	{
 		STF_EraseCounterDataSector();
+		ShiftedAddress = FLASH_COUNTER_START_ADDR;
 	}
 
 	NFLASH_Unlock();
 
 	for (i = 0; i < CounterStorageSize; ++i)
 	{
-		NFLASH_WriteArray32(ShiftedAddress, (uint32_t*)CounterTablePointers[i].Address, 1);
+		NFLASH_WriteArray16(ShiftedAddress, (pInt16U)CounterTablePointers[i].Address, 2);
 		ShiftedAddress += 4;
 	}
 }
@@ -216,17 +221,16 @@ Int32U STF_ShiftCounterStorageEnd()
 	{
 		for (Int16U j = 0; j < CounterStorageSize; ++j)
 		{
-			Int32U Value = NFLASH_ReadWord32(StoragePointer);
+			Int32U Value = STF_ReadCounter32(StoragePointer);
 			StoragePointer += 4;
 
 			if (Value == 0xFFFFFFFF)
 				MaxValuesCounter++;
 
-			if (MaxValuesCounter >= CounterStorageSize)
+			if (MaxValuesCounter == CounterStorageSize)
 				return StoragePointer - CounterStorageSize * 4;
 		}
 	}
-	return StoragePointer;
 }
 // ----------------------------------------
 
@@ -247,7 +251,7 @@ void STF_LoadCounters()
 	Int32U StoragePointer = STF_ShiftCounterStorageEnd() - CounterStorageSize * 4;
 	for (Int16U i = 0; i < CounterStorageSize; ++i)
 	{
-		CounterTablePointers[i].Value = NFLASH_ReadWord32(StoragePointer);
+		CounterTablePointers[i].Value = STF_ReadCounter32(StoragePointer);
 		StoragePointer += 4;
 	}
 }
@@ -258,5 +262,13 @@ Int16U StrLen(const char* string)
 	const char* s = string;
 	do n++; while (*s++);
 	return n;
+}
+// ----------------------------------------
+
+Int32U STF_ReadCounter32(Int32U Address)
+{
+	Int16U Word1 = NFLASH_ReadWord16(Address);
+	Int16U Word2 = NFLASH_ReadWord16(Address + 2);
+	return ((Int32U)Word1 << 16) | Word2;
 }
 // ----------------------------------------
