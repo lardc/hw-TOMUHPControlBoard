@@ -6,7 +6,14 @@
 #include "SysConfig.h"
 #include "StorageDescription.h"
 #include "Global.h"
+#include "DataTable.h"
 
+// Forward functions
+Int16U STF_StartAddressShift(Int16U Index);
+Int16U STF_GetTypeLength(DataType CurrentType);
+Int32U STF_ShiftStorageEnd();
+Int32U STF_ShiftCounterStorageEnd();
+Int32U STF_ReadCounter32(Int32U Address);
 Int16U StrLen(const char* string);
 
 typedef enum __ReadCountersStateMachine
@@ -16,7 +23,7 @@ typedef enum __ReadCountersStateMachine
 	RCSM_Description,
 	RCSM_DataType,
 	RCSM_DataLength,
-	RCSM_Data
+	RCSM_Data,
 } ReadCountersStateMachine;
 
 ReadCountersStateMachine CurrentState = RCSM_DescriptionType;
@@ -29,7 +36,7 @@ void STF_ResetStateMachine()
 	CurrentState = RCSM_DescriptionType;
 	LineNumber = 0;
 	DataPosition = 0;
-	FlashPosition = FLASH_COUNTER_START_ADDR;
+	FlashPosition = STF_ShiftCounterStorageEnd() - CounterStorageSize * 4;
 }
 
 Int16U STF_ReadCounter()
@@ -41,8 +48,10 @@ Int16U STF_ReadCounter()
 			RetVal = DT_Char;
 			CurrentState = RCSM_DescriptionLength;
 			DataPosition++;
+
 			if (LineNumber == CounterStorageSize)
-				LineNumber = 0;
+				return 0xFFFF;
+
 			break;
 
 		case RCSM_DescriptionLength:
@@ -70,10 +79,11 @@ Int16U STF_ReadCounter()
 
 		case RCSM_Data:
 			RetVal = NFLASH_ReadWord16(FlashPosition);
+
 			FlashPosition += 2;
 			DataPosition++;
 
-			if (DataPosition >= 2)
+			if (DataPosition == 2)
 			{
 				CurrentState = RCSM_DescriptionType;
 				LineNumber++;
@@ -83,13 +93,6 @@ Int16U STF_ReadCounter()
 
 	return RetVal;
 }
-
-// Forward functions
-Int16U STF_StartAddressShift(Int16U Index);
-Int16U STF_GetTypeLength(DataType CurrentType);
-Int32U STF_ShiftStorageEnd();
-Int32U STF_ShiftCounterStorageEnd();
-Int32U STF_ReadCounter32(Int32U Address);
 
 // Functions
 //
@@ -157,8 +160,6 @@ void STF_SaveDiagData()
 
 void STF_SaveCounterData()
 {
-	Int32U ShiftedAddress = STF_ShiftCounterStorageEnd();
-
 	// Проверка на то, изменились ли данные с момента последней записи
 	Int16U i;
 	for (i = 0; i < CounterStorageSize; ++i)
@@ -168,6 +169,8 @@ void STF_SaveCounterData()
 	}
 	if (i == CounterStorageSize)
 		return;
+
+	Int32U ShiftedAddress = STF_ShiftCounterStorageEnd();
 
 	// Проверка на свободное место в памяти
 	if (ShiftedAddress + CounterStorageSize * 4 > FLASH_COUNTER_END_ADDR)
@@ -215,10 +218,10 @@ Int32U STF_ShiftStorageEnd()
 Int32U STF_ShiftCounterStorageEnd()
 {
 	Int32U StoragePointer = FLASH_COUNTER_START_ADDR;
-	Int16U MaxValuesCounter = 0;
 
 	for (Int32U i = 0 ; i < FLASH_COUNTER_END_ADDR; ++i)
 	{
+		Int16U MaxValuesCounter = 0;
 		for (Int16U j = 0; j < CounterStorageSize; ++j)
 		{
 			Int32U Value = STF_ReadCounter32(StoragePointer);
@@ -231,6 +234,7 @@ Int32U STF_ShiftCounterStorageEnd()
 				return StoragePointer - CounterStorageSize * 4;
 		}
 	}
+	return FLASH_COUNTER_START_ADDR;
 }
 // ----------------------------------------
 
@@ -267,8 +271,8 @@ Int16U StrLen(const char* string)
 
 Int32U STF_ReadCounter32(Int32U Address)
 {
-	Int16U Word1 = NFLASH_ReadWord16(Address);
-	Int16U Word2 = NFLASH_ReadWord16(Address + 2);
-	return ((Int32U)Word1 << 16) | Word2;
+	Int16U LOW = NFLASH_ReadWord16(Address);
+	Int16U HIGH = NFLASH_ReadWord16(Address + 2);
+	return ((Int32U)HIGH << 16) | LOW;
 }
 // ----------------------------------------

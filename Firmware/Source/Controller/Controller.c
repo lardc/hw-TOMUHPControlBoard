@@ -74,11 +74,11 @@ volatile Int16U CONTROL_Values_TurnOnCounter = 0;
 Int16U CONTROL_AverageCounter = 0;
 Int64U CONTROL_AveragePeriodCounter = 0;
 
-Int32U CONTROL_Counter1 = 11;
-Int32U CONTROL_Counter2 = 22;
-Int32U CONTROL_Counter3 = 33;
-Int32U CONTROL_Counter4 = 44;
-Int32U CONTROL_Counter5 = 55;
+Int32U CONTROL_Counter1 = 70000;
+Int32U CONTROL_Counter2 = 91233;
+Int32U CONTROL_Counter3 = 999;
+Int32U CONTROL_Counter4 = 0xFFFE;
+Int32U CONTROL_Counter5 = 0;
 
 // Forward functions
 //
@@ -125,6 +125,7 @@ void CONTROL_Init()
 
 	CONTROL_InitStoragePointers();
 	CONTROL_InitCounterPointers();
+	STF_LoadCounters();
 
 	// Ожидание запуска TOCU
 	uint64_t CONTROL_TOCUPowerUpTimer = CONTROL_TimeCounter + TIME_TOCU_POWER_UP;
@@ -347,18 +348,6 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 
 		case ACT_FLASH_CNT_SAVE:
 			STF_SaveCounterData();
-			break;
-
-		case 337:
-			CONTROL_Counter1++;
-			CONTROL_Counter2++;
-			CONTROL_Counter3++;
-			CONTROL_Counter4++;
-			CONTROL_Counter5++;
-			break;
-
-		case 338:
-			STF_EraseCounterDataSector();
 			break;
 
 		default:
