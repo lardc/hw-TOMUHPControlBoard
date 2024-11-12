@@ -145,6 +145,22 @@
 #define REG_AVERAGE_PERIOD				82	// Период следования импульсов при усреднении (мс)
 // 83 - 84
 #define REG_AFTER_MEASURE_DELAY			85	// Пауза после измерения
+// 86 - 89
+#define REG_TOCU_1_CANID				90	//
+#define REG_TOCU_1_BITMASK				91	//
+#define REG_TOCU_1_EMULATION			92	//
+//
+#define REG_TOCU_2_CANID				93	//
+#define REG_TOCU_2_BITMASK				94	//
+#define REG_TOCU_2_EMULATION			95	//
+//
+#define REG_TOCU_3_CANID				96	//
+#define REG_TOCU_3_BITMASK				97	//
+#define REG_TOCU_3_EMULATION			98	//
+//
+#define REG_TOCU_4_CANID				99	//
+#define REG_TOCU_4_BITMASK				100	//
+#define REG_TOCU_4_EMULATION			101	//
 
 // Несохраняемы регистры чтения-записи
 #define REG_ANODE_VOLTAGE				128	// Анодное напряжение (В)
