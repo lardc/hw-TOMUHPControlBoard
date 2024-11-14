@@ -6,6 +6,7 @@
 #include "Controller.h"
 
 // Functions
+void LOGIC_NodeArrayInit();
 bool LOGIC_ReadSlavesState();
 bool LOGIC_WriteSlavesConfig();
 bool LOGIC_CallCommandForSlaves(uint16_t Command);

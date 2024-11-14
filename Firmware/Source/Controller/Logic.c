@@ -45,6 +45,16 @@ void LOGIC_AreInterruptsActive(bool State);
 
 // Functions
 //
+void LOGIC_NodeArrayInit()
+{
+	for (uint16_t i = 0; i < NODE_ARRAY_SIZE; ++i)
+	{
+		NodeArray[i].NodeID = DataTable[REG_TOCU_1_CANID + i * 3];
+		NodeArray[i].SupportedBits = DataTable[REG_TOCU_1_BITMASK + i * 3];
+		NodeArray[i].Emulation = DataTable[REG_TOCU_1_EMULATION + i * 3];
+	}
+}
+//
 bool LOGIC_ReadSlavesState()
 {
 	uint16_t State, OpResult;
@@ -52,6 +62,9 @@ bool LOGIC_ReadSlavesState()
 	
 	for(uint16_t i = 0; i < NODE_ARRAY_SIZE; ++i)
 	{
+		if (NodeArray[i].Emulation)
+			continue;
+
 		result = false;
 		
 		if(BHL_ReadRegister(NodeArray[i].NodeID, REG_TOCU_DEV_STATE, &State))
@@ -76,6 +89,9 @@ bool LOGIC_WriteSlavesConfig()
 
 	for(uint16_t i = 0; i < NODE_ARRAY_SIZE; ++i)
 	{
+		if (NodeArray[i].Emulation)
+			continue;
+
 		result = false;
 		
 		if(BHL_WriteRegister(NodeArray[i].NodeID, REG_TOCU_VOLTAGE_SETPOINT, NodeArray[i].Voltage))
@@ -94,7 +110,7 @@ bool LOGIC_CallCommandForSlaves(uint16_t Command)
 {
 	for(uint16_t i = 0; i < NODE_ARRAY_SIZE; ++i)
 	{
-		if(!BHL_Call(NodeArray[i].NodeID, Command))
+		if(NodeArray[i].Emulation && !BHL_Call(NodeArray[i].NodeID, Command))
 			return false;
 	}
 	
@@ -117,7 +133,7 @@ bool LOGIC_AreSlavesInStateX(uint16_t State)
 bool LOGIC_IsSlaveInFaultOrDisabled(uint16_t Fault, uint16_t Disabled)
 {
 	for(uint16_t i = 0; i < NODE_ARRAY_SIZE; ++i)
-		if(NodeArray[i].State == Fault || NodeArray[i].State == Disabled)
+		if(!NodeArray[i].Emulation && (NodeArray[i].State == Fault || NodeArray[i].State == Disabled))
 			return true;
 	
 	return false;

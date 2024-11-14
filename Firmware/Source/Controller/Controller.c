@@ -120,6 +120,8 @@ void CONTROL_Init()
 	CONTROL_WatchDogUpdate();
 
 	CONTROL_ResetToDefaultState();
+
+	LOGIC_NodeArrayInit();
 }
 //-----------------------------------------------
 
