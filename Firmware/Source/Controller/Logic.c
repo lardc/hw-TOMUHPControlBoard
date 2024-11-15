@@ -110,7 +110,7 @@ bool LOGIC_CallCommandForSlaves(uint16_t Command)
 {
 	for(uint16_t i = 0; i < NODE_ARRAY_SIZE; ++i)
 	{
-		if(NodeArray[i].Emulation && !BHL_Call(NodeArray[i].NodeID, Command))
+		if(!NodeArray[i].Emulation && !BHL_Call(NodeArray[i].NodeID, Command))
 			return false;
 	}
 	
