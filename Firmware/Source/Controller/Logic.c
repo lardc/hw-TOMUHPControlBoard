@@ -11,12 +11,6 @@
 #include "GateDriver.h"
 #include "InitConfig.h"
 
-// Definitions
-//
-#define TOCU1_CAN_NID			21
-#define TOCU1_BIT_MASK			0x3FF
-//
-
 // Types
 //
 typedef struct __Node
@@ -37,11 +31,9 @@ typedef struct __Node
 #define NODE_ARRAY_SIZE 4
 Node NodeArray[NODE_ARRAY_SIZE] = {0};
 
-
 // Functions prototypes
 //
 void LOGIC_AreInterruptsActive(bool State);
-//
 
 // Functions
 //
@@ -54,7 +46,8 @@ void LOGIC_NodeArrayInit()
 		NodeArray[i].Emulation = DataTable[REG_TOCU_1_EMULATION + i * 3];
 	}
 }
-//
+//-----------------------------------------------
+
 bool LOGIC_ReadSlavesState()
 {
 	uint16_t State, OpResult;
