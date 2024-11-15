@@ -111,25 +111,27 @@ bool LOGIC_CallCommandForSlaves(uint16_t Command)
 }
 //-----------------------------------------------
 
-bool LOGIC_AreSlavesInStateX(uint16_t State)
+bool LOGIC_AreAllSlavesInState(uint16_t State)
 {
 	bool result = true;
 	
 	for(uint16_t i = 0; i < NODE_ARRAY_SIZE; ++i)
-		if(NodeArray[i].State != State)
+		if(!NodeArray[i].Emulation && NodeArray[i].State != State)
 			result = false;
 	
 	return result;
 }
 //-----------------------------------------------
 
-bool LOGIC_IsSlaveInFaultOrDisabled(uint16_t Fault, uint16_t Disabled)
+bool LOGIC_IsAnySlaveInState(uint16_t State)
 {
+	bool result = false;
+
 	for(uint16_t i = 0; i < NODE_ARRAY_SIZE; ++i)
-		if(!NodeArray[i].Emulation && (NodeArray[i].State == Fault || NodeArray[i].State == Disabled))
-			return true;
-	
-	return false;
+		if(!NodeArray[i].Emulation && NodeArray[i].State == State)
+			result = true;
+
+	return result;
 }
 //-----------------------------------------------
 

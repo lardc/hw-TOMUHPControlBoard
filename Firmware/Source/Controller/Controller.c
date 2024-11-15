@@ -132,21 +132,10 @@ void CONTROL_ResetToDefaultState()
 	
 	CONTROL_ResetHardware(false);
 
-	if(CONTROL_ForceSlavesStateUpdate())
-	{
-		if(LOGIC_AreSlavesInStateX(TOCUDS_Fault))
-		{
-			if(!LOGIC_CallCommandForSlaves(ACT_TOCU_FAULT_CLEAR))
-				CONTROL_SwitchToFault(DF_INTERFACE);
-		}
-		else
-		{
-			if(LOGIC_CallCommandForSlaves(ACT_TOCU_DISABLE_POWER))
-				CONTROL_SetDeviceState(DS_None, SS_None);
-			else
-				CONTROL_SwitchToFault(DF_INTERFACE);
-		}
-	}
+	bool res = LOGIC_CallCommandForSlaves(ACT_TOCU_FAULT_CLEAR);
+	if(res) res = res && LOGIC_CallCommandForSlaves(ACT_TOCU_DISABLE_POWER);
+	if(res)
+		CONTROL_SetDeviceState(DS_None, SS_None);
 	else
 		CONTROL_SwitchToFault(DF_INTERFACE);
 }
@@ -373,11 +362,12 @@ void CONTROL_HandlePowerOn()
 				
 			case SS_WaitCharge:
 				{
-					if(LOGIC_AreSlavesInStateX(TOCUDS_Ready))
+					if(LOGIC_AreAllSlavesInState(TOCUDS_Ready))
 					{
 						CONTROL_SetDeviceState(DS_Ready, SS_None);
 					}
-					else if(LOGIC_IsSlaveInFaultOrDisabled(TOCUDS_Fault, TOCUDS_Disabled))
+					else if(LOGIC_IsAnySlaveInState(TOCUDS_None) || LOGIC_IsAnySlaveInState(TOCUDS_Fault) ||
+							LOGIC_IsAnySlaveInState(TOCUDS_Disabled))
 					{
 						CONTROL_SwitchToFault(DF_TOCU_WRONG_STATE);
 					}
@@ -442,7 +432,7 @@ void CONTROL_HandlePulseConfig()
 				{
 					if(CONTROL_ForceSlavesStateUpdate())
 					{
-						if(LOGIC_AreSlavesInStateX(TOCUDS_Ready))
+						if(LOGIC_AreAllSlavesInState(TOCUDS_Ready))
 							CONTROL_SetDeviceState(DS_InProcess, SS_AfterPulseWaiting);
 						else
 							if(CONTROL_TimeCounter > CONTROL_TimeCounterDelay)
@@ -517,7 +507,7 @@ void CONTROL_HandlePulseConfig()
 					{
 						if(CONTROL_ForceSlavesStateUpdate())
 						{
-							if(LOGIC_AreSlavesInStateX(TOCUDS_Ready))
+							if(LOGIC_AreAllSlavesInState(TOCUDS_Ready))
 							{
 								if(CONTROL_AverageCounter < DataTable[REG_AVERAGE_NUM])
 								{
@@ -554,10 +544,10 @@ void CONTROL_HandlePulseConfig()
 									CONTROL_SetDeviceState(DS_Ready, SS_None);
 								}
 							}
-							else
+							else if(LOGIC_IsAnySlaveInState(TOCUDS_None) || LOGIC_IsAnySlaveInState(TOCUDS_Fault) ||
+									LOGIC_IsAnySlaveInState(TOCUDS_Disabled))
 							{
-								if(!LOGIC_AreSlavesInStateX(TOCUDS_InProcess))
-									CONTROL_SwitchToFault(DF_TOCU_WRONG_STATE);
+								CONTROL_SwitchToFault(DF_TOCU_WRONG_STATE);
 							}
 						}
 						else
