@@ -291,6 +291,8 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 				GateDriver_SetRiseRate(&CachedMeasurementSettings);
 				GateDriver_SetFallRate(&CachedMeasurementSettings);
 				GateDriver_SetCompThreshold(CachedMeasurementSettings.GateCurrent * GATE_CURRENT_THRESHOLD);
+				// Время на стабилизацию выходов ЦАП
+				DELAY_US(50);
 
 				GateDriver_Sync(true);
 				DELAY_US(100);
