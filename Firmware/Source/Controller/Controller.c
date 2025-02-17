@@ -294,9 +294,11 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 				// Время на стабилизацию выходов ЦАП
 				DELAY_US(50);
 
+				LL_SyncOscilloscopeActivate(true);
 				GateDriver_Sync(true);
 				DELAY_US(100);
 				GateDriver_Sync(false);
+				LL_SyncOscilloscopeActivate(false);
 
 				CONTROL_ResetHardware(true);
 				COMM_InternalCommutation(false);
