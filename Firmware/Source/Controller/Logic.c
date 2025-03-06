@@ -46,6 +46,15 @@ void LOGIC_NodeArrayInit()
 		NodeArray[i].Emulation = DataTable[REG_TOCU_1_EMULATION + i * 3];
 	}
 }
+
+void LOGIC_NodeArrayEmulationUpdate()
+{
+	for (uint16_t i = 0; i < NODE_ARRAY_SIZE; ++i)
+	{
+		NodeArray[i].Emulation = DataTable[REG_TOCU_1_EMULATION + i * 3];
+	}
+}
+
 //-----------------------------------------------
 
 bool LOGIC_ReadSlavesState()

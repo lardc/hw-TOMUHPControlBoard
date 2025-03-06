@@ -7,6 +7,7 @@
 
 // Functions
 void LOGIC_NodeArrayInit();
+void LOGIC_NodeArrayEmulationUpdate();
 bool LOGIC_ReadSlavesState();
 bool LOGIC_WriteSlavesConfig();
 bool LOGIC_CallCommandForSlaves(uint16_t Command);
