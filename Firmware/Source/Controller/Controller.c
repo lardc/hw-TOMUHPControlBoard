@@ -63,6 +63,8 @@ volatile Int64U CONTROL_TimeCounter = 0;
 volatile Int64U CONTROL_FanTimeCounter = 0;
 static Boolean CycleActive = FALSE;
 static Boolean RequestUpdateEmulation = FALSE;
+static Boolean RequestInitialResetSlave = FALSE;
+Int64U CONTROL_TOCUPowerUpTimer = 0;
 Int64U CONTROL_TimeCounterDelay = 0;
 MeasurementSettings CachedMeasurementSettings;
 volatile Int16U CONTROL_Values_Current[PULSE_ARR_MAX_LENGTH] = {0};
@@ -81,6 +83,7 @@ void CONTROL_SetDeviceState(DeviceState NewState, SubState NewSubState);
 void CONTROL_SwitchToFault(Int16U Reason);
 void CONTROL_WatchDogUpdate();
 void CONTROL_ResetToDefaultState();
+void CONTROL_ResetSlaves();
 void CONTROL_ResetHardware(bool KeepPower);
 void CONTROL_ResetData();
 void CONTROL_SlavesStateUpdate();
@@ -116,8 +119,8 @@ void CONTROL_Init()
 	DEVPROFILE_ResetControlSection();
 
 	// Ожидание запуска TOCU
-	uint64_t CONTROL_TOCUPowerUpTimer = CONTROL_TimeCounter + TIME_TOCU_POWER_UP;
-	while(CONTROL_TimeCounter < CONTROL_TOCUPowerUpTimer){}
+	CONTROL_TOCUPowerUpTimer = CONTROL_TimeCounter + SLAVE_INITIAL_DELAY;
+
 	CONTROL_WatchDogUpdate();
 
 	LOGIC_NodeArrayInit();
@@ -132,7 +135,10 @@ void CONTROL_ResetToDefaultState()
 	BHL_ResetError();
 	
 	CONTROL_ResetHardware(false);
+}
 
+void CONTROL_ResetSlaves()
+{
 	bool res = LOGIC_CallCommandForSlaves(ACT_TOCU_FAULT_CLEAR);
 	if(res) res = res && LOGIC_CallCommandForSlaves(ACT_TOCU_DISABLE_POWER);
 	if(res)
@@ -141,7 +147,6 @@ void CONTROL_ResetToDefaultState()
 		CONTROL_SwitchToFault(DF_INTERFACE);
 }
 //-----------------------------------------------
-
 void CONTROL_ResetData()
 {
 	DataTable[REG_FAULT_REASON] = DF_NONE;
@@ -197,10 +202,15 @@ void CONTROL_Idle()
 	CONTROL_SlavesStateUpdate();
 	
 	if (RequestUpdateEmulation)
-		{
-			RequestUpdateEmulation = FALSE;
-			LOGIC_NodeArrayEmulationUpdate();
-		}
+	{
+		RequestUpdateEmulation = FALSE;
+		LOGIC_NodeArrayEmulationUpdate();
+	}
+
+	if (!RequestInitialResetSlave && (CONTROL_TimeCounter >= CONTROL_TOCUPowerUpTimer))
+	{
+		CONTROL_ResetSlaves();
+	}
 
 	CONTROL_MonitorSafety();
 	CONTROL_MonitorPressure();
@@ -238,6 +248,7 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 				if(CONTROL_State == DS_Ready)
 				{
 					CONTROL_ResetToDefaultState();
+					CONTROL_ResetSlaves();
 					CONTROL_SetDeviceState(DS_None, SS_PowerOff);
 				}
 				else if(CONTROL_State != DS_None)
@@ -308,7 +319,10 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 				RequestUpdateEmulation = TRUE;
 
 				if(CONTROL_State == DS_Fault)
-					CONTROL_ResetToDefaultState();
+					{
+						CONTROL_ResetToDefaultState();
+						CONTROL_ResetSlaves();
+					}
 			}
 			break;
 			

@@ -16,6 +16,7 @@
 #define ENABLE_LOCKING			FALSE			// Защита паролем
 
 #define SLAVE_UPDATE_PERIOD		100				// Период опроса блоков-рабов (мс)
+#define SLAVE_INITIAL_DELAY		2000			// Задержка начальной инициализиции блоков-рабов (мс)
 #define PRESSURE_FAULT_DELAY	100				// Задержка срабатывания аварии по давлению (мс)
 #define LED_BLINK_PERIOD		500				// Период моргания светодиода на плате (мс)
 #define COMMUTATION_PAUSE		500				// Задержка на коммутацию (мс)
