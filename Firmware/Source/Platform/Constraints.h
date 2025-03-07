@@ -85,7 +85,7 @@
 
 #define REF_VOLTAGE_MIN			1000	// мв
 #define REF_VOLTAGE_MAX			5000	// мв
-#define REF_VOLTAGE_DEF			1000	// мв
+#define REF_VOLTAGE_DEF			0		// мв
 // Types
 //
 typedef struct __TableItemConstraint

@@ -58,6 +58,7 @@ void MEASURE_ConvertRawArray(volatile uint16_t* RawArray, volatile uint16_t* Out
 {
 	uint16_t i, Imax = 0, ImaxArrayIndex = 0;
 	float tmp = 0;
+	float Uref = DataTable[REG_REF_VOLTAGE_VARIABLE] ? DataTable[REG_REF_VOLTAGE_VARIABLE] : ADC_REF_MV;
 
 	float Offset = (float)((int16_t)DataTable[REG_I_DUT_OFFSET]);
 	float K = (float)DataTable[REG_I_DUT_GAIN] / 1000;
@@ -70,7 +71,7 @@ void MEASURE_ConvertRawArray(volatile uint16_t* RawArray, volatile uint16_t* Out
 
 	for (i = 0; i < DataLength; ++i)
 	{
-		tmp = ((float)RawArray[i] - Offset) * ADC_REF_MV / ADC_RESOLUTION * K;
+		tmp = ((float)RawArray[i] - Offset) * Uref / ADC_RESOLUTION * K;
 		tmp = tmp / ShuntRes;
 		tmp = tmp * tmp * P2 + tmp * P1 + P0;
 		RawArray[i] = (tmp > 0) ? (uint16_t)tmp : 0;
