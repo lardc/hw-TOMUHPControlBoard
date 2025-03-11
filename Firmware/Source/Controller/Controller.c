@@ -62,7 +62,6 @@ volatile SubState SUB_State = SS_None;
 volatile Int64U CONTROL_TimeCounter = 0;
 volatile Int64U CONTROL_FanTimeCounter = 0;
 static Boolean CycleActive = FALSE;
-static Boolean RequestUpdateEmulation = FALSE;
 static Boolean RequestInitialResetSlave = FALSE;
 Int64U CONTROL_TOCUPowerUpTimer = 0;
 Int64U CONTROL_TimeCounterDelay = 0;
@@ -120,11 +119,8 @@ void CONTROL_Init()
 
 	// Ожидание запуска TOCU
 	CONTROL_TOCUPowerUpTimer = CONTROL_TimeCounter + SLAVE_INITIAL_DELAY;
-
 	CONTROL_WatchDogUpdate();
-
 	LOGIC_NodeArrayInit();
-
 	CONTROL_ResetToDefaultState();
 }
 //-----------------------------------------------
@@ -201,14 +197,11 @@ void CONTROL_Idle()
 	// Считывание состояний блоков-рабов
 	CONTROL_SlavesStateUpdate();
 	
-	if (RequestUpdateEmulation)
-	{
-		RequestUpdateEmulation = FALSE;
-		LOGIC_NodeArrayEmulationUpdate();
-	}
+	LOGIC_NodeArrayEmulationUpdate();
 
 	if (!RequestInitialResetSlave && (CONTROL_TimeCounter >= CONTROL_TOCUPowerUpTimer))
 	{
+		RequestInitialResetSlave = TRUE;
 		CONTROL_ResetSlaves();
 	}
 
@@ -232,8 +225,6 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 	{
 		case ACT_ENABLE_POWER:
 			{
-				RequestUpdateEmulation = TRUE;
-
 				if(CONTROL_State == DS_None)
 					CONTROL_SetDeviceState(DS_InProcess, SS_PowerOn);
 				else if(CONTROL_State != DS_Ready)
@@ -243,8 +234,6 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 			
 		case ACT_DISABLE_POWER:
 			{
-				RequestUpdateEmulation = TRUE;
-
 				if(CONTROL_State == DS_Ready)
 				{
 					CONTROL_ResetToDefaultState();
@@ -258,8 +247,6 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 			
 		case ACT_MEASURE_START:
 			{
-				RequestUpdateEmulation = TRUE;
-
 				if(LOGIC_IsAnodeVRegCorrect())
 				{
 					CachedMeasurementSettings = LOGIC_CacheMeasurementSettings();
@@ -282,8 +269,6 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 			
 		case ACT_MEASURE_STOP:
 			{
-				RequestUpdateEmulation = TRUE;
-
 				if(CONTROL_State == DS_InProcess)
 				{
 					CONTROL_ResetHardware(false);
@@ -296,8 +281,6 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 			
 		case ACT_GATE_PULSE:
 			{
-				RequestUpdateEmulation = TRUE;
-
 				CONTROL_GateDriverCharge();
 
 				CachedMeasurementSettings = LOGIC_CacheMeasurementSettings();
@@ -316,18 +299,15 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 
 		case ACT_FAULT_CLEAR:
 			{
-				RequestUpdateEmulation = TRUE;
-
 				if(CONTROL_State == DS_Fault)
-					{
-						CONTROL_ResetToDefaultState();
-						CONTROL_ResetSlaves();
-					}
+				{
+					CONTROL_ResetToDefaultState();
+					CONTROL_ResetSlaves();
+				}
 			}
 			break;
 			
 		case ACT_WARNING_CLEAR:
-			RequestUpdateEmulation = TRUE;
 			DataTable[REG_WARNING] = 0;
 			break;
 
