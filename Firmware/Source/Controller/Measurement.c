@@ -11,14 +11,9 @@
 #include "Delay.h"
 #include "FirCoefficients.h"
 
-// Macro
-//
-#define ABS(a)	(((a) < 0) ? -(a) : (a))
-//
+// Definitions
 #define MEASURE_POINTS_NUMBER		20		// Количество точек при единичном измерении
-//
 #define I_MAX_AVERAGE_POINTS		10		// Количество точек усреднения амплитуды тока
-//
 #define ITTERATIONS_OF_AVERAGING	3		// Количество иттераций усреднения
 
 // Variables
@@ -67,7 +62,7 @@ void MEASURE_ConvertRawArray(volatile uint16_t* RawArray, volatile uint16_t* Out
 
 	float P0 = (float)((int16_t)DataTable[REG_P0_I_DUT]);
 	float P1 = (float)DataTable[REG_P1_I_DUT] / 1000;
-	float P2 = (float)((int16_t)DataTable[REG_P2_I_DUT]) / 1e6;
+	float P2 = (float)((int16_t)DataTable[REG_P2_I_DUT]) / 1e6f;
 
 	for (i = 0; i < DataLength; ++i)
 	{
@@ -173,54 +168,45 @@ void MEASURE_FineTuneTdelTon(uint16_t* TurnDelay, uint16_t* TurnOn)
 	switch(DataTable[REG_ANODE_VOLTAGE])
 	{
 		case TOU_600V:
-		{
-			Tdel_P2 = (float)((int16_t)DataTable[REG_T_DEL_600V_P2]) / 1000000;
+			Tdel_P2 = (float)((int16_t)DataTable[REG_T_DEL_600V_P2]) / 1e6f;
 			Tdel_P1 = (float)DataTable[REG_T_DEL_600V_P1] / 1000;
 			Tdel_P0 = (int16_t)DataTable[REG_T_DEL_600V_P0];
 
-			Ton_P2 = (float)((int16_t)DataTable[REG_T_ON_600V_P2]) / 1000000;
+			Ton_P2 = (float)((int16_t)DataTable[REG_T_ON_600V_P2]) / 1e6f;
 			Ton_P1 = (float)DataTable[REG_T_ON_600V_P1] / 1000;
 			Ton_P0 = (int16_t)DataTable[REG_T_ON_600V_P0];
-		}
-		break;
+			break;
 
 		case TOU_1000V:
-		{
-			Tdel_P2 = (float)((int16_t)DataTable[REG_T_DEL_1000V_P2]) / 1000000;
+			Tdel_P2 = (float)((int16_t)DataTable[REG_T_DEL_1000V_P2]) / 1e6f;
 			Tdel_P1 = (float)DataTable[REG_T_DEL_1000V_P1] / 1000;
 			Tdel_P0 = (int16_t)DataTable[REG_T_DEL_1000V_P0];
 
-			Ton_P2 = (float)((int16_t)DataTable[REG_T_ON_1000V_P2]) / 1000000;
+			Ton_P2 = (float)((int16_t)DataTable[REG_T_ON_1000V_P2]) / 1e6f;
 			Ton_P1 = (float)DataTable[REG_T_ON_1000V_P1] / 1000;
 			Ton_P0 = (int16_t)DataTable[REG_T_ON_1000V_P0];
-		}
-		break;
+			break;
 
 		case TOU_1500V:
-		{
-			Tdel_P2 = (float)((int16_t)DataTable[REG_T_DEL_1500V_P2]) / 1000000;
+			Tdel_P2 = (float)((int16_t)DataTable[REG_T_DEL_1500V_P2]) / 1e6f;
 			Tdel_P1 = (float)DataTable[REG_T_DEL_1500V_P1] / 1000;
 			Tdel_P0 = (int16_t)DataTable[REG_T_DEL_1500V_P0];
 
-			Ton_P2 = (float)((int16_t)DataTable[REG_T_ON_1500V_P2]) / 1000000;
+			Ton_P2 = (float)((int16_t)DataTable[REG_T_ON_1500V_P2]) / 1e6f;
 			Ton_P1 = (float)DataTable[REG_T_ON_1500V_P1] / 1000;
 			Ton_P0 = (int16_t)DataTable[REG_T_ON_1500V_P0];
-		}
-		break;
+			break;
 
 		default:
-		{
 			Tdel_P2 = 0;
-			Tdel_P1 = 0;
+			Tdel_P1 = 1;
 			Tdel_P0 = 0;
 
 			Ton_P2 = 0;
-			Ton_P1 = 0;
+			Ton_P1 = 1;
 			Ton_P0 = 0;
-		}
 			break;
 	}
-
 
 	T = *TurnDelay;
 	*TurnDelay = T * T * Tdel_P2 + T * Tdel_P1 + Tdel_P0;
@@ -281,21 +267,21 @@ void MEASURE_AnodeCurrentTune(AnodeVoltageEnum AnodeVoltage, float *AnodeCurrent
 	switch(AnodeVoltage)
 	{
 		case TOU_600V:
-			P2 = ((float) ((int16_t)DataTable[REG_I_DUT_600V_P2])) / 1000000;
-			P1 = ((float) DataTable[REG_I_DUT_600V_P1]) / 1000;
-			P0 = (int16_t) DataTable[REG_I_DUT_600V_P0];
+			P2 = ((float)((int16_t)DataTable[REG_I_DUT_600V_P2])) / 1e6f;
+			P1 = ((float)DataTable[REG_I_DUT_600V_P1]) / 1000;
+			P0 = (int16_t)DataTable[REG_I_DUT_600V_P0];
 			break;
 
 		case TOU_1000V:
-			P2 = ((float) ((int16_t)DataTable[REG_I_DUT_1000V_P2])) / 1000000;
-			P1 = ((float) DataTable[REG_I_DUT_1000V_P1]) / 1000;
-			P0 = (int16_t) DataTable[REG_I_DUT_1000V_P0];
+			P2 = ((float)((int16_t)DataTable[REG_I_DUT_1000V_P2])) / 1e6f;
+			P1 = ((float)DataTable[REG_I_DUT_1000V_P1]) / 1000;
+			P0 = (int16_t)DataTable[REG_I_DUT_1000V_P0];
 			break;
 
 		case TOU_1500V:
-			P2 = ((float) ((int16_t)DataTable[REG_I_DUT_1500V_P2])) / 1000000;
-			P1 = ((float) DataTable[REG_I_DUT_1500V_P1]) / 1000;
-			P0 = (int16_t) DataTable[REG_I_DUT_1500V_P0];
+			P2 = ((float)((int16_t)DataTable[REG_I_DUT_1500V_P2])) / 1e6f;
+			P1 = ((float)DataTable[REG_I_DUT_1500V_P1]) / 1000;
+			P0 = (int16_t)DataTable[REG_I_DUT_1500V_P0];
 			break;
 
 		default:
@@ -303,9 +289,7 @@ void MEASURE_AnodeCurrentTune(AnodeVoltageEnum AnodeVoltage, float *AnodeCurrent
 	}
 
 	I = *AnodeCurrent;
-
 	I = I * I * P2 + I * P1 + P0;
-
 	*AnodeCurrent = I / 10;
 }
 //-----------------------------------------------
