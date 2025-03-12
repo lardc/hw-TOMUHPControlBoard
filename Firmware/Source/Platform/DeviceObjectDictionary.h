@@ -148,21 +148,21 @@
 // 83 - 84
 #define REG_AFTER_MEASURE_DELAY			85	// Пауза после измерения
 // 86 - 89
-#define REG_TOCU_1_CANID				90	//
-#define REG_TOCU_1_BITMASK				91	//
-#define REG_TOCU_1_EMULATION			92	//
+#define REG_TOCU_1_CANID				90	// CAN NodeID для блока TOCU №1
+#define REG_TOCU_1_BITMASK				91	// Битовая маска, поддерживаемая блоком TOCU №1
+#define REG_TOCU_1_EMULATION			92	// Переключение в эмуляцию блока TOCU №1
 //
-#define REG_TOCU_2_CANID				93	//
-#define REG_TOCU_2_BITMASK				94	//
-#define REG_TOCU_2_EMULATION			95	//
+#define REG_TOCU_2_CANID				93	// CAN NodeID для блока TOCU №2
+#define REG_TOCU_2_BITMASK				94	// Битовая маска, поддерживаемая блоком TOCU №2
+#define REG_TOCU_2_EMULATION			95	//Переключение в эмуляцию блока TOCU №2
 //
-#define REG_TOCU_3_CANID				96	//
-#define REG_TOCU_3_BITMASK				97	//
-#define REG_TOCU_3_EMULATION			98	//
+#define REG_TOCU_3_CANID				96	// CAN NodeID для блока TOCU №3
+#define REG_TOCU_3_BITMASK				97	// Битовая маска, поддерживаемая блоком TOCU №3
+#define REG_TOCU_3_EMULATION			98	// Переключение в эмуляцию блока TOCU №3
 //
-#define REG_TOCU_4_CANID				99	//
-#define REG_TOCU_4_BITMASK				100	//
-#define REG_TOCU_4_EMULATION			101	//
+#define REG_TOCU_4_CANID				99	// CAN NodeID для блока TOCU №4
+#define REG_TOCU_4_BITMASK				100	// Битовая маска, поддерживаемая блоком TOCU №4
+#define REG_TOCU_4_EMULATION			101	// Переключение в эмуляцию блока TOCU №4
 
 // Несохраняемы регистры чтения-записи
 #define REG_ANODE_VOLTAGE				128	// Анодное напряжение (В)
