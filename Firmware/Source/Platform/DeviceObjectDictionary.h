@@ -154,7 +154,7 @@
 //
 #define REG_TOCU_2_CANID				93	// CAN NodeID для блока TOCU №2
 #define REG_TOCU_2_BITMASK				94	// Битовая маска, поддерживаемая блоком TOCU №2
-#define REG_TOCU_2_EMULATION			95	//Переключение в эмуляцию блока TOCU №2
+#define REG_TOCU_2_EMULATION			95	// Переключение в эмуляцию блока TOCU №2
 //
 #define REG_TOCU_3_CANID				96	// CAN NodeID для блока TOCU №3
 #define REG_TOCU_3_BITMASK				97	// Битовая маска, поддерживаемая блоком TOCU №3
@@ -167,7 +167,7 @@
 // Несохраняемы регистры чтения-записи
 #define REG_ANODE_VOLTAGE				128	// Анодное напряжение (В)
 #define REG_ANODE_CURRENT				129	// Анодный ток (А) (х10)
-#define REG_GATE_CURRENT				130	// Ток цепи управления (mА)
+#define REG_GATE_CURRENT				130	// Ток цепи управления (мА)
 #define REG_GATE_CURRENT_RISE_RATE		131	// Скорость нарастания тока цепи управления (мА/мкс) (х10)
 
 #define REG_DBG_SLAVE_NID				180	// Node ID slave-узла

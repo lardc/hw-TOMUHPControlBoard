@@ -115,38 +115,32 @@ void GateDriver_SetFallRate(MeasurementSettings *Settings)
 	else
 		GateCurrentFallRate = Settings->GateCurrentFallRate;
 
-	Data = GateDriver_IrateToDAC(GateCurrentFallRate, DataTable[REG_GATE_I_FALL_RATE_K], DataTable[REG_GATE_I_FALL_RATE_OFFSET]);
+	Data = GateDriver_IrateToDAC(GateCurrentFallRate, DataTable[REG_GATE_I_FALL_RATE_K],
+			DataTable[REG_GATE_I_FALL_RATE_OFFSET]);
 	LL_WriteDACx((Data | DAC_CHANNEL_B), GPIO_CS_GD2, RISE_Edge);
 }
 //---------------------
 
 void GateDriver_SetRiseRate(MeasurementSettings *Settings)
 {
-	float FrontTime, FrontTimeMin, GateCurrentRiseRate, GateCurrentRiseRate2, P2, P1, P0;
-	uint16_t Data;
-
 	// Ограчичение минимальной длительности фронта тока
-	FrontTime = Settings->GateCurrent / Settings->GateCurrentRiseRate;
-	FrontTimeMin = (float)DataTable[REG_GATE_EDGE_TIME_MIN] / 10;
-
-	if(FrontTime < FrontTimeMin)
-		GateCurrentRiseRate = FrontTimeMin * Settings->GateCurrent;
-	else
-		GateCurrentRiseRate = Settings->GateCurrentRiseRate;
+	float FrontTime = Settings->GateCurrent / Settings->GateCurrentRiseRate;
+	float FrontTimeMin = (float)DataTable[REG_GATE_EDGE_TIME_MIN] / 10;
+	float GateCurrentRiseRate =
+			(FrontTime < FrontTimeMin) ? (FrontTimeMin * Settings->GateCurrent) : Settings->GateCurrentRiseRate;
 
 	// Сохранение фактической скорости нарастания тока
-	if(GateCurrentRiseRate > 0)
-		RealGateCurrentRiseRate = GateCurrentRiseRate;
+	RealGateCurrentRiseRate = GateCurrentRiseRate;
 
 	// Тонкая подстройка скорости нарастания тока
-	P2 = (float)((int16_t)DataTable[REG_GATE_I_RISE_RATE_P2]) / 1000000;
-	P1 = (float)DataTable[REG_GATE_I_RISE_RATE_P1] / 1000;
-	P0 = (int16_t)DataTable[REG_GATE_I_RISE_RATE_P0];
+	float P2 = (float)((int16_t)DataTable[REG_GATE_I_RISE_RATE_P2]) / 1e6f;
+	float P1 = (float)DataTable[REG_GATE_I_RISE_RATE_P1] / 1000;
+	float P0 = (int16_t)DataTable[REG_GATE_I_RISE_RATE_P0];
 
-	GateCurrentRiseRate2 = GateCurrentRiseRate * GateCurrentRiseRate * P2;
-	GateCurrentRiseRate = GateCurrentRiseRate2 + GateCurrentRiseRate * P1 + P0;
+	GateCurrentRiseRate = GateCurrentRiseRate * GateCurrentRiseRate * P2 + GateCurrentRiseRate * P1 + P0;
 
-	Data = GateDriver_IrateToDAC(GateCurrentRiseRate, DataTable[REG_GATE_I_RISE_RATE_K], DataTable[REG_GATE_I_RISE_RATE_OFFSET]);
+	uint16_t Data = GateDriver_IrateToDAC(GateCurrentRiseRate, DataTable[REG_GATE_I_RISE_RATE_K],
+			DataTable[REG_GATE_I_RISE_RATE_OFFSET]);
 	LL_WriteDACx((Data & ~DAC_CHANNEL_B), GPIO_CS_GD2, RISE_Edge);
 }
 //---------------------
