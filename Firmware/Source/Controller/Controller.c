@@ -281,6 +281,9 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 			
 		case ACT_GATE_PULSE:
 			{
+				if(CONTROL_State == DS_Ready || CONTROL_State == DS_None)
+				{
+				COMM_InternalCommutation(true);
 				CONTROL_GateDriverCharge();
 
 				CachedMeasurementSettings = LOGIC_CacheMeasurementSettings();
@@ -294,6 +297,10 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 				GateDriver_Sync(false);
 
 				CONTROL_ResetHardware(true);
+				COMM_InternalCommutation(false);
+				}
+				else
+					*pUserError = ERR_OPERATION_BLOCKED;
 			}
 			break;
 
