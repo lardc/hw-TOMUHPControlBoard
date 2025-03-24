@@ -283,7 +283,12 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 			{
 				if(CONTROL_State == DS_Ready || CONTROL_State == DS_None)
 				{
+				// Коммутация для BB
+				COMM_PotSwitch(true);
+				CONTROL_TimeCounterDelay = CONTROL_TimeCounter + COMMUTATION_PAUSE;
+
 				COMM_InternalCommutation(true);
+				LL_PsBoard_PowerInput(true);
 				CONTROL_GateDriverCharge();
 
 				CachedMeasurementSettings = LOGIC_CacheMeasurementSettings();
@@ -302,6 +307,7 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 
 				CONTROL_ResetHardware(true);
 				COMM_InternalCommutation(false);
+				COMM_PotSwitch(false);
 				}
 				else
 					*pUserError = ERR_OPERATION_BLOCKED;
