@@ -283,31 +283,39 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 			{
 				if(CONTROL_State == DS_Ready || CONTROL_State == DS_None)
 				{
-				// Коммутация для BB
-				COMM_PotSwitch(true);
-				CONTROL_TimeCounterDelay = CONTROL_TimeCounter + COMMUTATION_PAUSE;
+					// Зарядить GateDriver
+					LL_PsBoard_PowerInput(true);
+					CONTROL_GateDriverCharge();
 
-				COMM_InternalCommutation(true);
-				LL_PsBoard_PowerInput(true);
-				CONTROL_GateDriverCharge();
+					// Настройка системы коммутации
+					COMM_InternalCommutation(true);
+					COMM_PotSwitch(true);
+					CONTROL_TimeCounterDelay = CONTROL_TimeCounter + COMMUTATION_PAUSE;
+					while(CONTROL_TimeCounter < CONTROL_TimeCounterDelay)
+						DELAY_US(10);
 
-				CachedMeasurementSettings = LOGIC_CacheMeasurementSettings();
-				GateDriver_SetCurrent(CachedMeasurementSettings.GateCurrent);
-				GateDriver_SetRiseRate(&CachedMeasurementSettings);
-				GateDriver_SetFallRate(&CachedMeasurementSettings);
-				GateDriver_SetCompThreshold(CachedMeasurementSettings.GateCurrent * GATE_CURRENT_THRESHOLD);
-				// Время на стабилизацию выходов ЦАП
-				DELAY_US(50);
+					// Установка параметров импульса тока управления
+					CachedMeasurementSettings = LOGIC_CacheMeasurementSettings();
+					GateDriver_SetCurrent(CachedMeasurementSettings.GateCurrent);
+					GateDriver_SetRiseRate(&CachedMeasurementSettings);
+					GateDriver_SetFallRate(&CachedMeasurementSettings);
+					GateDriver_SetCompThreshold(CachedMeasurementSettings.GateCurrent * GATE_CURRENT_THRESHOLD);
 
-				LL_SyncOscilloscopeActivate(true);
-				GateDriver_Sync(true);
-				DELAY_US(100);
-				GateDriver_Sync(false);
-				LL_SyncOscilloscopeActivate(false);
+					// Время на стабилизацию выходов ЦАП
+					DELAY_US(50);
 
-				CONTROL_ResetHardware(true);
-				COMM_InternalCommutation(false);
-				COMM_PotSwitch(false);
+					// Запуск импульса тока управления
+					LL_SyncOscilloscopeActivate(true);
+					GateDriver_Sync(true);
+
+					DELAY_US(30);
+
+					// Завершение импульса тока управления
+					LL_SyncOscilloscopeActivate(false);
+					GateDriver_Sync(false);
+
+					// Отключение коммутации
+					CONTROL_ResetHardware(true);
 				}
 				else
 					*pUserError = ERR_OPERATION_BLOCKED;
