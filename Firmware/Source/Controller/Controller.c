@@ -291,7 +291,7 @@ static Boolean CONTROL_DispatchAction(Int16U ActionID, pInt16U pUserError)
 					COMM_InternalCommutation(true);
 					COMM_PotSwitch(true);
 					CONTROL_TimeCounterDelay = CONTROL_TimeCounter + COMMUTATION_PAUSE;
-					while(CONTROL_TimeCounter < CONTROL_TimeCounterDelay)
+					while(CONTROL_TimeCounter < CONTROL_TimeCounterDelay);
 
 					// Установка параметров импульса тока управления
 					CachedMeasurementSettings = LOGIC_CacheMeasurementSettings();
