@@ -169,7 +169,7 @@
 #define REG_ANODE_VOLTAGE				128	// Анодное напряжение (В)
 #define REG_ANODE_CURRENT				129	// Анодный ток (А) (х10)
 #define REG_GATE_CURRENT				130	// Ток цепи управления (мА)
-#define REG_GATE_CURRENT_RISE_RATE		131	// Скорость нарастания тока цепи управления (мА/мкс) (х10)
+#define REG_GATE_CURRENT_RISE_RATE		131	// Скорость нарастания тока цепи управления (мА/мкс)
 
 #define REG_DBG_SLAVE_NID				180	// Node ID slave-узла
 #define REG_DBG_SLAVE_REG				181	// Номер регистра slave-узла
