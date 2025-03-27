@@ -63,7 +63,7 @@ const TableItemConstraint NVConstraint[DATA_TABLE_NV_SIZE] =
 	{0, INT16U_MAX, 0},															// 51
 	{0, INT16U_MAX, 0},															// 52
 	{REF_VOLTAGE_MIN, REF_VOLTAGE_MAX, REF_VOLTAGE_DEF},						// 53
-	{0, 0, 0},																	// 54
+	{0, 1, 0},																	// 54
 	{0, 0, 0},																	// 55
 	{0, 0, 0},																	// 56
 	{0, 0, 0},																	// 57

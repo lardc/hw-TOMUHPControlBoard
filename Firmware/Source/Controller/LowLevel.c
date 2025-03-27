@@ -3,6 +3,7 @@
 
 // Include
 #include "Delay.h"
+#include "DataTable.h"
 
 // Functions
 //
@@ -73,7 +74,7 @@ void LL_GateLatchReset()
 
 void LL_SyncOscilloscopeActivate(bool State)
 {
-	GPIO_SetState(GPIO_SYNC, !State);
+	GPIO_SetState(GPIO_SYNC, DataTable[REG_INVERT_SCOPE_SYNC] ? (!State) : State);
 }
 //-----------------------------
 
