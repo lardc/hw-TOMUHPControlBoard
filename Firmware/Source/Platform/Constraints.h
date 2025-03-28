@@ -19,9 +19,9 @@
 #define DUT_VOLTAGE_MAX			1500	// В
 #define DUT_VOLTAGE_DEF			600		// В
 
-#define DUT_CURRENT_MIN			100		// А x10
-#define DUT_CURRENT_MAX			1000	// А x10
-#define DUT_CURRENT_DEF			100		// А x10
+#define DUT_CURRENT_MIN			125		// А
+#define DUT_CURRENT_MAX			2500	// А
+#define DUT_CURRENT_DEF			125		// А
 
 #define GATE_CURRENT_MIN		1000	// мA
 #define GATE_CURRENT_MAX		20000	// мA
