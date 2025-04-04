@@ -12,7 +12,7 @@
 #define	SCCI_TIMEOUT_TICKS		1000			// Таймаут протоколоа SCCI (мс)
 #define	BCCIM_TIMEOUT_TICKS		1000			// Таймаут протоколоа мастер BCCI (мс)
 #define EP_WRITE_COUNT			0				// Количество массивов для записи
-#define EP_COUNT				3				// Количество массивов для чтения
+#define EP_COUNT				4				// Количество массивов для чтения
 #define ENABLE_LOCKING			FALSE			// Защита паролем
 
 #define SLAVE_UPDATE_PERIOD		100				// Период опроса блоков-рабов (мс)
@@ -28,5 +28,7 @@
 
 #define DAC_RESOLUTION			4095
 #define DAC_REF_MV				5000			// Опорное напряжение ЦАП (мВ)
+
+#define VALUES_EXT_INFO_SIZE			300
 
 #endif //  __GLOBAL_H

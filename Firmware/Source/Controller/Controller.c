@@ -12,6 +12,7 @@
 #include "Constraints.h"
 #include "Delay.h"
 #include "BCCIxParams.h"
+#include "Global.h"
 
 // Defines
 //
@@ -72,6 +73,10 @@ volatile Int16U CONTROL_Values_TurnDelayCounter = 0;
 volatile Int16U CONTROL_Values_TurnOnCounter = 0;
 Int16U CONTROL_AverageCounter = 0;
 Int64U CONTROL_AveragePeriodCounter = 0;
+//
+Int16U CONTROL_ExtInfoData[VALUES_EXT_INFO_SIZE] = {0};
+Int16U CONTROL_ExtInfoCounter = 0;
+//
 
 // Forward functions
 //
@@ -96,12 +101,12 @@ void CONTROL_GateDriverCharge();
 void CONTROL_Init()
 {
 	// Переменные для конфигурации EndPoint
-	Int16U EPIndexes[EP_COUNT] = {EP_CURRENT, EP_TURN_DELAY, EP_TURN_ON};
-	Int16U EPSized[EP_COUNT] = {PULSE_ARR_MAX_LENGTH, TIME_ARR_MAX_LENGTH, TIME_ARR_MAX_LENGTH};
+	Int16U EPIndexes[EP_COUNT] = {EP_CURRENT, EP_TURN_DELAY, EP_TURN_ON, EP16_ExtInfoData};
+	Int16U EPSized[EP_COUNT] = {PULSE_ARR_MAX_LENGTH, TIME_ARR_MAX_LENGTH, TIME_ARR_MAX_LENGTH, VALUES_EXT_INFO_SIZE};
 	pInt16U EPCounters[EP_COUNT] = {(pInt16U)&CONTROL_Values_CurrentCounter, (pInt16U)&CONTROL_Values_TurnDelayCounter,
-									(pInt16U)&CONTROL_Values_TurnOnCounter};
+									(pInt16U)&CONTROL_Values_TurnOnCounter, (pInt16U)&CONTROL_ExtInfoCounter};
 	pInt16U EPDatas[EP_COUNT] = {(pInt16U)CONTROL_Values_Current, (pInt16U)CONTROL_Values_TurnDelay,
-									(pInt16U)CONTROL_Values_TurnOn};
+									(pInt16U)CONTROL_Values_TurnOn, (pInt16U)CONTROL_ExtInfoData};
 	
 	// Конфигурация сервиса работы Data-table и EPROM
 	EPROMServiceConfig EPROMService = {(FUNC_EPROM_WriteValues)&NFLASH_WriteDT, (FUNC_EPROM_ReadValues)&NFLASH_ReadDT};

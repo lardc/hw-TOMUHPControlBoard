@@ -30,6 +30,10 @@ extern volatile Int16U CONTROL_Values_TurnDelayCounter;
 extern volatile Int16U CONTROL_Values_TurnOnCounter;
 extern MeasurementSettings CachedMeasurementSettings;
 extern Int16U CONTROL_AverageCounter;
+extern Int16U CONTROL_ExtInfoCounter;
+
+// EP
+extern Int16U CONTROL_ExtInfoData[];
 
 // Functions
 void CONTROL_Init();
