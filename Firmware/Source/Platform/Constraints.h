@@ -83,9 +83,13 @@
 #define AFTER_MEASURE_DELAY_MAX	10000	// мс
 #define AFTER_MEASURE_DELAY_DEF	5000	// мс
 
-#define REF_VOLTAGE_MIN			1000	// мв
-#define REF_VOLTAGE_MAX			5000	// мв
-#define REF_VOLTAGE_DEF			0		// мв
+#define REF_ADC_VOLTAGE_MIN		1000	// мв
+#define REF_ADC_VOLTAGE_MAX		5000	// мв
+#define REF_ADC_VOLTAGE_DEF		0		// мв
+
+#define REF_DAC_VOLTAGE_MIN		1000	// мв
+#define REF_DAC_VOLTAGE_MAX		5000	// мв
+#define REF_DAC_VOLTAGE_DEF		0		// мв
 // Types
 //
 typedef struct __TableItemConstraint

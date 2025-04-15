@@ -69,7 +69,8 @@ uint16_t GateDriver_IrefToDAC(float GateCurrentThreshold)
 	GateCurrentThreshold = GateCurrentThreshold * K + Offset;
 
 	// Пересчет в значение ЦАП
-	result = (uint16_t)(GateCurrentThreshold * ShuntRes_Ohm * DAC_RESOLUTION / DAC_REF_MV);
+	float Uref = DataTable[REG_OVERRIDE_DAC_REF] ? DataTable[REG_OVERRIDE_DAC_REF] : DAC_REF_MV;
+	result = (uint16_t)(GateCurrentThreshold * ShuntRes_Ohm * DAC_RESOLUTION / Uref);
 
 	return (result > DAC_RESOLUTION) ? DAC_RESOLUTION : result;
 }

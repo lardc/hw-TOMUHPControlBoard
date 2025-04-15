@@ -30,7 +30,8 @@ void MEASURE_FineTuneTdelTon(uint16_t* TurnDelay, uint16_t* TurnOn);
 //
 uint16_t MEASURE_UrefToDAC(uint16_t Voltage)
 {
-	uint32_t result = (uint32_t)Voltage * DAC_RESOLUTION / DAC_REF_MV;
+	float Uref = DataTable[REG_OVERRIDE_DAC_REF] ? DataTable[REG_OVERRIDE_DAC_REF] : DAC_REF_MV;
+	uint32_t result = (uint32_t)Voltage * DAC_RESOLUTION / Uref;
 	return (result > DAC_RESOLUTION) ? DAC_RESOLUTION : result;
 }
 //---------------------
