@@ -71,6 +71,12 @@ void MEASURE_ConvertRawArray(volatile uint16_t* RawArray, volatile uint16_t* Out
 		tmp = tmp * tmp * P2 + tmp * P1 + P0;
 		RawArray[i] = (tmp > 0) ? (uint16_t)tmp : 0;
 
+ 		if(DataLength == 1)
+ 		{
+ 			OutputArray[i] = RawArray[i];
+ 			return;
+ 		}
+
 		// Фильтрация тока
 		OutputArray[i] = 0;
 
