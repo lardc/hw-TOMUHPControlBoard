@@ -55,7 +55,7 @@
 //
 #define REG_TOCU_CHARGE_TIMEOUT			2	// Таймаут ожидания заряда блока TOCU (мс)
 #define REG_TOCU_RES_PER_BIT			3	// Сопротивление одного бита блока TOCU (Ом)
-#define REG_ID_THRESHOLD				4	// Порог определения наличия анодного тока (% от REG_ANODE_CURRENT)
+#define REG_ID_THRESHOLD				4	// Порог определения наличия анодного тока (в А х10)
 #define REG_MEAS_TIME_LOW				5	// Минимальное измеряемое значение времени (нс)
 #define REG_FAN_OPERATE_TIME			6	// Время работы вентилятора (с)
 #define REG_FAN_OPERATE_PERIOD			7	// Период работы вентилятора
