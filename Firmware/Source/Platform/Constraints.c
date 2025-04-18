@@ -145,7 +145,7 @@ const TableItemConstraint VConstraint[DATA_TABLE_WP_START - DATA_TABLE_WR_START]
 	{DUT_CURRENT_MIN, DUT_CURRENT_MAX, DUT_CURRENT_DEF},						// 129
 	{GATE_CURRENT_MIN, GATE_CURRENT_MAX, GATE_CURRENT_DEF},					 	// 130
 	{GATE_I_RATE_MIN, GATE_I_RATE_MAX, GATE_I_RATE_DEF},					 	// 131
-	{0, 0, 0},																	// 132
+	{0, 1, 0},																	// 132
 	{0, 0, 0},																	// 133
 	{0, 0, 0},																	// 134
 	{0, 0, 0},																	// 135
