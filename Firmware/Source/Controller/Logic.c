@@ -280,25 +280,28 @@ uint16_t LOGIC_Pulse()
 		CONTROL_Values_CurrentCounter = PULSE_ARR_MAX_LENGTH;
 	
 		// Обработка внештатных ситуаций
-		if(DataTable[REG_MEAS_CURRENT_VALUE] < DataTable[REG_ID_THRESHOLD] / 10)
+		if(DataTable[REG_SHORT_CALIBRATE_FLAG] == 0)
 		{
-			Problem = PROBLEM_NO_PWR;
-		}
-		else if(!MEASURE_TurnDelayResultBuffer[CONTROL_AverageCounter] || !MEASURE_TurnOnResultBuffer[CONTROL_AverageCounter])
-		{
-			Problem = PROBLEM_NO_POT;
-		}
-		else if(Overflow90)
-		{
-			Problem = PROBLEM_OVERFLOW90;
-		}
-		else if(Overflow10)
-		{
-			Problem = PROBLEM_OVERFLOW10;
+			if(DataTable[REG_MEAS_CURRENT_VALUE] < DataTable[REG_ID_THRESHOLD] / 10)
+			{
+				Problem = PROBLEM_NO_PWR;
+			}
+			else if(!MEASURE_TurnDelayResultBuffer[CONTROL_AverageCounter] || !MEASURE_TurnOnResultBuffer[CONTROL_AverageCounter])
+			{
+				Problem = PROBLEM_NO_POT;
+			}
+			else if(Overflow90)
+			{
+				Problem = PROBLEM_OVERFLOW90;
+			}
+			else if(Overflow10)
+			{
+				Problem = PROBLEM_OVERFLOW10;
+			}
 		}
 	}
 
-	if(DataTable[REG_MUTE_PROBLEM])
+	if(DataTable[REG_MUTE_PROBLEM] || DataTable[REG_SHORT_CALIBRATE_FLAG])
 		return PROBLEM_NONE;
 	else
 		return Problem;
