@@ -149,7 +149,11 @@
 #define REG_AVERAGE_PERIOD				82	// Период следования импульсов при усреднении (мс)
 // 83 - 84
 #define REG_AFTER_MEASURE_DELAY			85	// Пауза после измерения
-// 86 - 89
+//
+#define REG_VOLTAGE_P2					86	// Калибровочный коэффициент P2 для напряжения
+#define REG_VOLTAGE_P1					87	// Калибровочный коэффициент P1 для напряжения
+#define REG_VOLTAGE_P0					88	// Калибровочный коэффициент P0 для напряжения
+//
 #define REG_TOCU_1_CANID				90	// CAN NodeID для блока TOCU №1
 #define REG_TOCU_1_BITMASK				91	// Битовая маска, поддерживаемая блоком TOCU №1
 #define REG_TOCU_1_EMULATION			92	// Переключение в эмуляцию блока TOCU №1

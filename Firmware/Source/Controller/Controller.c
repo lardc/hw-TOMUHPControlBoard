@@ -445,7 +445,7 @@ void CONTROL_HandlePulseConfig()
 		{
 			case SS_ConfigSlaves:
 				{
-					LOGIC_AssignVItoSlaves(CachedMeasurementSettings.AnodeVoltage,
+					LOGIC_AssignVItoSlaves(CachedMeasurementSettings.CorrectedVoltage,
 							CachedMeasurementSettings.AnodeCurrent);
 					if(LOGIC_WriteSlavesConfig())
 						CONTROL_SetDeviceState(DS_InProcess, SS_ConfigSlavesApply);
