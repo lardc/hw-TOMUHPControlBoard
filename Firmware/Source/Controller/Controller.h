@@ -14,6 +14,7 @@
 typedef struct __MeasurementSettings
 {
 	AnodeVoltageEnum AnodeVoltage;
+	float CorrectedVoltage;
 	float AnodeCurrent;
 	float GateCurrent;
 	float GateCurrentRiseRate;
