@@ -308,6 +308,24 @@ uint16_t LOGIC_Pulse()
 }
 //-----------------------------------------------
 
+bool LOGIC_IsAnySlaveInEmulation()
+{
+	for (Int16U i = 0; i < NODE_ARRAY_SIZE; ++i)
+		if (NodeArray[i].Emulation)
+			return true;
+	return false;
+}
+//-----------------------------------------------
+
+bool LOGIC_CheckSlavesOpResult(Int16U OpResult)
+{
+	for (Int16U i = 0; i < NODE_ARRAY_SIZE; ++i)
+		if (NodeArray[i].OpResult == OpResult)
+			return true;
+	return false;
+}
+//-----------------------------------------------
+
 MeasurementSettings LOGIC_CacheMeasurementSettings()
 {
 	MeasurementSettings result;

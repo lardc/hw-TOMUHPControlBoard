@@ -21,5 +21,7 @@ bool LOGIC_GetPressureState();
 void LOGIC_ConfigVoltageComparators(AnodeVoltageEnum AnodeVoltage);
 MeasurementSettings LOGIC_CacheMeasurementSettings();
 uint16_t LOGIC_Pulse();
+bool LOGIC_IsAnySlaveInEmulation();
+bool LOGIC_CheckSlavesOpResult(Int16U OpResult);
 
 #endif // __LOGIC_H

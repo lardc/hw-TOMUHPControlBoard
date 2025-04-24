@@ -256,6 +256,8 @@
 #define PROBLEM_OVERFLOW90				4	// Переполнение счётчика уровня 90%
 #define PROBLEM_OVERFLOW10				5	// Переполнение счётчика уровня 10%
 #define PROBLEM_SAFETY_VIOLATION		6	// Срабатывание контура безопасности
+#define PROBLEM_EMULATION				7	// Один или несколько Slave блоков находятся в эмуляции
+#define PROBLEM_SLAVES_OP_FAIL			8	// На одном или нескольких Slave блоках результат операции FAIL
 
 //  Warning
 #define WARNING_NONE					0

@@ -547,6 +547,12 @@ void CONTROL_HandlePulseConfig()
 						{
 							if(LOGIC_AreAllSlavesInState(TOCUDS_Ready))
 							{
+								if (LOGIC_CheckSlavesOpResult(OPRESULT_FAIL))
+								{
+									DataTable[REG_OP_RESULT] = OPRESULT_FAIL;
+									DataTable[REG_PROBLEM] = PROBLEM_SLAVES_OP_FAIL;
+								}
+
 								if(CONTROL_AverageCounter < DataTable[REG_AVERAGE_NUM])
 								{
 									Int16U Problem = LOGIC_Pulse();
@@ -575,7 +581,14 @@ void CONTROL_HandlePulseConfig()
 								else
 								{
 									MEASURE_TurnOnAveragingProcess();
+
 									DataTable[REG_OP_RESULT] = OPRESULT_OK;
+
+									if (LOGIC_IsAnySlaveInEmulation())
+									{
+										DataTable[REG_OP_RESULT] = OPRESULT_FAIL;
+										DataTable[REG_PROBLEM] = PROBLEM_EMULATION;
+									}
 
 									AfterPulsePause = CONTROL_TimeCounter + DataTable[REG_AFTER_MEASURE_DELAY];
 									CONTROL_ResetHardware(true);
