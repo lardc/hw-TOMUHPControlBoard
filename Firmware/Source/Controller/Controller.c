@@ -551,6 +551,11 @@ void CONTROL_HandlePulseConfig()
 								{
 									DataTable[REG_OP_RESULT] = OPRESULT_FAIL;
 									DataTable[REG_PROBLEM] = PROBLEM_SLAVES_OP_FAIL;
+
+									AfterPulsePause = CONTROL_TimeCounter + DataTable[REG_AFTER_MEASURE_DELAY];
+									CONTROL_ResetHardware(true);
+									CONTROL_SetDeviceState(DS_Ready, SS_None);
+									break;
 								}
 
 								if(CONTROL_AverageCounter < DataTable[REG_AVERAGE_NUM])
