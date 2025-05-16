@@ -192,6 +192,9 @@
 #define REG_SAFETY_STATE				200	// Состояние датчика безопасности
 #define REG_PRESSURE_STATE				201	// Состояние датчика давления
 //
+#define REG_DIAG_RAW_SHIFT_REG			208	// Диагностические сырые данные со двигового регистра
+#define REG_DIAG_RAW_SHIFT_REG_2		209	// Диагностические сырые данные со двигового регистра (старшие разряды)
+//
 #define REG_BHL_ERROR_CODE				210	// Ошибка интерфейса ВУ: код ошибки
 #define REG_BHL_DEVICE					211	// Ошибка интерфейса ВУ: NID устройства
 #define REG_BHL_FUNCTION				212	// Ошибка интерфейса ВУ: код функции

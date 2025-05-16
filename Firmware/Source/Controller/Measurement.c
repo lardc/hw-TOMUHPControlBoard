@@ -137,6 +137,10 @@ void MEASURE_TurnOnMeasurement()
 
 	DataRaw = LL_HSTimers_Read();
 
+	// Сохранение отладочной информации
+	DataTable[REG_DIAG_RAW_SHIFT_REG] = DataRaw & 0xFFFF;
+	DataTable[REG_DIAG_RAW_SHIFT_REG_2] = DataRaw >> 16;
+
 	TurnDelay = ((DataRaw >> 12) & 0x0FF0) | ((DataRaw >> 28) & 0x000F);
 	TurnDelay = TurnDelay * COUNTER_CLOCK_PERIOD_NS;
 

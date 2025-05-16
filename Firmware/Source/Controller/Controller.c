@@ -155,6 +155,9 @@ void CONTROL_ResetData()
 	DataTable[REG_MEAS_TIME_DELAY] = 0;
 	DataTable[REG_MEAS_TIME_ON] = 0;
 	
+	DataTable[REG_DIAG_RAW_SHIFT_REG] = 0;
+	DataTable[REG_DIAG_RAW_SHIFT_REG_2] = 0;
+
 	DEVPROFILE_ResetScopes(0);
 	DEVPROFILE_ResetEPReadState();
 }
