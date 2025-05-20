@@ -154,7 +154,7 @@ void Timer6_Config()
 
 void SPI_Config()
 {
-	SPI_Init(SPI1, SPI1_BAUDRATE_BITS, SPI1_LSB_FIRST);
+	SPI_Init8b(SPI1, SPI1_BAUDRATE_BITS, SPI1_LSB_FIRST);
 	SPI_Init(SPI2, SPI2_BAUDRATE_BITS, SPI2_LSB_FIRST);
 }
 //------------------------------------------------------------------------------

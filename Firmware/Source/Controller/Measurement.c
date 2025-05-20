@@ -141,13 +141,13 @@ void MEASURE_TurnOnMeasurement()
 	DataTable[REG_DIAG_RAW_SHIFT_REG] = DataRaw & 0xFFFF;
 	DataTable[REG_DIAG_RAW_SHIFT_REG_2] = DataRaw >> 16;
 
-	TurnDelay = ((DataRaw >> 12) & 0x0FF0) | ((DataRaw >> 28) & 0x000F);
+	TurnDelay = DataRaw >> 12;
 	TurnDelay = TurnDelay * COUNTER_CLOCK_PERIOD_NS;
 
 	if(TurnDelay < DataTable[REG_MEAS_TIME_LOW])
 		TurnDelay = 0;
 
-	TurnOn = (DataRaw & 0x00FF) | ((DataRaw >> 16) & 0x0F00);
+	TurnOn = TurnOn & 0xFFF;
 	TurnOn = TurnOn * COUNTER_CLOCK_PERIOD_NS;
 
 	if(TurnOn < DataTable[REG_MEAS_TIME_LOW])

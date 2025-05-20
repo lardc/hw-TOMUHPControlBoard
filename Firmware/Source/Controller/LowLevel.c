@@ -56,8 +56,9 @@ uint32_t LL_HSTimers_Read()
 	GPIO_SetState(GPIO_LOAD, true);
 
 	GPIO_SetState(GPIO_CS, false);
-	Data = SPI_ReadByte(SPI1) << 16;
-	Data |= SPI_ReadByte(SPI1);
+	Data = (uint32_t)SPI_ReadByte(SPI1) << 16;
+	Data |= (uint32_t)SPI_ReadByte(SPI1) << 8;
+	Data |= (uint32_t)SPI_ReadByte(SPI1);
 	GPIO_SetState(GPIO_CS, true);
 
 	return (Data);
