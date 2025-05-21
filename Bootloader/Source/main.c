@@ -66,11 +66,15 @@ void IO_Config()
 	RCC_GPIO_Clk_EN(PORTC);
 
 	// Выходы
-	GPIO_Config(GPIOC, Pin_13, Output, PushPull, HighSpeed, NoPull);	// PC13(LED)
-	GPIO_Config(GPIOC, Pin_14, Output, PushPull, HighSpeed, NoPull);	// PC14(Sync_GD)
-	GPIO_Config(GPIOB, Pin_12, Output, PushPull, HighSpeed, NoPull);	// PB12(CS_GD1)
-	GPIO_Config(GPIOB, Pin_14, Output, PushPull, HighSpeed, NoPull);	// PB14(LDAC)
+	GPIO_Config(GPIOC, Pin_13, Output, PushPull, HighSpeed, NoPull);	// PC13	(LED)
+	GPIO_Config(GPIOC, Pin_14, Output, PushPull, HighSpeed, NoPull);	// PC14	(Sync_GD)
+	GPIO_Config(GPIOB, Pin_12, Output, PushPull, HighSpeed, NoPull);	// PB12	(CS_GD1)
+	GPIO_Config(GPIOB, Pin_14, Output, PushPull, HighSpeed, NoPull);	// PB14	(LDAC)
+	GPIO_Config(GPIOB, Pin_2,  Output, PushPull, HighSpeed, NoPull);	// PB2	(SNC_TOCU)
+	GPIO_Config(GPIOA, Pin_8,  Output, PushPull, HighSpeed, NoPull);	// PA8	(SYNC)
 
+	GPIO_Bit_Rst(GPIOB, Pin_2);
+	GPIO_Bit_Rst(GPIOA, Pin_8);
 	GPIO_Bit_Rst(GPIOC, Pin_14);
 	GPIO_Bit_Set(GPIOB, Pin_12);
 	GPIO_Bit_Set(GPIOB, Pin_14);
