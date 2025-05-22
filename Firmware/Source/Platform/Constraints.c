@@ -96,7 +96,7 @@ const TableItemConstraint NVConstraint[DATA_TABLE_NV_SIZE] =
 	{0, 0, 0},																 	// 84
 	{AFTER_MEASURE_DELAY_MIN, AFTER_MEASURE_DELAY_MAX, AFTER_MEASURE_DELAY_DEF},// 85
 	{0, INT16U_MAX, 0},															// 86
-	{0, INT16U_MAX, 0},															// 87
+	{GAIN_COEFFICIENT_MIN, GAIN_COEFFICIENT_MAX, GAIN_COEFFICIENT_DEF},			// 87
 	{0, INT16U_MAX, 0},															// 88
 	{0, 0, 0},																	// 89
 	{0, INT16U_MAX, 0},															// 90
