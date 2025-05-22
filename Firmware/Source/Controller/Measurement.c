@@ -126,7 +126,7 @@ bool MEASURE_CheckAnodeCurrent()
 	uint16_t AnodeCurrent = 0;
 	MEASURE_ConvertRawArray(&AnodeCurrentRaw16b, &AnodeCurrent, 1);
 
-	return (DataTable[REG_SHORT_CALIBRATE_FLAG] == 0) && (AnodeCurrent * 10 > DataTable[REG_ID_THRESHOLD]);
+	return (DataTable[REG_SHORT_CALIBRATE_FLAG] == 0) && (AnodeCurrent * 10 > DataTable[REG_SHORT_THRESHOLD]);
 }
 //---------------------
 

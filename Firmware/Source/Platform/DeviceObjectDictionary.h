@@ -55,7 +55,7 @@
 //
 #define REG_TOCU_CHARGE_TIMEOUT			2	// Таймаут ожидания заряда блока TOCU (мс)
 #define REG_TOCU_RES_PER_BIT			3	// Сопротивление одного бита блока TOCU (Ом)
-#define REG_ID_THRESHOLD				4	// Порог определения наличия анодного тока (в А х10)
+#define REG_SHORT_THRESHOLD				4	// Порог определения наличия КЗ на выходе (в А х10)
 #define REG_MEAS_TIME_LOW				5	// Минимальное измеряемое значение времени (нс)
 #define REG_FAN_OPERATE_TIME			6	// Время работы вентилятора (с)
 #define REG_FAN_OPERATE_PERIOD			7	// Период работы вентилятора
@@ -147,7 +147,8 @@
 #define REG_AVERAGE_NUM					80	// Число точек усреднений
 #define REG_AVERAGE_ALLOWED_SPREAD		81	// Допустимый разброс значений (нс)
 #define REG_AVERAGE_PERIOD				82	// Период следования импульсов при усреднении (мс)
-// 83 - 84
+// 83
+#define REG_NO_PWR_THRESHOLD			84	// Порог определения отсутствия силового тока (в % от REG_ANODE_CURRENT)
 #define REG_AFTER_MEASURE_DELAY			85	// Пауза после измерения
 //
 #define REG_VOLTAGE_P2					86	// Калибровочный коэффициент P2 для напряжения
