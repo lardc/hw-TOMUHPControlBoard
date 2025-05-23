@@ -46,6 +46,9 @@
 #define ACT_RESET_TO_DEFAULT			202	// Сброс DataTable в состояние по умолчанию
 
 #define ACT_BOOT_LOADER_REQUEST			320	// Перезапуск процессора с целью перепрограммирования
+//
+#define ACT_JSON_INIT_READ				341	// Инициализация начала считывания JSON
+#define ACT_JSON_TO_EP					342	// Выполнить чтение шаблона JSON в EP
 // -----------------------------------------------
 
 // Регистры
@@ -238,6 +241,8 @@
 #define EP_CURRENT						1	// Массив значений тока
 #define EP_TURN_DELAY					2	// Массив значений времени задержки включения
 #define EP_TURN_ON						3	// Массив значений времени включения
+//
+#define EP16_ExtInfoData				20	// Diag data drom flash
 // -----------------------------------------------
 
 // Operation results
