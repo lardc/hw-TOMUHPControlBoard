@@ -229,7 +229,7 @@
 #define EP_TURN_DELAY					2	// Массив значений времени задержки включения
 #define EP_TURN_ON						3	// Массив значений времени включения
 //
-#define EP16_ExtInfoData				4	// Diag data drom flash
+#define EP16_ExtInfoData				20	// Diag data drom flash
 // -----------------------------------------------
 
 // Operation results
