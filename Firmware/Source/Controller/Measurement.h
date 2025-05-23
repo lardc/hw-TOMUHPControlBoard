@@ -23,6 +23,6 @@ bool MEASURE_CheckAnodeCurrent();
 void MEASURE_TurnOnAveragingProcess();
 void MEASURE_TurnOnMeasurement();
 bool MEASURE_CheckAnodeCurrent();
-void MEASURE_AnodeCurrentTune(AnodeVoltageEnum AnodeVoltage, float *AnodeCurrent);
+float MEASURE_AnodeCurrentTune(AnodeVoltageEnum AnodeVoltage, float AnodeCurrent);
 
 #endif // __MEASUREMENT_H

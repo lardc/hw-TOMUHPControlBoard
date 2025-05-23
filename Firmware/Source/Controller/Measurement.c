@@ -266,7 +266,7 @@ void MEASURE_AveragingData(Int16U *Array, Int16U *MeanValue, Int16U AllowedSprea
 }
 //-----------------------------------------------
 
-void MEASURE_AnodeCurrentTune(AnodeVoltageEnum AnodeVoltage, float *AnodeCurrent)
+float MEASURE_AnodeCurrentTune(AnodeVoltageEnum AnodeVoltage, float AnodeCurrent)
 {
 	float P2, P1, P0;
 
@@ -291,10 +291,9 @@ void MEASURE_AnodeCurrentTune(AnodeVoltageEnum AnodeVoltage, float *AnodeCurrent
 			break;
 
 		default:
-			return;
+			return 0;
 	}
 
-	float I = *AnodeCurrent;
-	*AnodeCurrent = I * I * P2 + I * P1 + P0;
+	return AnodeCurrent * AnodeCurrent * P2 + AnodeCurrent * P1 + P0;
 }
 //-----------------------------------------------

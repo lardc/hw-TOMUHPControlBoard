@@ -144,29 +144,26 @@ bool LOGIC_IsAnySlaveInState(uint16_t State)
 }
 //-----------------------------------------------
 
-void LOGIC_AssignVItoSlaves(AnodeVoltageEnum AnodeVoltage, float AnodeCurrent)
+void LOGIC_AssignVItoSlaves(pMeasurementSettings Settings)
 {
-	float CurrentPerBit;
-	uint16_t ActualBitmask = 0, MaximumBitmask = 0;
-
-	MEASURE_AnodeCurrentTune(AnodeVoltage, &AnodeCurrent);
-
 	// Определение максимально допустимой битовой маски
+	uint16_t MaximumBitmask = 0;
 	for(uint16_t i = 0; i < NODE_ARRAY_SIZE; ++i)
 		MaximumBitmask |= NodeArray[i].SupportedBits;
 	
 	// Определение величины тока на бит при заданном напряжении
-	CurrentPerBit = (float)AnodeVoltage / DataTable[REG_TOCU_RES_PER_BIT];
+	float CurrentPerBit = (float)(Settings->AnodeVoltage) / DataTable[REG_TOCU_RES_PER_BIT];
 	
 	// Определение битовой маски для выбранного значения тока
-	ActualBitmask = (uint16_t)(AnodeCurrent / CurrentPerBit);
+	float AnodeCurrent = MEASURE_AnodeCurrentTune(Settings->AnodeVoltage, Settings->AnodeCurrent);
+	uint16_t ActualBitmask = (uint16_t)(AnodeCurrent / CurrentPerBit);
 	if(ActualBitmask > MaximumBitmask)
 		ActualBitmask = MaximumBitmask;
 	
 	// Формирование уставки для блоков
 	for(uint16_t i = 0; i < NODE_ARRAY_SIZE; ++i)
 	{
-		NodeArray[i].Voltage = AnodeVoltage;
+		NodeArray[i].Voltage = Settings->CorrectedVoltage;
 		NodeArray[i].Mask = NodeArray[i].SupportedBits & ActualBitmask;
 	}
 }
@@ -333,6 +330,10 @@ MeasurementSettings LOGIC_CacheMeasurementSettings()
 	float Voltage = DataTable[REG_ANODE_VOLTAGE];
 	result.AnodeVoltage = (Int32U)Voltage;
 	result.CorrectedVoltage = Voltage * Voltage * (float)(Int16S)DataTable[REG_VOLTAGE_P2] / 1e6f + Voltage * DataTable[REG_VOLTAGE_P1] / 1000 + (float)(Int16S)DataTable[REG_VOLTAGE_P0];
+
+	// Защита от превышения напряжения
+	if(result.CorrectedVoltage > TOU_1500V)
+		result.CorrectedVoltage = TOU_1500V;
 
 	result.AnodeCurrent = (float)DataTable[REG_ANODE_CURRENT] / 10;
 	result.GateCurrent = (float)DataTable[REG_GATE_CURRENT];

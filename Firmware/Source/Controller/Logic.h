@@ -14,7 +14,7 @@ bool LOGIC_CallCommandForSlaves(uint16_t Command);
 bool LOGIC_AreAllSlavesInState(uint16_t State);
 bool LOGIC_IsAnySlaveInState(uint16_t State);
 bool LOGIC_IsSlaveInFaultOrDisabled(uint16_t Fault, uint16_t Disabled);
-void LOGIC_AssignVItoSlaves(AnodeVoltageEnum AnodeVoltage, float AnodeCurrent);
+void LOGIC_AssignVItoSlaves(pMeasurementSettings Settings);
 bool LOGIC_IsAnodeVRegCorrect();
 bool LOGIC_GetSafetyState();
 bool LOGIC_GetPressureState();

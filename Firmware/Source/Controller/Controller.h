@@ -6,9 +6,7 @@
 #include "Measurement.h"
 
 // Defines
-//
 #define EP_SIZE			(PULSE_ARR_MAX_LENGTH / 2)
-//
 
 // Types
 typedef struct __MeasurementSettings
@@ -19,7 +17,7 @@ typedef struct __MeasurementSettings
 	float GateCurrent;
 	float GateCurrentRiseRate;
 	float GateCurrentFallRate;
-} MeasurementSettings;
+} MeasurementSettings, *pMeasurementSettings;
 
 // Variables
 extern volatile Int64U CONTROL_TimeCounter;
