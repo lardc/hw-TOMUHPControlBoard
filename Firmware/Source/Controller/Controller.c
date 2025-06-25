@@ -32,20 +32,21 @@ typedef enum __DeviceState
 typedef enum __SubState
 {
 	SS_None 				= 0,
-	SS_PowerOn 				= 1,
-	SS_WaitCharge 			= 2,
+	SS_PowerOn,
+	SS_WaitCharge,
+	SS_PowerOff,
 	
-	SS_PowerOff 			= 3,
-	
-	SS_ConfigSlaves 		= 4,
-	SS_ConfigSlavesApply 	= 5,
-	SS_WaitConfig			= 6,
-	SS_ConfigCommutation	= 7,
-	SS_CommPause 			= 8,
-	SS_HardwareConfig		= 9,
-	SS_TOCU_PulseConfig		= 10,
-	SS_StartPulse 			= 11,
-	SS_AfterPulseWaiting	= 12
+	SS_ConfigSlaves,
+	SS_WaitConfig,
+	SS_ConfigCommutation,
+	SS_CommPause,
+	SS_HardwareConfig,
+	SS_AfterPulseWaiting,
+	SS_TOCUPulseConfig,
+	SS_TOCUCheckProblem,
+	SS_StartPulse,
+	SS_NextPulseOrAverage,
+	SS_AverageResult
 } SubState;
 typedef enum __TOCUDeviceState
 {
@@ -154,7 +155,9 @@ void CONTROL_ResetData()
 	DataTable[REG_WARNING] = WARNING_NONE;
 	DataTable[REG_PROBLEM] = PROBLEM_NONE;
 	DataTable[REG_OP_RESULT] = OPRESULT_NONE;
+	DataTable[REG_FAILED_SUB_STATE] = SS_None;
 	
+	DataTable[REG_PULSE_COUNTER] = 0;
 	DataTable[REG_MEAS_CURRENT_VALUE] = 0;
 	DataTable[REG_MEAS_TIME_DELAY] = 0;
 	DataTable[REG_MEAS_TIME_ON] = 0;
@@ -445,178 +448,154 @@ void CONTROL_HandlePowerOff()
 void CONTROL_HandlePulseConfig()
 {
 	static uint64_t AfterPulsePause = 0, CONTROL_AveragePeriodCounter = 0;
+	static SubState NextSS = SS_None;
 
 	if(CONTROL_State == DS_InProcess)
 	{
 		switch (SUB_State)
 		{
 			case SS_ConfigSlaves:
+				LOGIC_AssignVItoSlaves(&CachedMeasurementSettings);
+				if(LOGIC_WriteSlavesConfig())
 				{
-					LOGIC_AssignVItoSlaves(&CachedMeasurementSettings);
-					if(LOGIC_WriteSlavesConfig())
-						CONTROL_SetDeviceState(DS_InProcess, SS_ConfigSlavesApply);
-					else
-						CONTROL_SwitchToFault(DF_INTERFACE);
+					CONTROL_TimeCounterDelay = CONTROL_TimeCounter + APPLY_SETTINGS_TIMEOUT;
+					CONTROL_SetDeviceState(DS_InProcess, SS_WaitConfig);
 				}
-				break;
-				
-			case SS_ConfigSlavesApply:
-				{
-					if(LOGIC_CallCommandForSlaves(ACT_TOCU_VOLTAGE_CONFIG))
-					{
-						CONTROL_TimeCounterDelay = CONTROL_TimeCounter + APPLY_SETTINGS_TIMEOUT;
-						CONTROL_SetDeviceState(DS_InProcess, SS_WaitConfig);
-					}
-					else
-						CONTROL_SwitchToFault(DF_INTERFACE);
-				}
+				else
+					CONTROL_SwitchToFault(DF_INTERFACE);
 				break;
 
 			case SS_WaitConfig:
+				if(CONTROL_ForceSlavesStateUpdate())
 				{
-					if(CONTROL_ForceSlavesStateUpdate())
-					{
-						if(LOGIC_AreAllSlavesInState(TOCUDS_Ready))
-							CONTROL_SetDeviceState(DS_InProcess, SS_AfterPulseWaiting);
-						else
-							if(CONTROL_TimeCounter > CONTROL_TimeCounterDelay)
-								CONTROL_SwitchToFault(DF_TOCU_STATE_TIMEOUT);
-					}
-					else
-						CONTROL_SwitchToFault(DF_INTERFACE);
-				}
-				break;
-				
-			case SS_AfterPulseWaiting:
-				{
-					if(CONTROL_TimeCounter > AfterPulsePause)
+					if(LOGIC_AreAllSlavesInState(TOCUDS_Ready))
 						CONTROL_SetDeviceState(DS_InProcess, SS_ConfigCommutation);
+					else if(CONTROL_TimeCounter > CONTROL_TimeCounterDelay)
+							CONTROL_SwitchToFault(DF_TOCU_STATE_TIMEOUT);
 				}
+				else
+					CONTROL_SwitchToFault(DF_INTERFACE);
 				break;
 
 			case SS_ConfigCommutation:
-				{
-					// Зарядить GateDriver
-					CONTROL_GateDriverCharge();
+				COMM_TOSU(CachedMeasurementSettings.AnodeVoltage);
+				COMM_InternalCommutation(true);
+				COMM_PotSwitch(true);
 
-					// Настройка системы коммутации
-					COMM_TOSU(CachedMeasurementSettings.AnodeVoltage);
-					COMM_InternalCommutation(true);
-					COMM_PotSwitch(true);
-
-					CONTROL_TimeCounterDelay = CONTROL_TimeCounter + COMMUTATION_PAUSE;
-					CONTROL_SetDeviceState(DS_InProcess, SS_CommPause);
-				}
+				CONTROL_TimeCounterDelay = CONTROL_TimeCounter + COMMUTATION_PAUSE;
+				CONTROL_SetDeviceState(DS_InProcess, SS_CommPause);
 				break;
 				
 			case SS_CommPause:
-				{
-					if(CONTROL_TimeCounter > CONTROL_TimeCounterDelay)
-						CONTROL_SetDeviceState(DS_InProcess, SS_HardwareConfig);
-				}
+				if(CONTROL_TimeCounter > CONTROL_TimeCounterDelay)
+					CONTROL_SetDeviceState(DS_InProcess, SS_HardwareConfig);
 				break;
 				
 			case SS_HardwareConfig:
-				{
-					// Настройка компараторов напряжения
-					LOGIC_ConfigVoltageComparators(CachedMeasurementSettings.AnodeVoltage);
+				// Настройка компараторов напряжения
+				LOGIC_ConfigVoltageComparators(CachedMeasurementSettings.AnodeVoltage);
 
-					// Настройка параметров цепи управления
-					GateDriver_SetCurrent(CachedMeasurementSettings.GateCurrent);
-					GateDriver_SetFallRate(&CachedMeasurementSettings);
-					GateDriver_SetRiseRate(&CachedMeasurementSettings);
-					GateDriver_SetCompThreshold(CachedMeasurementSettings.GateCurrent * GATE_CURRENT_THRESHOLD);
+				// Настройка параметров цепи управления
+				GateDriver_SetCurrent(CachedMeasurementSettings.GateCurrent);
+				GateDriver_SetFallRate(&CachedMeasurementSettings);
+				GateDriver_SetRiseRate(&CachedMeasurementSettings);
+				GateDriver_SetCompThreshold(CachedMeasurementSettings.GateCurrent * GATE_CURRENT_THRESHOLD);
 
-					CONTROL_SetDeviceState(DS_InProcess, SS_TOCU_PulseConfig);
-
-					CONTROL_AveragePeriodCounter = 0;
-					CONTROL_AverageCounter = 0;
-				}
+				CONTROL_SetDeviceState(DS_InProcess, SS_AfterPulseWaiting);
+				CONTROL_AveragePeriodCounter = 0;
+				CONTROL_AverageCounter = 0;
 				break;
 
-			case SS_TOCU_PulseConfig:
+			case SS_AfterPulseWaiting:
+				if(CONTROL_TimeCounter > AfterPulsePause && CONTROL_TimeCounter > CONTROL_AveragePeriodCounter)
+					CONTROL_SetDeviceState(DS_InProcess, SS_TOCUPulseConfig);
+				break;
+
+			case SS_TOCUPulseConfig:
+				if(LOGIC_CallCommandForSlaves(ACT_TOCU_PULSE_CONFIG))
 				{
-					if(CONTROL_TimeCounter > CONTROL_AveragePeriodCounter)
+					CONTROL_SetDeviceState(DS_InProcess, SS_TOCUCheckProblem);
+					NextSS = SS_StartPulse;
+				}
+				else
+					CONTROL_SwitchToFault(DF_INTERFACE);
+				break;
+
+			case SS_TOCUCheckProblem:
+				if(CONTROL_ForceSlavesStateUpdate())
+				{
+					if(LOGIC_AreAllSlavesInState(TOCUDS_Ready))
 					{
-						if(LOGIC_CallCommandForSlaves(ACT_TOCU_PULSE_CONFIG))
-							CONTROL_SetDeviceState(DS_InProcess, SS_StartPulse);
+						// Если при подготовке возник problem, то всё стопаем
+						if(LOGIC_CheckSlavesOpResult(OPRESULT_FAIL))
+						{
+							DataTable[REG_OP_RESULT] = OPRESULT_FAIL;
+							DataTable[REG_PROBLEM] = PROBLEM_SLAVES_OP_FAIL;
+
+							CONTROL_ResetHardware(true);
+							CONTROL_SetDeviceState(DS_Ready, SS_None);
+						}
+						// Иначе переходим к следующей ветке логики
 						else
-							CONTROL_SwitchToFault(DF_INTERFACE);
+							CONTROL_SetDeviceState(DS_InProcess, NextSS);
 					}
-				}
-				break;
-
-			case SS_StartPulse:
-				{
-					if(CONTROL_ForceSlavesStateUpdate())
+					else if(LOGIC_IsAnySlaveInState(TOCUDS_None) || LOGIC_IsAnySlaveInState(TOCUDS_Fault) ||
+							LOGIC_IsAnySlaveInState(TOCUDS_Disabled))
 					{
-						if(LOGIC_AreAllSlavesInState(TOCUDS_Ready))
-						{
-							if (LOGIC_CheckSlavesOpResult(OPRESULT_FAIL))
-							{
-								DataTable[REG_OP_RESULT] = OPRESULT_FAIL;
-								DataTable[REG_PROBLEM] = PROBLEM_SLAVES_OP_FAIL;
-
-								AfterPulsePause = CONTROL_TimeCounter + DataTable[REG_AFTER_MEASURE_DELAY];
-								CONTROL_ResetHardware(true);
-								CONTROL_SetDeviceState(DS_Ready, SS_None);
-								break;
-							}
-
-							if(CONTROL_AverageCounter < DataTable[REG_AVERAGE_NUM])
-							{
-								Int16U Problem = LOGIC_Pulse();
-								if(Problem == PROBLEM_NONE)
-								{
-									// Зарядить GateDriver перед следующим импульсом
-									CONTROL_GateDriverCharge();
-
-									CONTROL_AverageCounter++;
-
-									CONTROL_Values_TurnDelayCounter = CONTROL_AverageCounter;
-									CONTROL_Values_TurnOnCounter = CONTROL_AverageCounter;
-
-									CONTROL_AveragePeriodCounter = CONTROL_TimeCounter + DataTable[REG_AVERAGE_PERIOD];
-									CONTROL_SetDeviceState(DS_InProcess, SS_TOCU_PulseConfig);
-								}
-								else
-								{
-									DataTable[REG_PROBLEM] = Problem;
-									DataTable[REG_OP_RESULT] = OPRESULT_FAIL;
-
-									AfterPulsePause = CONTROL_TimeCounter + DataTable[REG_AFTER_MEASURE_DELAY];
-									CONTROL_ResetHardware(true);
-									CONTROL_SetDeviceState(DS_Ready, SS_None);
-								}
-							}
-							else
-							{
-								MEASURE_TurnOnAveragingProcess();
-
-								DataTable[REG_OP_RESULT] = OPRESULT_OK;
-
-								if (LOGIC_IsAnySlaveInEmulation())
-								{
-									DataTable[REG_OP_RESULT] = OPRESULT_FAIL;
-									DataTable[REG_PROBLEM] = PROBLEM_EMULATION;
-								}
-
-								AfterPulsePause = CONTROL_TimeCounter + DataTable[REG_AFTER_MEASURE_DELAY];
-								CONTROL_ResetHardware(true);
-								CONTROL_SetDeviceState(DS_Ready, SS_None);
-							}
-						}
-						else if(LOGIC_IsAnySlaveInState(TOCUDS_None) || LOGIC_IsAnySlaveInState(TOCUDS_Fault) ||
-								LOGIC_IsAnySlaveInState(TOCUDS_Disabled))
-						{
-							CONTROL_SwitchToFault(DF_TOCU_WRONG_STATE);
-						}
+						CONTROL_SwitchToFault(DF_TOCU_WRONG_STATE);
 					}
-					else
-						CONTROL_SwitchToFault(DF_INTERFACE);
 				}
+				else
+					CONTROL_SwitchToFault(DF_INTERFACE);
 				break;
 				
+			case SS_StartPulse:
+				CONTROL_GateDriverCharge();
+				Int16U Problem = LOGIC_Pulse();
+				CONTROL_AverageCounter++;
+
+				DataTable[REG_PULSE_COUNTER] = CONTROL_AverageCounter;
+				AfterPulsePause = CONTROL_TimeCounter + DataTable[REG_AFTER_MEASURE_DELAY];
+
+				if(Problem == PROBLEM_NONE)
+				{
+					CONTROL_Values_TurnDelayCounter = CONTROL_AverageCounter;
+					CONTROL_Values_TurnOnCounter = CONTROL_AverageCounter;
+					CONTROL_AveragePeriodCounter = CONTROL_TimeCounter + DataTable[REG_AVERAGE_PERIOD];
+
+					CONTROL_SetDeviceState(DS_InProcess, SS_TOCUCheckProblem);
+					NextSS = SS_NextPulseOrAverage;
+				}
+				else
+				{
+					DataTable[REG_PROBLEM] = Problem;
+					DataTable[REG_OP_RESULT] = OPRESULT_FAIL;
+					CONTROL_ResetHardware(true);
+					CONTROL_SetDeviceState(DS_Ready, SS_None);
+				}
+				break;
+
+			case SS_NextPulseOrAverage:
+				CONTROL_SetDeviceState(DS_Ready,
+						(CONTROL_AverageCounter < DataTable[REG_AVERAGE_NUM]) ?
+								SS_AfterPulseWaiting : SS_AverageResult);
+				break;
+
+			case SS_AverageResult:
+				if(LOGIC_IsAnySlaveInEmulation())
+				{
+					DataTable[REG_OP_RESULT] = OPRESULT_FAIL;
+					DataTable[REG_PROBLEM] = PROBLEM_EMULATION;
+				}
+				else
+				{
+					MEASURE_TurnOnAveragingProcess();
+					DataTable[REG_OP_RESULT] = OPRESULT_OK;
+					CONTROL_ResetHardware(true);
+				}
+				CONTROL_SetDeviceState(DS_Ready, SS_None);
+				break;
+
 			default:
 				break;
 		}
@@ -658,9 +637,10 @@ void CONTROL_SwitchToFault(Int16U Reason)
 	}
 	
 	CONTROL_ResetHardware(false);
-	
-	CONTROL_SetDeviceState(DS_Fault, SS_None);
+	DataTable[REG_FAILED_SUB_STATE] = SUB_State;
 	DataTable[REG_FAULT_REASON] = Reason;
+
+	CONTROL_SetDeviceState(DS_Fault, SS_None);
 }
 //-----------------------------------------------
 

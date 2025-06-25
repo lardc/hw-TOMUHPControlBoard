@@ -196,6 +196,7 @@
 #define REG_PROBLEM						196	// Регистр Problem
 #define REG_OP_RESULT					197	// Регистр статуса операции
 #define REG_DEV_SUB_STATE				198	// Регистр вспомогательного состояния
+#define REG_FAILED_SUB_STATE			199	// Вспомогательное состояние при котором возникла ошибка
 //
 #define REG_SAFETY_STATE				200	// Состояние датчика безопасности
 #define REG_PRESSURE_STATE				201	// Состояние датчика давления
@@ -211,6 +212,7 @@
 #define REG_MEAS_CURRENT_VALUE			250	// Измеренное значение тока (А)
 #define	REG_MEAS_TIME_DELAY				251	// Измеренное значение задержки включения (нс)
 #define	REG_MEAS_TIME_ON				252	// Измеренное значение времени включения (нс)
+#define REG_PULSE_COUNTER				253	// Счётчик сформированных импульсов
 // -----------------------------------------------
 
 // Секция регистров и команд блоков TOCU
