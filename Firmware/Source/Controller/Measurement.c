@@ -110,9 +110,11 @@ bool MEASURE_CheckAnodeCurrent()
 	// Запуск процесса оцифровки тока
 	DMA_ChannelReload(DMA_ADC_DUT_I_CHANNEL, MEASURE_POINTS_NUMBER);
 	DMA_ChannelEnable(DMA_ADC_DUT_I_CHANNEL, true);
-	TIM_Start(TIM6);
 
+	TIM_Start(TIM6);
 	DELAY_US(7);
+	// Гарантируетя остановка, если вызов раньше прерывания DMA
+	TIM_Stop(TIM6);
 
 	DMA_ChannelReload(DMA_ADC_DUT_I_CHANNEL, PULSE_ARR_MAX_LENGTH);
 	DMA_ChannelEnable(DMA_ADC_DUT_I_CHANNEL, true);
