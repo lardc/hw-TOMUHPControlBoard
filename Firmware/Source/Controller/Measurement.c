@@ -169,9 +169,9 @@ void MEASURE_TurnOnMeasurement()
 
 void MEASURE_FineTuneTdelTon(uint16_t* TurnDelay, uint16_t* TurnOn)
 {
-	float Tdel_P2, Tdel_P1, Ton_P2, Ton_P1;
-	int16_t Tdel_P0, Ton_P0;
-	uint16_t T;
+	float Tdel_P2 = 0, Tdel_P1 = 1, Tdel_P0 = 0;
+	float Ton_P2 = 0, Ton_P1 = 1, Ton_P0 = 0;
+	float T;
 
 	switch(DataTable[REG_ANODE_VOLTAGE])
 	{
@@ -206,21 +206,16 @@ void MEASURE_FineTuneTdelTon(uint16_t* TurnDelay, uint16_t* TurnOn)
 			break;
 
 		default:
-			Tdel_P2 = 0;
-			Tdel_P1 = 1;
-			Tdel_P0 = 0;
-
-			Ton_P2 = 0;
-			Ton_P1 = 1;
-			Ton_P0 = 0;
 			break;
 	}
 
 	T = *TurnDelay;
-	*TurnDelay = T * T * Tdel_P2 + T * Tdel_P1 + Tdel_P0;
+	T = T * T * Tdel_P2 + T * Tdel_P1 + Tdel_P0;
+	*TurnDelay = (T > 0) ? ((uint16_t)T) : 0;
 
 	T = *TurnOn;
-	*TurnOn = T * T * Ton_P2 + T * Ton_P1 + Ton_P0;
+	T = T * T * Ton_P2 + T * Ton_P1 + Ton_P0;
+	*TurnOn = (T > 0) ? ((uint16_t)T) : 0;
 }
 //-----------------------------------------------
 
