@@ -98,7 +98,7 @@ bool LOGIC_WriteSlavesConfig()
 		
 		if(BHL_WriteRegister(NodeArray[i].NodeID, REG_TOCU_VOLTAGE_SETPOINT, NodeArray[i].Voltage))
 			if(BHL_WriteRegister(NodeArray[i].NodeID, REG_TOCU_GATE_REGISTER, NodeArray[i].Mask))
-				if(BHL_Call(NodeArray[i].NodeID, ACT_VOLTAGE_CONFIG))
+				if(BHL_Call(NodeArray[i].NodeID, ACT_TOCU_VOLTAGE_CONFIG))
 					result = true;
 		
 		if(!result)

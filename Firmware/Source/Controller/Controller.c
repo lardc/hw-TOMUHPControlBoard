@@ -508,7 +508,10 @@ void CONTROL_HandlePulseConfig()
 
 			case SS_AfterPulseWaiting:
 				if(CONTROL_TimeCounter > AfterPulsePause && CONTROL_TimeCounter > CONTROL_AveragePeriodCounter)
+				{
+					CONTROL_GateDriverCharge();
 					CONTROL_SetDeviceState(DS_InProcess, SS_TOCUPulseConfig);
+				}
 				break;
 
 			case SS_TOCUPulseConfig:
@@ -550,33 +553,34 @@ void CONTROL_HandlePulseConfig()
 				break;
 				
 			case SS_StartPulse:
-				CONTROL_GateDriverCharge();
-				Int16U Problem = LOGIC_Pulse();
-				CONTROL_AverageCounter++;
-
-				DataTable[REG_PULSE_COUNTER] = CONTROL_AverageCounter;
-				AfterPulsePause = CONTROL_TimeCounter + DataTable[REG_AFTER_MEASURE_DELAY];
-
-				if(Problem == PROBLEM_NONE)
 				{
-					CONTROL_Values_TurnDelayCounter = CONTROL_AverageCounter;
-					CONTROL_Values_TurnOnCounter = CONTROL_AverageCounter;
-					CONTROL_AveragePeriodCounter = CONTROL_TimeCounter + DataTable[REG_AVERAGE_PERIOD];
+					Int16U Problem = LOGIC_Pulse();
+					CONTROL_AverageCounter++;
 
-					CONTROL_SetDeviceState(DS_InProcess, SS_TOCUCheckProblem);
-					NextSS = SS_NextPulseOrAverage;
-				}
-				else
-				{
-					DataTable[REG_PROBLEM] = Problem;
-					DataTable[REG_OP_RESULT] = OPRESULT_FAIL;
-					CONTROL_ResetHardware(true);
-					CONTROL_SetDeviceState(DS_Ready, SS_None);
+					DataTable[REG_PULSE_COUNTER] = CONTROL_AverageCounter;
+					AfterPulsePause = CONTROL_TimeCounter + DataTable[REG_AFTER_MEASURE_DELAY];
+
+					if(Problem == PROBLEM_NONE)
+					{
+						CONTROL_Values_TurnDelayCounter = CONTROL_AverageCounter;
+						CONTROL_Values_TurnOnCounter = CONTROL_AverageCounter;
+						CONTROL_AveragePeriodCounter = CONTROL_TimeCounter + DataTable[REG_AVERAGE_PERIOD];
+
+						CONTROL_SetDeviceState(DS_InProcess, SS_TOCUCheckProblem);
+						NextSS = SS_NextPulseOrAverage;
+					}
+					else
+					{
+						DataTable[REG_PROBLEM] = Problem;
+						DataTable[REG_OP_RESULT] = OPRESULT_FAIL;
+						CONTROL_ResetHardware(true);
+						CONTROL_SetDeviceState(DS_Ready, SS_None);
+					}
 				}
 				break;
 
 			case SS_NextPulseOrAverage:
-				CONTROL_SetDeviceState(DS_Ready,
+				CONTROL_SetDeviceState(DS_InProcess,
 						(CONTROL_AverageCounter < DataTable[REG_AVERAGE_NUM]) ?
 								SS_AfterPulseWaiting : SS_AverageResult);
 				break;
@@ -591,8 +595,8 @@ void CONTROL_HandlePulseConfig()
 				{
 					MEASURE_TurnOnAveragingProcess();
 					DataTable[REG_OP_RESULT] = OPRESULT_OK;
-					CONTROL_ResetHardware(true);
 				}
+				CONTROL_ResetHardware(true);
 				CONTROL_SetDeviceState(DS_Ready, SS_None);
 				break;
 
