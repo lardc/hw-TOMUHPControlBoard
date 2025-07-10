@@ -158,12 +158,10 @@ void MEASURE_TurnOnMeasurement()
 	if(TurnDelay && TurnOn)
 		MEASURE_FineTuneTdelTon(&TurnDelay, &TurnOn);
 
-	MEASURE_TurnDelayResultBuffer[CONTROL_AverageCounter] = TurnDelay;
-	MEASURE_TurnOnResultBuffer[CONTROL_AverageCounter] = TurnOn;
-
 	// Сохранение результата в endpoint
-	CONTROL_Values_TurnDelay[CONTROL_AverageCounter] = TurnDelay;
-	CONTROL_Values_TurnOn[CONTROL_AverageCounter] = TurnOn;
+	CONTROL_Values_TurnDelay[CONTROL_Values_TurnCounter] = TurnDelay;
+	CONTROL_Values_TurnOn[CONTROL_Values_TurnCounter] = TurnOn;
+	CONTROL_Values_TurnCounter++;
 }
 //-----------------------------------------------
 
@@ -230,8 +228,8 @@ Int16U MEASURE_AverageData(pInt16U Data, Int16U DataCount)
 
 void MEASURE_TurnOnAveragingProcess()
 {
-	DataTable[REG_MEAS_TIME_DELAY] = MEASURE_AverageData(MEASURE_TurnDelayResultBuffer, DataTable[REG_AVERAGE_NUM]);
-	DataTable[REG_MEAS_TIME_ON] = MEASURE_AverageData(MEASURE_TurnOnResultBuffer, DataTable[REG_AVERAGE_NUM]);
+	DataTable[REG_MEAS_TIME_DELAY] = MEASURE_AverageData((pInt16U)CONTROL_Values_TurnDelay, CONTROL_Values_TurnCounter);
+	DataTable[REG_MEAS_TIME_ON] = MEASURE_AverageData((pInt16U)CONTROL_Values_TurnOn, CONTROL_Values_TurnCounter);
 }
 //-----------------------------------------------
 

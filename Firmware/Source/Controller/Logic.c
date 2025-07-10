@@ -280,11 +280,14 @@ uint16_t LOGIC_Pulse()
 		// Обработка внештатных ситуаций
 		if(DataTable[REG_SHORT_CALIBRATE_FLAG] == 0)
 		{
-			if (DataTable[REG_MEAS_CURRENT_VALUE] < (CachedMeasurementSettings.AnodeCurrent * DataTable[REG_NO_PWR_THRESHOLD] / 100))
+			if(DataTable[REG_MEAS_CURRENT_VALUE]
+					< (CachedMeasurementSettings.AnodeCurrent * DataTable[REG_NO_PWR_THRESHOLD] / 100))
 			{
 				Problem = PROBLEM_NO_PWR;
 			}
-			else if(!MEASURE_TurnDelayResultBuffer[CONTROL_AverageCounter] || !MEASURE_TurnOnResultBuffer[CONTROL_AverageCounter])
+			else if(CONTROL_Values_TurnCounter > 0
+					&& (CONTROL_Values_TurnDelay[CONTROL_Values_TurnCounter - 1] == 0
+					|| CONTROL_Values_TurnOn[CONTROL_Values_TurnCounter - 1] == 0))
 			{
 				Problem = PROBLEM_NO_POT;
 			}

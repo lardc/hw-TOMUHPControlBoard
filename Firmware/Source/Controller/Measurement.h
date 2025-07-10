@@ -11,8 +11,6 @@
 
 // Variables
 extern volatile uint16_t LOGIC_OutputPulseRaw[PULSE_ARR_MAX_LENGTH];
-extern Int16U MEASURE_TurnDelayResultBuffer[TIME_ARR_MAX_LENGTH];
-extern Int16U MEASURE_TurnOnResultBuffer[TIME_ARR_MAX_LENGTH];
 
 // Functions
 void MEASURE_SetUref10(uint16_t Voltage);

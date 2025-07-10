@@ -25,10 +25,8 @@ extern volatile Int16U CONTROL_Values_Current[PULSE_ARR_MAX_LENGTH];
 extern volatile Int16U CONTROL_Values_TurnDelay[TIME_ARR_MAX_LENGTH];
 extern volatile Int16U CONTROL_Values_TurnOn[TIME_ARR_MAX_LENGTH];
 extern volatile Int16U CONTROL_Values_CurrentCounter;
-extern volatile Int16U CONTROL_Values_TurnDelayCounter;
-extern volatile Int16U CONTROL_Values_TurnOnCounter;
+extern volatile Int16U CONTROL_Values_TurnCounter;
 extern MeasurementSettings CachedMeasurementSettings;
-extern Int16U CONTROL_AverageCounter;
 extern Int16U CONTROL_ExtInfoCounter;
 
 // EP
