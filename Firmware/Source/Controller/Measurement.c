@@ -14,7 +14,6 @@
 // Definitions
 #define MEASURE_POINTS_NUMBER		20		// Количество точек при единичном измерении
 #define I_MAX_AVERAGE_POINTS		10		// Количество точек усреднения амплитуды тока
-#define ITTERATIONS_OF_AVERAGING	3		// Количество иттераций усреднения
 
 // Variables
 volatile uint16_t LOGIC_OutputPulseRaw[PULSE_ARR_MAX_LENGTH];
@@ -23,7 +22,7 @@ Int16U MEASURE_TurnOnResultBuffer[TIME_ARR_MAX_LENGTH];
 
 // Forward functions
 uint16_t MEASURE_UrefToDAC(uint16_t Voltage);
-void MEASURE_AveragingData(Int16U *Array, Int16U *MeanValue, Int16U AllowedSpread);
+Int16U MEASURE_AverageData(pInt16U Data, Int16U DataCount);
 void MEASURE_FineTuneTdelTon(uint16_t* TurnDelay, uint16_t* TurnOn);
 
 // Functions
@@ -225,47 +224,19 @@ void MEASURE_FineTuneTdelTon(uint16_t* TurnDelay, uint16_t* TurnOn)
 }
 //-----------------------------------------------
 
-
-void MEASURE_TurnOnAveragingProcess()
+Int16U MEASURE_AverageData(pInt16U Data, Int16U DataCount)
 {
-	Int16U TonAverage = 0, TonDelayAverage = 0;
-
-	for(int i = 0; i < ITTERATIONS_OF_AVERAGING; i++)
-	{
-		MEASURE_AveragingData(&MEASURE_TurnDelayResultBuffer[0], &TonDelayAverage, DataTable[REG_AVERAGE_ALLOWED_SPREAD]);
-		MEASURE_AveragingData(&MEASURE_TurnOnResultBuffer[0], &TonAverage, DataTable[REG_AVERAGE_ALLOWED_SPREAD]);
-	}
-
-	DataTable[REG_MEAS_TIME_DELAY] = TonDelayAverage;
-	DataTable[REG_MEAS_TIME_ON] = TonAverage;
+	Int32U Avg = 0;
+	for(int i = 0; i < DataCount; i++)
+		Avg += Data[i];
+	return Avg / DataCount;
 }
 //-----------------------------------------------
 
-void MEASURE_AveragingData(Int16U *Array, Int16U *MeanValue, Int16U AllowedSpread)
+void MEASURE_TurnOnAveragingProcess()
 {
-	float Result = 0;
-	Int16U AverageCounter = 0;
-
-	if(*MeanValue == 0)
-	{
-		for(int i = 0; i < DataTable[REG_AVERAGE_NUM]; i++)
-			Result += *(Array + i);
-
-		*MeanValue = (Int16U)(Result / DataTable[REG_AVERAGE_NUM]);
-	}
-	else
-	{
-		for(int i = 0; i < DataTable[REG_AVERAGE_NUM]; i++)
-		{
-			if(((*MeanValue + AllowedSpread) >= *(Array + i)) && ((*MeanValue - AllowedSpread) <= *(Array + i)))
-			{
-				Result += *(Array + i);
-				AverageCounter++;
-			}
-		}
-
-		*MeanValue = (Int16U)(Result / AverageCounter);
-	}
+	DataTable[REG_MEAS_TIME_DELAY] = MEASURE_AverageData(MEASURE_TurnDelayResultBuffer, DataTable[REG_AVERAGE_NUM]);
+	DataTable[REG_MEAS_TIME_ON] = MEASURE_AverageData(MEASURE_TurnOnResultBuffer, DataTable[REG_AVERAGE_NUM]);
 }
 //-----------------------------------------------
 

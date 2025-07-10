@@ -148,7 +148,7 @@
 #define	REG_T_ON_1500V_P0				78	// Калибровочный коэффициент P0 измерения Ton при напряжении 1500В
 // 79 - 80
 #define REG_AVERAGE_NUM					80	// Число точек усреднений
-#define REG_AVERAGE_ALLOWED_SPREAD		81	// Допустимый разброс значений (нс)
+#define REG_AVERAGE_ALLOWED_SPREAD		81	// не используется
 #define REG_AVERAGE_PERIOD				82	// Период следования импульсов при усреднении (мс)
 // 83
 #define REG_NO_PWR_THRESHOLD			84	// Порог определения отсутствия силового тока (в % от REG_ANODE_CURRENT)
