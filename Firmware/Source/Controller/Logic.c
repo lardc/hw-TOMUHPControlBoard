@@ -283,6 +283,7 @@ uint16_t LOGIC_Pulse()
 			if(DataTable[REG_MEAS_CURRENT_VALUE]
 					< (CachedMeasurementSettings.AnodeCurrent * DataTable[REG_NO_PWR_THRESHOLD] / 100))
 			{
+				DataTable[REG_MEAS_CURRENT_VALUE] = 0;
 				Problem = PROBLEM_NO_PWR;
 			}
 			else if(CONTROL_Values_TurnCounter > 0

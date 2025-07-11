@@ -30,6 +30,8 @@
 #define DAC_RESOLUTION			4095
 #define DAC_REF_MV				5000			// Опорное напряжение ЦАП (мВ)
 
-#define VALUES_EXT_INFO_SIZE			300
+#define VALUES_EXT_INFO_SIZE	300
+
+#define I_DUT_PRE_SKIP_POINTS	120 			// Для пропуска первых точек при оцифровке тока из-за тычка
 
 #endif //  __GLOBAL_H

@@ -64,7 +64,7 @@ void MEASURE_ConvertRawArray(volatile uint16_t* RawArray, volatile uint16_t* Out
 	float P1 = (float)DataTable[REG_P1_I_DUT] / 1000;
 	float P2 = (float)((int16_t)DataTable[REG_P2_I_DUT]) / 1e6f;
 
-	for (i = 0; i < DataLength; ++i)
+	for (i = I_DUT_PRE_SKIP_POINTS; i < DataLength; ++i)
 	{
 		tmp = ((float)RawArray[i] - Offset) * Uref / ADC_RESOLUTION * K;
 		tmp = tmp / ShuntRes;
