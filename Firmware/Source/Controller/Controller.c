@@ -507,6 +507,9 @@ void CONTROL_HandlePulseConfig()
 			case SS_AfterPulseWaiting:
 				if(CONTROL_TimeCounter > AfterPulsePause && CONTROL_TimeCounter > CONTROL_AveragePeriodCounter)
 				{
+					LL_GateLatchReset();
+					LL_HSTimers_Reset();
+					LL_HSTimers_Read();
 					CONTROL_GateDriverCharge();
 					CONTROL_SetDeviceState(DS_InProcess, SS_TOCUPulseConfig);
 				}
