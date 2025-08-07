@@ -1,355 +1,1717 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <title>TOMUHP Control Board Software Specification</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/1.9.1/showdown.min.js"></script>
-  <style>
-    body { font-family: sans-serif; padding: 20px; }
-    pre, code { background: #f4f4f4; padding: 2px 4px; }
-    table { border-collapse: collapse; width: 100%; margin-bottom: 1em; }
-    table, th, td { border: 1px solid #ccc; padding: 8px; }
-  </style>
-</head>
-<body>
-  <div id="content"></div>
-  <script>
-    var converter = new showdown.Converter({tables: true, ghCodeBlocks: true});
-    var mdContent = `# TOMUHP Control Board Software Specification
-
-## Table of Contents
-
-1. [Writable Registers](#writable-registers)
-2. [Read-Only Registers](#read-only-registers)
-3. [Commands](#commands)
-4. [Endpoints](#endpoints)
-
-## Overview
-
-This document provides a comprehensive specification of the TOMUHP Control Board firmware, including all writable and read-only registers, commands, and endpoints. The system is designed for high-power device testing with precise current and voltage control capabilities.
-
-### System Architecture
-
-- **Data Type**: All registers use \`Int16U\` (16-bit unsigned integer)
-- **Volatility**: Registers 0-127 are non-volatile (saved to flash), registers 128-191 are volatile
-- **Communication**: CAN bus interface with master-slave architecture
-- **Measurement**: High-precision current and voltage measurement with timing analysis
-
----
-
-## Writable Registers
-
-### Device Configuration & Calibration
-
-| Num | Name | Type | Description | Value List/Range | Value Name | Value Description |
-|-----|------|------|-------------|------------------|-------------|-------------------|
-| 0 | REG_DUT_CURRENT_SHUNT | Int16U | DUT current shunt resistance (mΩ ×10) | 1 - 10000 | CURRENT_SHUNT_MIN to CURRENT_SHUNT_MAX | Shunt resistance for current measurement |
-| 1 | REG_GATE_CURRENT_SHUNT | Int16U | Gate current shunt resistance (mΩ) | 1 - 10000 | CURRENT_SHUNT_MIN to CURRENT_SHUNT_MAX | Shunt resistance for gate current measurement |
-| 2 | REG_TOCU_CHARGE_TIMEOUT | Int16U | TOCU charge timeout (ms) | 1000 - 60000 | TOCU_CHRG_TIMEOUT_MIN to TOCU_CHRG_TIMEOUT_MAX | Timeout for TOCU block charge |
-| 3 | REG_TOCU_RES_PER_BIT | Int16U | TOCU resistance per bit (Ω) | 1 - 10000 | TOCU_RES_PER_BIT_MIN to TOCU_RES_PER_BIT_MAX | Resistance per bit for TOCU block |
-| 4 | REG_SHORT_THRESHOLD | Int16U | Short circuit threshold (A ×10) | 300 - 25000 | DUT_CURRENT_MIN to DUT_CURRENT_MAX | Threshold for short circuit detection |
-| 5 | REG_MEAS_TIME_LOW | Int16U | Minimum measurable time (ns) | 0 - 1000 | MEAS_TIME_LOW_MIN to MEAS_TIME_LOW_MAX | Minimum time measurement value |
-| 6 | REG_FAN_OPERATE_TIME | Int16U | Fan operation time (s) | 0 - 65535 | 0 to INT16U_MAX | Fan operation duration |
-| 7 | REG_FAN_OPERATE_PERIOD | Int16U | Fan operation period | 0 - 65535 | 0 to INT16U_MAX | Fan operation cycle period |
-| 8 | REG_GATE_I_FALL_RATE | Int16U | Gate current fall rate (A/μs ×10) | 1000 - 10000 | GATE_I_RATE_MIN to GATE_I_RATE_MAX | Gate current fall rate |
-| 9 | REG_GATE_EDGE_TIME_MIN | Int16U | Minimum gate edge time (μs ×10) | 0 - 20 | GATE_FRONT_MIN to GATE_FRONT_MAX | Minimum gate edge duration |
-| 10 | REG_GATE_TIME_CHARGE | Int16U | Gate driver charge time (ms) | 100 - 1000 | GATE_TIME_CHRG_MIN to GATE_TIME_CHRG_MAX | Gate driver charging time |
-
-### Safety & Monitoring Control
-
-| Num | Name | Type | Description | Value List/Range | Value Name | Value Description |
-|-----|------|------|-------------|------------------|-------------|-------------------|
-| 11 | REG_MUTE_SAFETY_MONITOR | Int16U | Disable safety monitoring | 0 | NO | Safety monitoring enabled |
-| | | | | 1 | YES | Safety monitoring disabled |
-| 12 | REG_MUTE_PRESSURE_MONITOR | Int16U | Disable pressure monitoring | 0 | NO | Pressure monitoring enabled |
-| | | | | 1 | YES | Pressure monitoring disabled |
-| 13 | REG_MUTE_PROBLEM | Int16U | Error control | 0 | NO | Problem monitoring enabled |
-| | | | | 1 | YES | Problem monitoring disabled |
-| 14 | REG_MUTE_COMMUTATION | Int16U | Continuous commutation mode | 0 | NO | Commutation mode enabled |
-| | | | | 1 | YES | Commutation mode disabled |
-
-### Runtime Control Parameters
-
-| Num | Name | Type | Description | Value List/Range | Value Name | Value Description |
-|-----|------|------|-------------|------------------|-------------|-------------------|
-| 128 | REG_ANODE_VOLTAGE | Int16U | Anode voltage (V) | 600 | TOU_600V | Anode voltage 600V |
-| | | | | 1000 | TOU_1000V | Anode voltage 1000V |
-| | | | | 1500 | TOU_1500V | Anode voltage 1500V |
-| | | | | 600 - 1500 | DUT_VOLTAGE_MIN to DUT_VOLTAGE_MAX | Anode voltage setting (continuous range) |
-| 129 | REG_ANODE_CURRENT | Int16U | Anode current (A ×10) | 300 - 25000 | DUT_CURRENT_MIN to DUT_CURRENT_MAX | Anode current setting |
-| 130 | REG_GATE_CURRENT | Int16U | Gate current (mA) | 1000 - 20000 | GATE_CURRENT_MIN to GATE_CURRENT_MAX | Gate current setting |
-| 131 | REG_GATE_CURRENT_RISE_RATE | Int16U | Gate current rise rate (mA/μs) | 1000 - 10000 | GATE_I_RATE_MIN to GATE_I_RATE_MAX | Gate current rise rate setting |
-| 132 | REG_SHORT_CALIBRATE_FLAG | Int16U | Short circuit calibration flag | 0 | 0 | Short circuit calibration disabled |
-| | | | | 1 | 1 | Short circuit calibration enabled |
-
-### Measurement Configuration
-
-| Num | Name | Type | Description | Value List/Range | Value Name | Value Description |
-|-----|------|------|-------------|------------------|-------------|-------------------|
-| 80 | REG_AVERAGE_NUM | Int16U | Number of averaging points | 1 - 20 | AVERAGE_NUM_MIN to AVERAGE_NUM_MAX | Number of points for averaging |
-| 81 | REG_AVERAGE_ALLOWED_SPREAD | Int16U | Allowed spread for averaging (ns) | 0 - 500 | ALLOWED_SPREAD_MIN to ALLOWED_SPREAD_MAX | Allowed spread for averaging |
-| 82 | REG_AVERAGE_PERIOD | Int16U | Averaging period (ms) | 300 - 2000 | AVERAGE_PERIOD_MIN to AVERAGE_PERIOD_MAX | Period between pulses during averaging |
-| 84 | REG_NO_PWR_THRESHOLD | Int16U | No power threshold (%) | 0 - 80 | ID_THRESHOLD_MIN to ID_THRESHOLD_MAX | Threshold for no power detection |
-| 85 | REG_AFTER_MEASURE_DELAY | Int16U | Post-measurement delay (ms) | 1000 - 10000 | AFTER_MEASURE_DELAY_MIN to AFTER_MEASURE_DELAY_MAX | Delay after measurement |
-
-### Debug Parameters
-
-| Num | Name | Type | Description | Value List/Range | Value Name | Value Description |
-|-----|------|------|-------------|------------------|-------------|-------------------|
-| 180 | REG_DBG_SLAVE_NID | Int16U | Debug slave node ID | 0 - 65535 | 0 to INT16U_MAX | Debug slave node ID |
-| 181 | REG_DBG_SLAVE_REG | Int16U | Debug slave register number | 0 - 65535 | 0 to INT16U_MAX | Debug slave register number |
-| 182 | REG_DBG_SLAVE_DATA | Int16U | Debug slave register data | 0 - 65535 | 0 to INT16U_MAX | Debug slave register data |
-| 183 | REG_DBG_SLAVE_ACT | Int16U | Debug slave action command | 0 - 65535 | 0 to INT16U_MAX | Debug slave action command |
-| 190 | REG_DBG | Int16U | Debug register | 0 - 65535 | 0 to INT16U_MAX | Debug register |
-
-### Calibration Registers (Continuous Ranges)
-
-*Note: The following calibration registers use continuous ranges rather than discrete codes:*
-
-- **Gate Driver Calibration** (Registers 15-29): Continuous coefficient ranges
-- **Voltage Comparator Calibration** (Registers 30-35): Continuous voltage ranges (0-5000 mV)
-- **Current Calibration** (Registers 36-49): Continuous coefficient ranges
-- **Time Delay Calibration** (Registers 60-68): Continuous coefficient ranges
-- **Turn-On Time Calibration** (Registers 70-78): Continuous coefficient ranges
-- **Voltage Calibration** (Registers 86-88): Continuous coefficient ranges
-- **TOCU Configuration** (Registers 90-101): Continuous CAN ID and bitmask ranges
-
----
-
-## Read-Only Registers
-
-### Device Status & State Information
-
-| Num | Name | Type | Description | Value List/Range | Value Name | Value Description |
-|-----|------|------|-------------|------------------|-------------|-------------------|
-| 192 | REG_DEV_STATE | Int16U | Device state register | 0 | DS_None | No state |
-| | | | | 1 | DS_Fault | Fault state |
-| | | | | 2 | DS_Disabled | Disabled state |
-| | | | | 3 | DS_Ready | Ready state |
-| | | | | 4 | DS_InProcess | In process state |
-| 193 | REG_FAULT_REASON | Int16U | Fault reason register | 0 | DF_NONE | No fault |
-| | | | | 1 | DF_INTERFACE | Master interface error |
-| | | | | 2 | DF_PRESSURE | No pressure |
-| | | | | 3 | DF_TOCU_WRONG_STATE | Wrong TOCU block state |
-| | | | | 4 | DF_TOCU_STATE_TIMEOUT | TOCU state transition timeout |
-| 194 | REG_DISABLE_REASON | Int16U | Disable reason register | 0 | DF_NONE | No disable reason |
-| | | | | 1 | DF_INTERFACE | Master interface error |
-| | | | | 2 | DF_PRESSURE | No pressure |
-| | | | | 3 | DF_TOCU_WRONG_STATE | Wrong TOCU block state |
-| | | | | 4 | DF_TOCU_STATE_TIMEOUT | TOCU state transition timeout |
-| 195 | REG_WARNING | Int16U | Warning register | 0 | WARNING_NONE | No warnings |
-| 196 | REG_PROBLEM | Int16U | Problem register | 0 | PROBLEM_NONE | No problems |
-| | | | | 1 | PROBLEM_NO_PWR | No power current |
-| | | | | 2 | PROBLEM_SHORT | Short circuit on output |
-| | | | | 3 | PROBLEM_NO_POT | No signal from potential line |
-| | | | | 4 | PROBLEM_OVERFLOW90 | 90% level counter overflow |
-| | | | | 5 | PROBLEM_OVERFLOW10 | 10% level counter overflow |
-| | | | | 6 | PROBLEM_SAFETY_VIOLATION | Safety circuit activation |
-| | | | | 7 | PROBLEM_EMULATION | One or more slave blocks in emulation |
-| | | | | 8 | PROBLEM_SLAVES_OP_FAIL | One or more slave blocks operation failed |
-| 197 | REG_OP_RESULT | Int16U | Operation status register | 0 | OPRESULT_NONE | No information or not finished |
-| | | | | 1 | OPRESULT_OK | Operation was successful |
-| | | | | 2 | OPRESULT_FAIL | Operation failed |
-| 198 | REG_DEV_SUB_STATE | Int16U | Device sub-state register | 0 | SS_None | No sub-state |
-| | | | | 1 | SS_PowerOn | Power on sub-state |
-| | | | | 2 | SS_WaitCharge | Wait charge sub-state |
-| | | | | 3 | SS_PowerOff | Power off sub-state |
-| | | | | 4 | SS_ConfigSlaves | Configure slaves sub-state |
-| | | | | 5 | SS_WaitConfig | Wait configuration sub-state |
-| | | | | 6 | SS_ConfigCommutation | Configure commutation sub-state |
-| | | | | 7 | SS_CommPause | Commutation pause sub-state |
-| | | | | 8 | SS_HardwareConfig | Hardware configuration sub-state |
-| | | | | 9 | SS_AfterPulseWaiting | After pulse waiting sub-state |
-| | | | | 10 | SS_TOCUPulseConfig | TOCU pulse configuration sub-state |
-| | | | | 11 | SS_TOCUCheckProblem | TOCU check problem sub-state |
-| | | | | 12 | SS_StartPulse | Start pulse sub-state |
-| | | | | 13 | SS_NextPulseOrAverage | Next pulse or average sub-state |
-| | | | | 14 | SS_AverageResult | Average result sub-state |
-| 199 | REG_FAILED_SUB_STATE | Int16U | Failed sub-state register | 0 - 14 | 0 to 14 | Sub-state when error occurred |
-
-### Safety & Monitoring Status
-
-| Num | Name | Type | Description | Value List/Range | Value Name | Value Description |
-|-----|------|------|-------------|------------------|-------------|-------------------|
-| 200 | REG_SAFETY_STATE | Int16U | Safety sensor state | 0 | 0 | Safety sensor inactive |
-| | | | | 1 | 1 | Safety sensor active |
-| 201 | REG_PRESSURE_STATE | Int16U | Pressure sensor state | 0 | 0 | Pressure sensor inactive |
-| | | | | 1 | 1 | Pressure sensor active |
-
-### Diagnostic Data
-
-| Num | Name | Type | Description | Value List/Range | Value Name | Value Description |
-|-----|------|------|-------------|------------------|-------------|-------------------|
-| 208 | REG_DIAG_RAW_SHIFT_REG | Int16U | Raw diagnostic data from shift register (lower bits) | 0 - 4095 | 0 to 0xFFF | Raw diagnostic data lower 12 bits |
-| 209 | REG_DIAG_RAW_SHIFT_REG_2 | Int16U | Raw diagnostic data from shift register (upper bits) | 0 - 65535 | 0 to INT16U_MAX | Raw diagnostic data upper bits |
-
-### Interface Error Information
-
-| Num | Name | Type | Description | Value List/Range | Value Name | Value Description |
-|-----|------|------|-------------|------------------|-------------|-------------------|
-| 210 | REG_BHL_ERROR_CODE | Int16U | Interface error code | 0 - 65535 | 0 to INT16U_MAX | Interface error code |
-| 211 | REG_BHL_DEVICE | Int16U | Interface error device ID | 0 - 65535 | 0 to INT16U_MAX | Interface error device ID |
-| 212 | REG_BHL_FUNCTION | Int16U | Interface error function code | 0 - 65535 | 0 to INT16U_MAX | Interface error function code |
-| 213 | REG_BHL_EXT_DATA | Int16U | Interface error extended data | 0 - 65535 | 0 to INT16U_MAX | Interface error extended data |
-
-### Measurement Results
-
-| Num | Name | Type | Description | Value List/Range | Value Name | Value Description |
-|-----|------|------|-------------|------------------|-------------|-------------------|
-| 250 | REG_MEAS_CURRENT_VALUE | Int16U | Measured current value (A) | 0 - 65535 | 0 to INT16U_MAX | Measured current value |
-| 251 | REG_MEAS_TIME_DELAY | Int16U | Measured turn-on delay (ns) | 0 - 65535 | 0 to INT16U_MAX | Measured turn-on delay time |
-| 252 | REG_MEAS_TIME_ON | Int16U | Measured turn-on time (ns) | 0 - 65535 | 0 to INT16U_MAX | Measured turn-on time |
-| 253 | REG_PULSE_COUNTER | Int16U | Generated pulse counter | 0 - 65535 | 0 to INT16U_MAX | Number of generated pulses |
-
----
-
-## Commands
-
-### Power Management Commands
-
-| Num | Name | Description |
-|-----|------|-------------|
-| 1 | ACT_ENABLE_POWER | Transition to standby state |
-| 2 | ACT_DISABLE_POWER | Turn off the block |
-
-### System Control Commands
-
-| Num | Name | Description |
-|-----|------|-------------|
-| 3 | ACT_FAULT_CLEAR | Clear fault state |
-| 4 | ACT_WARNING_CLEAR | Clear warning state |
-
-### Measurement Control Commands
-
-| Num | Name | Description |
-|-----|------|-------------|
-| 100 | ACT_MEASURE_START | Start measurement |
-| 101 | ACT_MEASURE_STOP | Stop measurement |
-| 110 | ACT_GATE_PULSE | Generate control current pulse |
-
-### Data Management Commands
-
-| Num | Name | Description |
-|-----|------|-------------|
-| 200 | ACT_SAVE_TO_ROM | Save user data to processor FLASH |
-| 201 | ACT_RESTORE_FROM_ROM | Restore data from FLASH |
-| 202 | ACT_RESET_TO_DEFAULT | Reset DataTable to default state |
-
-### System Maintenance Commands
-
-| Num | Name | Description |
-|-----|------|-------------|
-| 320 | ACT_BOOT_LOADER_REQUEST | Restart processor for reprogramming |
-
-### JSON Data Commands
-
-| Num | Name | Description |
-|-----|------|-------------|
-| 341 | ACT_JSON_INIT_READ | Initialize JSON reading start |
-| 342 | ACT_JSON_TO_EP | Execute JSON template reading to EP |
-
-### Debug Commands - Gate Driver Testing
-
-| Num | Name | Description |
-|-----|------|-------------|
-| 10 | ACT_DBG_GD_I_SET | Test TOMUHPGateDriver current amplitude setting |
-| 11 | ACT_DBG_GD_TRIG_THRESHOLD | Test comparator trigger threshold setting |
-| 12 | ACT_DBG_GD_I_RISE_RATE | Test TOMUHPGateDriver current rise rate setting |
-| 13 | ACT_DBG_GD_I_FALL_RATE | Test TOMUHPGateDriver current fall rate setting |
-| 14 | ACT_DBG_GD_SYNC | Test Sync_GD output |
-| 15 | ACT_DBG_PS_EN | Test PS_EN output |
-| 16 | ACT_DBG_FAN | Test FAN output |
-| 17 | ACT_DBG_IND | Test IND output |
-| 18 | ACT_DBG_RLC | Test RLC output |
-| 19 | ACT_DBG_RELAY | Test RELAY output |
-| 20 | ACT_DBG_SNC_TOCU | Test SNC_TOCU output |
-| 21 | ACT_DBG_TOSU_SWITCH | Test TOSU switching |
-| 22 | ACT_DBG_POT_SWITCH | Test PotSwitch control |
-
-### Debug Commands - Reference Voltage Testing
-
-| Num | Name | Description |
-|-----|------|-------------|
-| 24 | ACT_DBG_U_REF_U10 | Test U10 comparator reference voltage setting |
-| 25 | ACT_DBG_U_REF_U90 | Test U90 comparator reference voltage setting |
-
-### Debug Commands - System Testing
-
-| Num | Name | Description |
-|-----|------|-------------|
-| 26 | ACT_DBG_READ_PRESSURE | Test pressure sensor operation |
-| 27 | ACT_DBG_SFTY_ACTIVATION | Test SFTY_EN output |
-| 28 | ACT_DBG_OUT_ISO | Test isolated outputs |
-| 29 | ACT_DBG_READ_EXT_REG | Test external register reading |
-| 30 | ACT_DBG_TRIG_RST | Test trigger reset |
-| 31 | ACT_DBG_M_RESET | Test M_RESET output |
-
-### Debug Commands - Slave Interface
-
-| Num | Name | Description |
-|-----|------|-------------|
-| 40 | ACT_DBG_SLAVE_CALL | Execute command on slave node |
-| 41 | ACT_DBG_SLAVE_READ_REG | Read register from slave node |
-| 42 | ACT_DBG_SLAVE_WRITE_REG | Write register to slave node |
-| 43 | ACT_DBG_RESET_INT_ERROR | Reset master interface error |
-
-### TOCU (Test Object Control Unit) Commands
-
-| Num | Name | Description |
-|-----|------|-------------|
-| 1 | ACT_TOCU_ENABLE_POWER | Transition to standby state (TOCU) |
-| 2 | ACT_TOCU_DISABLE_POWER | Turn off the block (TOCU) |
-| 3 | ACT_TOCU_FAULT_CLEAR | Clear fault (TOCU) |
-| 4 | ACT_TOCU_WARNING_CLEAR | Clear warning (TOCU) |
-| 100 | ACT_TOCU_VOLTAGE_CONFIG | Configure block voltage (TOCU) |
-| 101 | ACT_TOCU_PULSE_CONFIG | Configure block for required current (TOCU) |
-
----
-
-## Endpoints
-
-| Num | Name | Description | Data Type | Size |
-|-----|------|-------------|-----------|------|
-| 1 | EP_CURRENT | Current values array | Int16U | 300 |
-| 2 | EP_TURN_DELAY | Turn-on delay time array | Int16U | 20 |
-| 3 | EP_TURN_ON | Turn-on time array | Int16U | 20 |
-| 20 | EP16_ExtInfoData | Diagnostic data from flash | Int16U | 300 |
-
----
-
-## Notes
-
-### System Architecture
-- **Data Type**: All registers use \`Int16U\` (16-bit unsigned integer)
-- **Volatility**: Registers 0-127 are non-volatile (saved to flash), registers 128-191 are volatile
-- **Communication**: CAN bus interface with master-slave architecture
-- **Measurement**: High-precision current and voltage measurement with timing analysis
-
-### Register Categories
-1. **Device Configuration & Calibration**: Basic system setup and calibration parameters
-2. **Safety & Monitoring Control**: Safety system configuration and monitoring controls
-3. **Runtime Control Parameters**: Real-time operational parameters
-4. **Measurement Configuration**: Measurement process configuration
-5. **Debug Parameters**: Debugging and testing parameters
-
-### Command Categories
-1. **Power Management**: Basic power control commands
-2. **System Control**: System state management commands
-3. **Measurement Control**: Measurement process control
-4. **Data Management**: Configuration data management
-5. **System Maintenance**: System maintenance and updates
-6. **JSON Interface**: JSON data handling
-7. **Debug Commands**: Comprehensive debugging and testing commands
-8. **TOCU Commands**: Slave device control commands
-
-### Endpoint Characteristics
-- All endpoints are read-only
-- Current measurement data (300 points)
-- Timing measurement data (20 points each for delay and turn-on)
-- Diagnostic data (300 points)
-
-This specification provides complete documentation of the TOMUHP Control Board's software interface, enabling integration with external systems and comprehensive system control and monitoring. `;
-    document.getElementById('content').innerHTML = converter.makeHtml(mdContent);
-  </script>
-</body>
-</html>
+<html lang="en"><head><meta charset="UTF-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><title>TOMUHP Control
+Board Software Specification</title><style>
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 20px;
+    background-color: #f5f5f5;
+}
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background-color: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+h1 {
+    color: #2c3e50;
+    border-bottom: 3px solid #3498db;
+    padding-bottom: 10px;
+}
+h2 {
+    color: #34495e;
+    margin-top: 30px;
+    border-left: 4px solid #3498db;
+    padding-left: 15px;
+}
+h3 {
+    color: #2c3e50;
+    margin-top: 25px;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 14px;
+}
+th, td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+}
+th {
+    background-color: #3498db;
+    color: white;
+    font-weight: bold;
+}
+tr:nth-child(even) {
+    background-color: #f8f9fa;
+}
+tr:hover {
+    background-color: #e3f2fd;
+}
+.git-info {
+    background-color: #e8f5e8;
+    padding: 15px;
+    border-radius: 5px;
+    margin: 20px 0;
+    border-left: 4px solid #27ae60;
+}
+.notes {
+    background-color: #fff3cd;
+    padding: 15px;
+    border-radius: 5px;
+    margin: 20px 0;
+    border-left: 4px solid #ffc107;
+}
+.notes ul {
+    margin: 10px 0;
+}
+.notes li {
+    margin: 5px 0;
+}
+code {
+    background-color: #f4f4f4;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: 'Courier New', monospace;
+}
+.section {
+    margin-bottom: 40px;
+}
+</style></head><h1 id="tomuhp-control-board-software-specification">TOMUHP Control
+Board Software Specification</h1>
+<h2 id="table-of-contents">Table of Contents</h2>
+<ol type="1">
+<li><a href="#writable-registers">Writable Registers</a></li>
+<li><a href="#read-only-registers">Read-Only Registers</a></li>
+<li><a href="#commands">Commands</a></li>
+<li><a href="#endpoints">Endpoints</a></li>
+</ol>
+<h2 id="overview">Overview</h2>
+<p>This document provides a comprehensive specification of the TOMUHP
+Control Board firmware, including all writable and read-only registers,
+commands, and endpoints. The system is designed for high-power device
+testing with precise current and voltage control capabilities.</p>
+<h3 id="system-architecture">System Architecture</h3>
+<ul>
+<li><strong>Data Type</strong>: All registers use <code>Int16U</code>
+(16-bit unsigned integer)</li>
+<li><strong>Volatility</strong>: Registers 0-127 are non-volatile (saved
+to flash), registers 128-191 are volatile</li>
+<li><strong>Communication</strong>: CAN bus interface with master-slave
+architecture</li>
+<li><strong>Measurement</strong>: High-precision current and voltage
+measurement with timing analysis</li>
+</ul>
+<hr/>
+<h2 id="writable-registers">Writable Registers</h2>
+<h3 id="device-configuration-calibration">Device Configuration &amp;
+Calibration</h3>
+<table>
+<colgroup>
+<col style="width: 6%"/>
+<col style="width: 7%"/>
+<col style="width: 7%"/>
+<col style="width: 16%"/>
+<col style="width: 22%"/>
+<col style="width: 16%"/>
+<col style="width: 23%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>Num</th>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Value List/Range</th>
+<th>Value Name</th>
+<th>Value Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>0</td>
+<td>REG_DUT_CURRENT_SHUNT</td>
+<td>Int16U</td>
+<td>DUT current shunt resistance (mΩ ×10)</td>
+<td>1 - 10000</td>
+<td>CURRENT_SHUNT_MIN to CURRENT_SHUNT_MAX</td>
+<td>Shunt resistance for current measurement</td>
+</tr>
+<tr class="even">
+<td>1</td>
+<td>REG_GATE_CURRENT_SHUNT</td>
+<td>Int16U</td>
+<td>Gate current shunt resistance (mΩ)</td>
+<td>1 - 10000</td>
+<td>CURRENT_SHUNT_MIN to CURRENT_SHUNT_MAX</td>
+<td>Shunt resistance for gate current measurement</td>
+</tr>
+<tr class="odd">
+<td>2</td>
+<td>REG_TOCU_CHARGE_TIMEOUT</td>
+<td>Int16U</td>
+<td>TOCU charge timeout (ms)</td>
+<td>1000 - 60000</td>
+<td>TOCU_CHRG_TIMEOUT_MIN to TOCU_CHRG_TIMEOUT_MAX</td>
+<td>Timeout for TOCU block charge</td>
+</tr>
+<tr class="even">
+<td>3</td>
+<td>REG_TOCU_RES_PER_BIT</td>
+<td>Int16U</td>
+<td>TOCU resistance per bit (Ω)</td>
+<td>1 - 10000</td>
+<td>TOCU_RES_PER_BIT_MIN to TOCU_RES_PER_BIT_MAX</td>
+<td>Resistance per bit for TOCU block</td>
+</tr>
+<tr class="odd">
+<td>4</td>
+<td>REG_SHORT_THRESHOLD</td>
+<td>Int16U</td>
+<td>Short circuit threshold (A ×10)</td>
+<td>300 - 25000</td>
+<td>DUT_CURRENT_MIN to DUT_CURRENT_MAX</td>
+<td>Threshold for short circuit detection</td>
+</tr>
+<tr class="even">
+<td>5</td>
+<td>REG_MEAS_TIME_LOW</td>
+<td>Int16U</td>
+<td>Minimum measurable time (ns)</td>
+<td>0 - 1000</td>
+<td>MEAS_TIME_LOW_MIN to MEAS_TIME_LOW_MAX</td>
+<td>Minimum time measurement value</td>
+</tr>
+<tr class="odd">
+<td>6</td>
+<td>REG_FAN_OPERATE_TIME</td>
+<td>Int16U</td>
+<td>Fan operation time (s)</td>
+<td>0 - 65535</td>
+<td>0 to INT16U_MAX</td>
+<td>Fan operation duration</td>
+</tr>
+<tr class="even">
+<td>7</td>
+<td>REG_FAN_OPERATE_PERIOD</td>
+<td>Int16U</td>
+<td>Fan operation period</td>
+<td>0 - 65535</td>
+<td>0 to INT16U_MAX</td>
+<td>Fan operation cycle period</td>
+</tr>
+<tr class="odd">
+<td>8</td>
+<td>REG_GATE_I_FALL_RATE</td>
+<td>Int16U</td>
+<td>Gate current fall rate (A/μs ×10)</td>
+<td>1000 - 10000</td>
+<td>GATE_I_RATE_MIN to GATE_I_RATE_MAX</td>
+<td>Gate current fall rate</td>
+</tr>
+<tr class="even">
+<td>9</td>
+<td>REG_GATE_EDGE_TIME_MIN</td>
+<td>Int16U</td>
+<td>Minimum gate edge time (μs ×10)</td>
+<td>0 - 20</td>
+<td>GATE_FRONT_MIN to GATE_FRONT_MAX</td>
+<td>Minimum gate edge duration</td>
+</tr>
+<tr class="odd">
+<td>10</td>
+<td>REG_GATE_TIME_CHARGE</td>
+<td>Int16U</td>
+<td>Gate driver charge time (ms)</td>
+<td>100 - 1000</td>
+<td>GATE_TIME_CHRG_MIN to GATE_TIME_CHRG_MAX</td>
+<td>Gate driver charging time</td>
+</tr>
+</tbody>
+</table>
+<h3 id="safety-monitoring-control">Safety &amp; Monitoring Control</h3>
+<table>
+<colgroup>
+<col style="width: 6%"/>
+<col style="width: 7%"/>
+<col style="width: 7%"/>
+<col style="width: 16%"/>
+<col style="width: 22%"/>
+<col style="width: 16%"/>
+<col style="width: 23%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>Num</th>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Value List/Range</th>
+<th>Value Name</th>
+<th>Value Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>11</td>
+<td>REG_MUTE_SAFETY_MONITOR</td>
+<td>Int16U</td>
+<td>Disable safety monitoring</td>
+<td>0</td>
+<td>NO</td>
+<td>Safety monitoring enabled</td>
+</tr>
+<tr class="even">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>1</td>
+<td>YES</td>
+<td>Safety monitoring disabled</td>
+</tr>
+<tr class="odd">
+<td>12</td>
+<td>REG_MUTE_PRESSURE_MONITOR</td>
+<td>Int16U</td>
+<td>Disable pressure monitoring</td>
+<td>0</td>
+<td>NO</td>
+<td>Pressure monitoring enabled</td>
+</tr>
+<tr class="even">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>1</td>
+<td>YES</td>
+<td>Pressure monitoring disabled</td>
+</tr>
+<tr class="odd">
+<td>13</td>
+<td>REG_MUTE_PROBLEM</td>
+<td>Int16U</td>
+<td>Error control</td>
+<td>0</td>
+<td>NO</td>
+<td>Problem monitoring enabled</td>
+</tr>
+<tr class="even">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>1</td>
+<td>YES</td>
+<td>Problem monitoring disabled</td>
+</tr>
+<tr class="odd">
+<td>14</td>
+<td>REG_MUTE_COMMUTATION</td>
+<td>Int16U</td>
+<td>Continuous commutation mode</td>
+<td>0</td>
+<td>NO</td>
+<td>Commutation mode enabled</td>
+</tr>
+<tr class="even">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>1</td>
+<td>YES</td>
+<td>Commutation mode disabled</td>
+</tr>
+</tbody>
+</table>
+<h3 id="runtime-control-parameters">Runtime Control Parameters</h3>
+<table>
+<colgroup>
+<col style="width: 6%"/>
+<col style="width: 7%"/>
+<col style="width: 7%"/>
+<col style="width: 16%"/>
+<col style="width: 22%"/>
+<col style="width: 16%"/>
+<col style="width: 23%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>Num</th>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Value List/Range</th>
+<th>Value Name</th>
+<th>Value Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>128</td>
+<td>REG_ANODE_VOLTAGE</td>
+<td>Int16U</td>
+<td>Anode voltage (V)</td>
+<td>600</td>
+<td>TOU_600V</td>
+<td>Anode voltage 600V</td>
+</tr>
+<tr class="even">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>1000</td>
+<td>TOU_1000V</td>
+<td>Anode voltage 1000V</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>1500</td>
+<td>TOU_1500V</td>
+<td>Anode voltage 1500V</td>
+</tr>
+<tr class="even">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>600 - 1500</td>
+<td>DUT_VOLTAGE_MIN to DUT_VOLTAGE_MAX</td>
+<td>Anode voltage setting (continuous range)</td>
+</tr>
+<tr class="odd">
+<td>129</td>
+<td>REG_ANODE_CURRENT</td>
+<td>Int16U</td>
+<td>Anode current (A ×10)</td>
+<td>300 - 25000</td>
+<td>DUT_CURRENT_MIN to DUT_CURRENT_MAX</td>
+<td>Anode current setting</td>
+</tr>
+<tr class="even">
+<td>130</td>
+<td>REG_GATE_CURRENT</td>
+<td>Int16U</td>
+<td>Gate current (mA)</td>
+<td>1000 - 20000</td>
+<td>GATE_CURRENT_MIN to GATE_CURRENT_MAX</td>
+<td>Gate current setting</td>
+</tr>
+<tr class="odd">
+<td>131</td>
+<td>REG_GATE_CURRENT_RISE_RATE</td>
+<td>Int16U</td>
+<td>Gate current rise rate (mA/μs)</td>
+<td>1000 - 10000</td>
+<td>GATE_I_RATE_MIN to GATE_I_RATE_MAX</td>
+<td>Gate current rise rate setting</td>
+</tr>
+<tr class="even">
+<td>132</td>
+<td>REG_SHORT_CALIBRATE_FLAG</td>
+<td>Int16U</td>
+<td>Short circuit calibration flag</td>
+<td>0</td>
+<td>0</td>
+<td>Short circuit calibration disabled</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>1</td>
+<td>1</td>
+<td>Short circuit calibration enabled</td>
+</tr>
+</tbody>
+</table>
+<h3 id="measurement-configuration">Measurement Configuration</h3>
+<table>
+<colgroup>
+<col style="width: 6%"/>
+<col style="width: 7%"/>
+<col style="width: 7%"/>
+<col style="width: 16%"/>
+<col style="width: 22%"/>
+<col style="width: 16%"/>
+<col style="width: 23%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>Num</th>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Value List/Range</th>
+<th>Value Name</th>
+<th>Value Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>80</td>
+<td>REG_AVERAGE_NUM</td>
+<td>Int16U</td>
+<td>Number of averaging points</td>
+<td>1 - 20</td>
+<td>AVERAGE_NUM_MIN to AVERAGE_NUM_MAX</td>
+<td>Number of points for averaging</td>
+</tr>
+<tr class="even">
+<td>81</td>
+<td>REG_AVERAGE_ALLOWED_SPREAD</td>
+<td>Int16U</td>
+<td>Allowed spread for averaging (ns)</td>
+<td>0 - 500</td>
+<td>ALLOWED_SPREAD_MIN to ALLOWED_SPREAD_MAX</td>
+<td>Allowed spread for averaging</td>
+</tr>
+<tr class="odd">
+<td>82</td>
+<td>REG_AVERAGE_PERIOD</td>
+<td>Int16U</td>
+<td>Averaging period (ms)</td>
+<td>300 - 2000</td>
+<td>AVERAGE_PERIOD_MIN to AVERAGE_PERIOD_MAX</td>
+<td>Period between pulses during averaging</td>
+</tr>
+<tr class="even">
+<td>84</td>
+<td>REG_NO_PWR_THRESHOLD</td>
+<td>Int16U</td>
+<td>No power threshold (%)</td>
+<td>0 - 80</td>
+<td>ID_THRESHOLD_MIN to ID_THRESHOLD_MAX</td>
+<td>Threshold for no power detection</td>
+</tr>
+<tr class="odd">
+<td>85</td>
+<td>REG_AFTER_MEASURE_DELAY</td>
+<td>Int16U</td>
+<td>Post-measurement delay (ms)</td>
+<td>1000 - 10000</td>
+<td>AFTER_MEASURE_DELAY_MIN to AFTER_MEASURE_DELAY_MAX</td>
+<td>Delay after measurement</td>
+</tr>
+</tbody>
+</table>
+<h3 id="debug-parameters">Debug Parameters</h3>
+<table>
+<colgroup>
+<col style="width: 6%"/>
+<col style="width: 7%"/>
+<col style="width: 7%"/>
+<col style="width: 16%"/>
+<col style="width: 22%"/>
+<col style="width: 16%"/>
+<col style="width: 23%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>Num</th>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Value List/Range</th>
+<th>Value Name</th>
+<th>Value Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>180</td>
+<td>REG_DBG_SLAVE_NID</td>
+<td>Int16U</td>
+<td>Debug slave node ID</td>
+<td>0 - 65535</td>
+<td>0 to INT16U_MAX</td>
+<td>Debug slave node ID</td>
+</tr>
+<tr class="even">
+<td>181</td>
+<td>REG_DBG_SLAVE_REG</td>
+<td>Int16U</td>
+<td>Debug slave register number</td>
+<td>0 - 65535</td>
+<td>0 to INT16U_MAX</td>
+<td>Debug slave register number</td>
+</tr>
+<tr class="odd">
+<td>182</td>
+<td>REG_DBG_SLAVE_DATA</td>
+<td>Int16U</td>
+<td>Debug slave register data</td>
+<td>0 - 65535</td>
+<td>0 to INT16U_MAX</td>
+<td>Debug slave register data</td>
+</tr>
+<tr class="even">
+<td>183</td>
+<td>REG_DBG_SLAVE_ACT</td>
+<td>Int16U</td>
+<td>Debug slave action command</td>
+<td>0 - 65535</td>
+<td>0 to INT16U_MAX</td>
+<td>Debug slave action command</td>
+</tr>
+<tr class="odd">
+<td>190</td>
+<td>REG_DBG</td>
+<td>Int16U</td>
+<td>Debug register</td>
+<td>0 - 65535</td>
+<td>0 to INT16U_MAX</td>
+<td>Debug register</td>
+</tr>
+</tbody>
+</table>
+<h3 id="calibration-registers-continuous-ranges">Calibration Registers
+(Continuous Ranges)</h3>
+<p><em>Note: The following calibration registers use continuous ranges
+rather than discrete codes:</em></p>
+<ul>
+<li><strong>Gate Driver Calibration</strong> (Registers 15-29):
+Continuous coefficient ranges</li>
+<li><strong>Voltage Comparator Calibration</strong> (Registers 30-35):
+Continuous voltage ranges (0-5000 mV)</li>
+<li><strong>Current Calibration</strong> (Registers 36-49): Continuous
+coefficient ranges</li>
+<li><strong>Time Delay Calibration</strong> (Registers 60-68):
+Continuous coefficient ranges</li>
+<li><strong>Turn-On Time Calibration</strong> (Registers 70-78):
+Continuous coefficient ranges</li>
+<li><strong>Voltage Calibration</strong> (Registers 86-88): Continuous
+coefficient ranges</li>
+<li><strong>TOCU Configuration</strong> (Registers 90-101): Continuous
+CAN ID and bitmask ranges</li>
+</ul>
+<hr/>
+<h2 id="read-only-registers">Read-Only Registers</h2>
+<h3 id="device-status-state-information">Device Status &amp; State
+Information</h3>
+<table>
+<colgroup>
+<col style="width: 6%"/>
+<col style="width: 7%"/>
+<col style="width: 7%"/>
+<col style="width: 16%"/>
+<col style="width: 22%"/>
+<col style="width: 16%"/>
+<col style="width: 23%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>Num</th>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Value List/Range</th>
+<th>Value Name</th>
+<th>Value Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>192</td>
+<td>REG_DEV_STATE</td>
+<td>Int16U</td>
+<td>Device state register</td>
+<td>0</td>
+<td>DS_None</td>
+<td>No state</td>
+</tr>
+<tr class="even">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>1</td>
+<td>DS_Fault</td>
+<td>Fault state</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>2</td>
+<td>DS_Disabled</td>
+<td>Disabled state</td>
+</tr>
+<tr class="even">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>3</td>
+<td>DS_Ready</td>
+<td>Ready state</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>4</td>
+<td>DS_InProcess</td>
+<td>In process state</td>
+</tr>
+<tr class="even">
+<td>193</td>
+<td>REG_FAULT_REASON</td>
+<td>Int16U</td>
+<td>Fault reason register</td>
+<td>0</td>
+<td>DF_NONE</td>
+<td>No fault</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>1</td>
+<td>DF_INTERFACE</td>
+<td>Master interface error</td>
+</tr>
+<tr class="even">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>2</td>
+<td>DF_PRESSURE</td>
+<td>No pressure</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>3</td>
+<td>DF_TOCU_WRONG_STATE</td>
+<td>Wrong TOCU block state</td>
+</tr>
+<tr class="even">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>4</td>
+<td>DF_TOCU_STATE_TIMEOUT</td>
+<td>TOCU state transition timeout</td>
+</tr>
+<tr class="odd">
+<td>194</td>
+<td>REG_DISABLE_REASON</td>
+<td>Int16U</td>
+<td>Disable reason register</td>
+<td>0</td>
+<td>DF_NONE</td>
+<td>No disable reason</td>
+</tr>
+<tr class="even">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>1</td>
+<td>DF_INTERFACE</td>
+<td>Master interface error</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>2</td>
+<td>DF_PRESSURE</td>
+<td>No pressure</td>
+</tr>
+<tr class="even">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>3</td>
+<td>DF_TOCU_WRONG_STATE</td>
+<td>Wrong TOCU block state</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>4</td>
+<td>DF_TOCU_STATE_TIMEOUT</td>
+<td>TOCU state transition timeout</td>
+</tr>
+<tr class="even">
+<td>195</td>
+<td>REG_WARNING</td>
+<td>Int16U</td>
+<td>Warning register</td>
+<td>0</td>
+<td>WARNING_NONE</td>
+<td>No warnings</td>
+</tr>
+<tr class="odd">
+<td>196</td>
+<td>REG_PROBLEM</td>
+<td>Int16U</td>
+<td>Problem register</td>
+<td>0</td>
+<td>PROBLEM_NONE</td>
+<td>No problems</td>
+</tr>
+<tr class="even">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>1</td>
+<td>PROBLEM_NO_PWR</td>
+<td>No power current</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>2</td>
+<td>PROBLEM_SHORT</td>
+<td>Short circuit on output</td>
+</tr>
+<tr class="even">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>3</td>
+<td>PROBLEM_NO_POT</td>
+<td>No signal from potential line</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>4</td>
+<td>PROBLEM_OVERFLOW90</td>
+<td>90% level counter overflow</td>
+</tr>
+<tr class="even">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>5</td>
+<td>PROBLEM_OVERFLOW10</td>
+<td>10% level counter overflow</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>6</td>
+<td>PROBLEM_SAFETY_VIOLATION</td>
+<td>Safety circuit activation</td>
+</tr>
+<tr class="even">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>7</td>
+<td>PROBLEM_EMULATION</td>
+<td>One or more slave blocks in emulation</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>8</td>
+<td>PROBLEM_SLAVES_OP_FAIL</td>
+<td>One or more slave blocks operation failed</td>
+</tr>
+<tr class="even">
+<td>197</td>
+<td>REG_OP_RESULT</td>
+<td>Int16U</td>
+<td>Operation status register</td>
+<td>0</td>
+<td>OPRESULT_NONE</td>
+<td>No information or not finished</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>1</td>
+<td>OPRESULT_OK</td>
+<td>Operation was successful</td>
+</tr>
+<tr class="even">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>2</td>
+<td>OPRESULT_FAIL</td>
+<td>Operation failed</td>
+</tr>
+<tr class="odd">
+<td>198</td>
+<td>REG_DEV_SUB_STATE</td>
+<td>Int16U</td>
+<td>Device sub-state register</td>
+<td>0</td>
+<td>SS_None</td>
+<td>No sub-state</td>
+</tr>
+<tr class="even">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>1</td>
+<td>SS_PowerOn</td>
+<td>Power on sub-state</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>2</td>
+<td>SS_WaitCharge</td>
+<td>Wait charge sub-state</td>
+</tr>
+<tr class="even">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>3</td>
+<td>SS_PowerOff</td>
+<td>Power off sub-state</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>4</td>
+<td>SS_ConfigSlaves</td>
+<td>Configure slaves sub-state</td>
+</tr>
+<tr class="even">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>5</td>
+<td>SS_WaitConfig</td>
+<td>Wait configuration sub-state</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>6</td>
+<td>SS_ConfigCommutation</td>
+<td>Configure commutation sub-state</td>
+</tr>
+<tr class="even">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>7</td>
+<td>SS_CommPause</td>
+<td>Commutation pause sub-state</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>8</td>
+<td>SS_HardwareConfig</td>
+<td>Hardware configuration sub-state</td>
+</tr>
+<tr class="even">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>9</td>
+<td>SS_AfterPulseWaiting</td>
+<td>After pulse waiting sub-state</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>10</td>
+<td>SS_TOCUPulseConfig</td>
+<td>TOCU pulse configuration sub-state</td>
+</tr>
+<tr class="even">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>11</td>
+<td>SS_TOCUCheckProblem</td>
+<td>TOCU check problem sub-state</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>12</td>
+<td>SS_StartPulse</td>
+<td>Start pulse sub-state</td>
+</tr>
+<tr class="even">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>13</td>
+<td>SS_NextPulseOrAverage</td>
+<td>Next pulse or average sub-state</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>14</td>
+<td>SS_AverageResult</td>
+<td>Average result sub-state</td>
+</tr>
+<tr class="even">
+<td>199</td>
+<td>REG_FAILED_SUB_STATE</td>
+<td>Int16U</td>
+<td>Failed sub-state register</td>
+<td>0 - 14</td>
+<td>0 to 14</td>
+<td>Sub-state when error occurred</td>
+</tr>
+</tbody>
+</table>
+<h3 id="safety-monitoring-status">Safety &amp; Monitoring Status</h3>
+<table>
+<colgroup>
+<col style="width: 6%"/>
+<col style="width: 7%"/>
+<col style="width: 7%"/>
+<col style="width: 16%"/>
+<col style="width: 22%"/>
+<col style="width: 16%"/>
+<col style="width: 23%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>Num</th>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Value List/Range</th>
+<th>Value Name</th>
+<th>Value Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>200</td>
+<td>REG_SAFETY_STATE</td>
+<td>Int16U</td>
+<td>Safety sensor state</td>
+<td>0</td>
+<td>0</td>
+<td>Safety sensor inactive</td>
+</tr>
+<tr class="even">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>1</td>
+<td>1</td>
+<td>Safety sensor active</td>
+</tr>
+<tr class="odd">
+<td>201</td>
+<td>REG_PRESSURE_STATE</td>
+<td>Int16U</td>
+<td>Pressure sensor state</td>
+<td>0</td>
+<td>0</td>
+<td>Pressure sensor inactive</td>
+</tr>
+<tr class="even">
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+<td>1</td>
+<td>1</td>
+<td>Pressure sensor active</td>
+</tr>
+</tbody>
+</table>
+<h3 id="diagnostic-data">Diagnostic Data</h3>
+<table>
+<colgroup>
+<col style="width: 6%"/>
+<col style="width: 7%"/>
+<col style="width: 7%"/>
+<col style="width: 16%"/>
+<col style="width: 22%"/>
+<col style="width: 16%"/>
+<col style="width: 23%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>Num</th>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Value List/Range</th>
+<th>Value Name</th>
+<th>Value Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>208</td>
+<td>REG_DIAG_RAW_SHIFT_REG</td>
+<td>Int16U</td>
+<td>Raw diagnostic data from shift register (lower bits)</td>
+<td>0 - 4095</td>
+<td>0 to 0xFFF</td>
+<td>Raw diagnostic data lower 12 bits</td>
+</tr>
+<tr class="even">
+<td>209</td>
+<td>REG_DIAG_RAW_SHIFT_REG_2</td>
+<td>Int16U</td>
+<td>Raw diagnostic data from shift register (upper bits)</td>
+<td>0 - 65535</td>
+<td>0 to INT16U_MAX</td>
+<td>Raw diagnostic data upper bits</td>
+</tr>
+</tbody>
+</table>
+<h3 id="interface-error-information">Interface Error Information</h3>
+<table>
+<colgroup>
+<col style="width: 6%"/>
+<col style="width: 7%"/>
+<col style="width: 7%"/>
+<col style="width: 16%"/>
+<col style="width: 22%"/>
+<col style="width: 16%"/>
+<col style="width: 23%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>Num</th>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Value List/Range</th>
+<th>Value Name</th>
+<th>Value Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>210</td>
+<td>REG_BHL_ERROR_CODE</td>
+<td>Int16U</td>
+<td>Interface error code</td>
+<td>0 - 65535</td>
+<td>0 to INT16U_MAX</td>
+<td>Interface error code</td>
+</tr>
+<tr class="even">
+<td>211</td>
+<td>REG_BHL_DEVICE</td>
+<td>Int16U</td>
+<td>Interface error device ID</td>
+<td>0 - 65535</td>
+<td>0 to INT16U_MAX</td>
+<td>Interface error device ID</td>
+</tr>
+<tr class="odd">
+<td>212</td>
+<td>REG_BHL_FUNCTION</td>
+<td>Int16U</td>
+<td>Interface error function code</td>
+<td>0 - 65535</td>
+<td>0 to INT16U_MAX</td>
+<td>Interface error function code</td>
+</tr>
+<tr class="even">
+<td>213</td>
+<td>REG_BHL_EXT_DATA</td>
+<td>Int16U</td>
+<td>Interface error extended data</td>
+<td>0 - 65535</td>
+<td>0 to INT16U_MAX</td>
+<td>Interface error extended data</td>
+</tr>
+</tbody>
+</table>
+<h3 id="measurement-results">Measurement Results</h3>
+<table>
+<colgroup>
+<col style="width: 6%"/>
+<col style="width: 7%"/>
+<col style="width: 7%"/>
+<col style="width: 16%"/>
+<col style="width: 22%"/>
+<col style="width: 16%"/>
+<col style="width: 23%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>Num</th>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Value List/Range</th>
+<th>Value Name</th>
+<th>Value Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>250</td>
+<td>REG_MEAS_CURRENT_VALUE</td>
+<td>Int16U</td>
+<td>Measured current value (A)</td>
+<td>0 - 65535</td>
+<td>0 to INT16U_MAX</td>
+<td>Measured current value</td>
+</tr>
+<tr class="even">
+<td>251</td>
+<td>REG_MEAS_TIME_DELAY</td>
+<td>Int16U</td>
+<td>Measured turn-on delay (ns)</td>
+<td>0 - 65535</td>
+<td>0 to INT16U_MAX</td>
+<td>Measured turn-on delay time</td>
+</tr>
+<tr class="odd">
+<td>252</td>
+<td>REG_MEAS_TIME_ON</td>
+<td>Int16U</td>
+<td>Measured turn-on time (ns)</td>
+<td>0 - 65535</td>
+<td>0 to INT16U_MAX</td>
+<td>Measured turn-on time</td>
+</tr>
+<tr class="even">
+<td>253</td>
+<td>REG_PULSE_COUNTER</td>
+<td>Int16U</td>
+<td>Generated pulse counter</td>
+<td>0 - 65535</td>
+<td>0 to INT16U_MAX</td>
+<td>Number of generated pulses</td>
+</tr>
+</tbody>
+</table>
+<hr/>
+<h2 id="commands">Commands</h2>
+<h3 id="power-management-commands">Power Management Commands</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Num</th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>ACT_ENABLE_POWER</td>
+<td>Transition to standby state</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>ACT_DISABLE_POWER</td>
+<td>Turn off the block</td>
+</tr>
+</tbody>
+</table>
+<h3 id="system-control-commands">System Control Commands</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Num</th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>3</td>
+<td>ACT_FAULT_CLEAR</td>
+<td>Clear fault state</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>ACT_WARNING_CLEAR</td>
+<td>Clear warning state</td>
+</tr>
+</tbody>
+</table>
+<h3 id="measurement-control-commands">Measurement Control Commands</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Num</th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>100</td>
+<td>ACT_MEASURE_START</td>
+<td>Start measurement</td>
+</tr>
+<tr class="even">
+<td>101</td>
+<td>ACT_MEASURE_STOP</td>
+<td>Stop measurement</td>
+</tr>
+<tr class="odd">
+<td>110</td>
+<td>ACT_GATE_PULSE</td>
+<td>Generate control current pulse</td>
+</tr>
+</tbody>
+</table>
+<h3 id="data-management-commands">Data Management Commands</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Num</th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>200</td>
+<td>ACT_SAVE_TO_ROM</td>
+<td>Save user data to processor FLASH</td>
+</tr>
+<tr class="even">
+<td>201</td>
+<td>ACT_RESTORE_FROM_ROM</td>
+<td>Restore data from FLASH</td>
+</tr>
+<tr class="odd">
+<td>202</td>
+<td>ACT_RESET_TO_DEFAULT</td>
+<td>Reset DataTable to default state</td>
+</tr>
+</tbody>
+</table>
+<h3 id="system-maintenance-commands">System Maintenance Commands</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Num</th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>320</td>
+<td>ACT_BOOT_LOADER_REQUEST</td>
+<td>Restart processor for reprogramming</td>
+</tr>
+</tbody>
+</table>
+<h3 id="json-data-commands">JSON Data Commands</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Num</th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>341</td>
+<td>ACT_JSON_INIT_READ</td>
+<td>Initialize JSON reading start</td>
+</tr>
+<tr class="even">
+<td>342</td>
+<td>ACT_JSON_TO_EP</td>
+<td>Execute JSON template reading to EP</td>
+</tr>
+</tbody>
+</table>
+<h3 id="debug-commands---gate-driver-testing">Debug Commands - Gate
+Driver Testing</h3>
+<table>
+<colgroup>
+<col style="width: 20%"/>
+<col style="width: 25%"/>
+<col style="width: 54%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>Num</th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>10</td>
+<td>ACT_DBG_GD_I_SET</td>
+<td>Test TOMUHPGateDriver current amplitude setting</td>
+</tr>
+<tr class="even">
+<td>11</td>
+<td>ACT_DBG_GD_TRIG_THRESHOLD</td>
+<td>Test comparator trigger threshold setting</td>
+</tr>
+<tr class="odd">
+<td>12</td>
+<td>ACT_DBG_GD_I_RISE_RATE</td>
+<td>Test TOMUHPGateDriver current rise rate setting</td>
+</tr>
+<tr class="even">
+<td>13</td>
+<td>ACT_DBG_GD_I_FALL_RATE</td>
+<td>Test TOMUHPGateDriver current fall rate setting</td>
+</tr>
+<tr class="odd">
+<td>14</td>
+<td>ACT_DBG_GD_SYNC</td>
+<td>Test Sync_GD output</td>
+</tr>
+<tr class="even">
+<td>15</td>
+<td>ACT_DBG_PS_EN</td>
+<td>Test PS_EN output</td>
+</tr>
+<tr class="odd">
+<td>16</td>
+<td>ACT_DBG_FAN</td>
+<td>Test FAN output</td>
+</tr>
+<tr class="even">
+<td>17</td>
+<td>ACT_DBG_IND</td>
+<td>Test IND output</td>
+</tr>
+<tr class="odd">
+<td>18</td>
+<td>ACT_DBG_RLC</td>
+<td>Test RLC output</td>
+</tr>
+<tr class="even">
+<td>19</td>
+<td>ACT_DBG_RELAY</td>
+<td>Test RELAY output</td>
+</tr>
+<tr class="odd">
+<td>20</td>
+<td>ACT_DBG_SNC_TOCU</td>
+<td>Test SNC_TOCU output</td>
+</tr>
+<tr class="even">
+<td>21</td>
+<td>ACT_DBG_TOSU_SWITCH</td>
+<td>Test TOSU switching</td>
+</tr>
+<tr class="odd">
+<td>22</td>
+<td>ACT_DBG_POT_SWITCH</td>
+<td>Test PotSwitch control</td>
+</tr>
+</tbody>
+</table>
+<h3 id="debug-commands---reference-voltage-testing">Debug Commands -
+Reference Voltage Testing</h3>
+<table>
+<colgroup>
+<col style="width: 20%"/>
+<col style="width: 25%"/>
+<col style="width: 54%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>Num</th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>24</td>
+<td>ACT_DBG_U_REF_U10</td>
+<td>Test U10 comparator reference voltage setting</td>
+</tr>
+<tr class="even">
+<td>25</td>
+<td>ACT_DBG_U_REF_U90</td>
+<td>Test U90 comparator reference voltage setting</td>
+</tr>
+</tbody>
+</table>
+<h3 id="debug-commands---system-testing">Debug Commands - System
+Testing</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Num</th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>26</td>
+<td>ACT_DBG_READ_PRESSURE</td>
+<td>Test pressure sensor operation</td>
+</tr>
+<tr class="even">
+<td>27</td>
+<td>ACT_DBG_SFTY_ACTIVATION</td>
+<td>Test SFTY_EN output</td>
+</tr>
+<tr class="odd">
+<td>28</td>
+<td>ACT_DBG_OUT_ISO</td>
+<td>Test isolated outputs</td>
+</tr>
+<tr class="even">
+<td>29</td>
+<td>ACT_DBG_READ_EXT_REG</td>
+<td>Test external register reading</td>
+</tr>
+<tr class="odd">
+<td>30</td>
+<td>ACT_DBG_TRIG_RST</td>
+<td>Test trigger reset</td>
+</tr>
+<tr class="even">
+<td>31</td>
+<td>ACT_DBG_M_RESET</td>
+<td>Test M_RESET output</td>
+</tr>
+</tbody>
+</table>
+<h3 id="debug-commands---slave-interface">Debug Commands - Slave
+Interface</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Num</th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>40</td>
+<td>ACT_DBG_SLAVE_CALL</td>
+<td>Execute command on slave node</td>
+</tr>
+<tr class="even">
+<td>41</td>
+<td>ACT_DBG_SLAVE_READ_REG</td>
+<td>Read register from slave node</td>
+</tr>
+<tr class="odd">
+<td>42</td>
+<td>ACT_DBG_SLAVE_WRITE_REG</td>
+<td>Write register to slave node</td>
+</tr>
+<tr class="even">
+<td>43</td>
+<td>ACT_DBG_RESET_INT_ERROR</td>
+<td>Reset master interface error</td>
+</tr>
+</tbody>
+</table>
+<h3 id="tocu-test-object-control-unit-commands">TOCU (Test Object
+Control Unit) Commands</h3>
+<table>
+<colgroup>
+<col style="width: 20%"/>
+<col style="width: 25%"/>
+<col style="width: 54%"/>
+</colgroup>
+<thead>
+<tr class="header">
+<th>Num</th>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>ACT_TOCU_ENABLE_POWER</td>
+<td>Transition to standby state (TOCU)</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>ACT_TOCU_DISABLE_POWER</td>
+<td>Turn off the block (TOCU)</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>ACT_TOCU_FAULT_CLEAR</td>
+<td>Clear fault (TOCU)</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>ACT_TOCU_WARNING_CLEAR</td>
+<td>Clear warning (TOCU)</td>
+</tr>
+<tr class="odd">
+<td>100</td>
+<td>ACT_TOCU_VOLTAGE_CONFIG</td>
+<td>Configure block voltage (TOCU)</td>
+</tr>
+<tr class="even">
+<td>101</td>
+<td>ACT_TOCU_PULSE_CONFIG</td>
+<td>Configure block for required current (TOCU)</td>
+</tr>
+</tbody>
+</table>
+<hr/>
+<h2 id="endpoints">Endpoints</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Num</th>
+<th>Name</th>
+<th>Description</th>
+<th>Data Type</th>
+<th>Size</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>EP_CURRENT</td>
+<td>Current values array</td>
+<td>Int16U</td>
+<td>300</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>EP_TURN_DELAY</td>
+<td>Turn-on delay time array</td>
+<td>Int16U</td>
+<td>20</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>EP_TURN_ON</td>
+<td>Turn-on time array</td>
+<td>Int16U</td>
+<td>20</td>
+</tr>
+<tr class="even">
+<td>20</td>
+<td>EP16_ExtInfoData</td>
+<td>Diagnostic data from flash</td>
+<td>Int16U</td>
+<td>300</td>
+</tr>
+</tbody>
+</table>
+<hr/>
+<h2 id="notes">Notes</h2>
+<h3 id="system-architecture-1">System Architecture</h3>
+<ul>
+<li><strong>Data Type</strong>: All registers use <code>Int16U</code>
+(16-bit unsigned integer)</li>
+<li><strong>Volatility</strong>: Registers 0-127 are non-volatile (saved
+to flash), registers 128-191 are volatile</li>
+<li><strong>Communication</strong>: CAN bus interface with master-slave
+architecture</li>
+<li><strong>Measurement</strong>: High-precision current and voltage
+measurement with timing analysis</li>
+</ul>
+<h3 id="register-categories">Register Categories</h3>
+<ol type="1">
+<li><strong>Device Configuration &amp; Calibration</strong>: Basic
+system setup and calibration parameters</li>
+<li><strong>Safety &amp; Monitoring Control</strong>: Safety system
+configuration and monitoring controls</li>
+<li><strong>Runtime Control Parameters</strong>: Real-time operational
+parameters</li>
+<li><strong>Measurement Configuration</strong>: Measurement process
+configuration</li>
+<li><strong>Debug Parameters</strong>: Debugging and testing
+parameters</li>
+</ol>
+<h3 id="command-categories">Command Categories</h3>
+<ol type="1">
+<li><strong>Power Management</strong>: Basic power control commands</li>
+<li><strong>System Control</strong>: System state management
+commands</li>
+<li><strong>Measurement Control</strong>: Measurement process
+control</li>
+<li><strong>Data Management</strong>: Configuration data management</li>
+<li><strong>System Maintenance</strong>: System maintenance and
+updates</li>
+<li><strong>JSON Interface</strong>: JSON data handling</li>
+<li><strong>Debug Commands</strong>: Comprehensive debugging and testing
+commands</li>
+<li><strong>TOCU Commands</strong>: Slave device control commands</li>
+</ol>
+<h3 id="endpoint-characteristics">Endpoint Characteristics</h3>
+<ul>
+<li>All endpoints are read-only</li>
+<li>Current measurement data (300 points)</li>
+<li>Timing measurement data (20 points each for delay and turn-on)</li>
+<li>Diagnostic data (300 points)</li>
+</ul>
+<p>This specification provides complete documentation of the TOMUHP
+Control Board’s software interface, enabling integration with external
+systems and comprehensive system control and monitoring.</p>
+<body><div class="container"></div></body></html>
