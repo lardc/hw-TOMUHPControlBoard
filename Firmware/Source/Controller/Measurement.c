@@ -64,33 +64,39 @@ void MEASURE_ConvertRawArray(volatile uint16_t* RawArray, volatile uint16_t* Out
 	float P1 = (float)DataTable[REG_P1_I_DUT] / 1000;
 	float P2 = (float)((int16_t)DataTable[REG_P2_I_DUT]) / 1e6f;
 
-	for (i = I_DUT_PRE_SKIP_POINTS; i < DataLength; ++i)
+	if(DataLength == 1)
 	{
-		tmp = ((float)RawArray[i] - Offset) * Uref / ADC_RESOLUTION * K;
+		tmp = ((float)RawArray[0] - Offset) * Uref / ADC_RESOLUTION * K;
 		tmp = tmp / ShuntRes;
 		tmp = tmp * tmp * P2 + tmp * P1 + P0;
-		RawArray[i] = (tmp > 0) ? (uint16_t)tmp : 0;
-
- 		if(DataLength == 1)
- 		{
- 			OutputArray[i] = RawArray[i];
- 			return;
- 		}
-
-		// Фильтрация тока
-		OutputArray[i] = 0;
-
-		for(int j = 0; j < FIR_LENGTH - 1; j++)
+		RawArray[0] = (tmp > 0) ? (uint16_t)tmp : 0;
+		OutputArray[0] = RawArray[0];
+		return;
+	}
+	else
+	{
+		for(i = I_DUT_PRE_SKIP_POINTS; i < DataLength; ++i)
 		{
-			if((i - j) >= 0)
-				OutputArray[i] += RawArray[i - j] * FIR_Coefficients[j];
-		}
+			tmp = ((float)RawArray[i] - Offset) * Uref / ADC_RESOLUTION * K;
+			tmp = tmp / ShuntRes;
+			tmp = tmp * tmp * P2 + tmp * P1 + P0;
+			RawArray[i] = (tmp > 0) ? (uint16_t)tmp : 0;
 
-		// Определение индекса массива с максимальным значением тока
-		if(OutputArray[i] > Imax)
-		{
-			Imax = OutputArray[i];
-			ImaxArrayIndex = i;
+			// Фильтрация тока
+			OutputArray[i] = 0;
+
+			for(int j = 0; j < FIR_LENGTH - 1; j++)
+			{
+				if((i - j) >= 0)
+					OutputArray[i] += RawArray[i - j] * FIR_Coefficients[j];
+			}
+
+			// Определение индекса массива с максимальным значением тока
+			if(OutputArray[i] > Imax)
+			{
+				Imax = OutputArray[i];
+				ImaxArrayIndex = i;
+			}
 		}
 	}
 
@@ -126,6 +132,8 @@ bool MEASURE_CheckAnodeCurrent()
 
 	uint16_t AnodeCurrent = 0;
 	MEASURE_ConvertRawArray(&AnodeCurrentRaw16b, &AnodeCurrent, 1);
+
+	DataTable[REG_DIAG_ANODE_SHORT] = AnodeCurrent;
 
 	return (DataTable[REG_SHORT_CALIBRATE_FLAG] == 0) && (AnodeCurrent * 10 > DataTable[REG_SHORT_THRESHOLD]);
 }
