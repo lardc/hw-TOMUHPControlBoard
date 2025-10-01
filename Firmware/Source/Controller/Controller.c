@@ -354,7 +354,7 @@ void CONTROL_MonitorSafety()
 {
 	bool SystemIsSafe = LOGIC_GetSafetyState();
 	
-	if(CONTROL_State == DS_InProcess && SUB_State == SS_ConfigSlaves)
+	if(CONTROL_State == DS_InProcess)
 	{
 		if(!SystemIsSafe)
 		{
