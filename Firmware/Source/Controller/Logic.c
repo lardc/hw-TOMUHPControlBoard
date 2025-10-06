@@ -276,7 +276,7 @@ uint16_t LOGIC_Pulse()
 		// Сохранение оцифрованных значений в endpoint
 		MEASURE_ConvertRawArray(&LOGIC_OutputPulseRaw[0], &CONTROL_Values_Current[0], PULSE_ARR_MAX_LENGTH);
 
-		CONTROL_Values_CurrentCounter = DataTable[REG_SAVE_CURRENT_DATA] ? PULSE_ARR_MAX_LENGTH : 0;
+		CONTROL_Values_CurrentCounter = !(DataTable[REG_DISABLE_CURRENT_EP]) ? PULSE_ARR_MAX_LENGTH : 0;
 	
 		// Обработка внештатных ситуаций
 		if(DataTable[REG_SHORT_CALIBRATE_FLAG] == 0)

@@ -174,7 +174,7 @@
 #define REG_TOCU_4_BITMASK				100	// Битовая маска, поддерживаемая блоком TOCU №4
 #define REG_TOCU_4_EMULATION			101	// Переключение в эмуляцию блока TOCU №4
 
-#define REG_SAVE_CURRENT_DATA			102 // Сохранения данных  в EP тока
+#define REG_DISABLE_CURRENT_EP			102 // Сохранениe данных в EP тока
 
 // Несохраняемы регистры чтения-записи
 #define REG_ANODE_VOLTAGE				128	// Анодное напряжение (В)
