@@ -13,10 +13,12 @@
 #include "Delay.h"
 #include "BCCIxParams.h"
 #include "Global.h"
+#include "SaveToFlash.h"
 
 // Defines
 //
 #define TIME_TOCU_POWER_UP		1000
+#define CT_SAVE_TIMEOUT			1800000
 
 // Types
 //
@@ -62,6 +64,7 @@ typedef enum __TOCUDeviceState
 volatile DeviceState CONTROL_State = DS_None;
 volatile SubState SUB_State = SS_None;
 volatile Int64U CONTROL_TimeCounter = 0;
+Int64U CT_SaveTimer = 0;					 // Последняя отметка времени автосохранения
 volatile Int64U CONTROL_FanTimeCounter = 0;
 static Boolean CycleActive = FALSE;
 static Boolean RequestInitialResetSlave = FALSE;
@@ -97,6 +100,7 @@ void CONTROL_HandlePowerOn();
 void CONTROL_HandlePowerOff();
 void CONTROL_HandlePulseConfig();
 void CONTROL_GateDriverCharge();
+void CONTROL_InitStoragePointers();
 
 // Functions
 //
@@ -120,6 +124,9 @@ void CONTROL_Init()
 	DEVPROFILE_InitEPService(EPIndexes, EPSized, EPCounters, EPDatas);
 	// Сброс значений
 	DEVPROFILE_ResetControlSection();
+	// Инициализация указателей на счетчики и сами счетчики
+	CONTROL_InitStoragePointers();
+	STF_LoadCounters();
 
 	// Ожидание запуска TOCU
 	CONTROL_TOCUPowerUpTimer = CONTROL_TimeCounter + SLAVE_INITIAL_DELAY;
@@ -222,6 +229,12 @@ void CONTROL_Idle()
 	CONTROL_HandlePowerOn();
 	CONTROL_HandlePowerOff();
 	CONTROL_HandlePulseConfig();
+	// Counter data update
+	if (CONTROL_TimeCounter - CT_SaveTimer >= CT_SAVE_TIMEOUT)
+	{
+		STF_SaveCounterData();
+		CT_SaveTimer = CONTROL_TimeCounter;
+	}
 
 	CONTROL_WatchDogUpdate();
 }
@@ -700,3 +713,10 @@ void CONTROL_GateDriverCharge()
 	DELAY_MS(10);
 }
 //-----------------------------------------------
+
+void CONTROL_InitStoragePointers()
+{
+	for (Int16U i = 0; i < COMMUTATION_TABLE_SIZE; ++i)
+		STF_AssignCounterPointer(i, (Int32U)&CycleCounters[i]);
+}
+//------------------------------------------

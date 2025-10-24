@@ -13,10 +13,15 @@
 #define COMM_TOSU_MASK_1500		0x09
 #define COMM_TOSU_MASK_OFF		0x00
 
+#define COMM_TOU_600			0
+#define COMM_TOU_1000			1
+#define COMM_TOU_1500			2
+
 #define COMM_POT_SW_MASK		0x10
 
 // Variables
 uint8_t CommutationMask = 0;
+uint8_t CommutationPointer = 0;
 Int32U CycleCounters[COMMUTATION_TABLE_SIZE] = {0};
 
 // Forward functions
@@ -69,14 +74,17 @@ void COMM_TOSU(AnodeVoltageEnum AnodeVoltage)
 	{
 		case TOU_600V:
 			CommutationMask = COMM_TOSU_MASK_600;
+			CommutationPointer = COMM_TOU_600;
 			break;
 
 		case TOU_1000V:
 			CommutationMask = COMM_TOSU_MASK_1000;
+			CommutationPointer = COMM_TOU_1000;
 			break;
 
 		case TOU_1500V:
 			CommutationMask = COMM_TOSU_MASK_1500;
+			CommutationPointer = COMM_TOU_1500;
 			break;
 
 		default:
@@ -90,8 +98,8 @@ void COMM_TOSU(AnodeVoltageEnum AnodeVoltage)
 
 void COMM_PotSwitch(bool State)
 {
+	CycleCounters[CommutationPointer]++;
 	State ? (CommutationMask |= COMM_POT_SW_MASK) : (CommutationMask &=~ COMM_POT_SW_MASK);
 	COMM_OutputRegister_Write(CommutationMask);
 }
 //-----------------------------
-
