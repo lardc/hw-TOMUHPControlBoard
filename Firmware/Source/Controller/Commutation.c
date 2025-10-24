@@ -17,6 +17,7 @@
 
 // Variables
 uint8_t CommutationMask = 0;
+Int32U CycleCounters[COMMUTATION_TABLE_SIZE] = {0};
 
 // Forward functions
 void COMM_OutputRegister_Write(uint16_t Data);
