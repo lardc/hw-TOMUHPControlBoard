@@ -18,7 +18,7 @@
 // Defines
 //
 #define TIME_TOCU_POWER_UP		1000
-#define CT_SAVE_TIMEOUT			1800000
+#define CT_SAVE_TIMEOUT			1800000 // в мс
 
 // Types
 //

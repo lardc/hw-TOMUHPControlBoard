@@ -32,7 +32,6 @@ void DEVPROFILE_UpdateCANDiagStatus();
 Int16U DEVPROFILE_CallbackReadX(Int16U Endpoint, pInt16U *Buffer, Boolean Streamed,
 									   Boolean RepeatLastTransmission, void *EPStateAddress, Int16U MaxNonStreamSize);
 
-void DEVPROFILE_ResetEPReadState();
 void DEVPROFILE_ResetScopes();
 void DEVPROFILE_InitEPWriteService(pInt16U Indexes, pInt16U Sizes, pInt16U *Counters, pInt16U *Datas);
 Boolean DEVPROFILE_CallbackWriteX(Int16U Endpoint, pInt16U Buffer, Boolean Streamed, Int16U Length, void *EPStateAddress);

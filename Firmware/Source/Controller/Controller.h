@@ -4,6 +4,7 @@
 // Include
 #include "stdinc.h"
 #include "Measurement.h"
+#include "Global.h"
 
 // Defines
 #define EP_SIZE			(PULSE_ARR_MAX_LENGTH / 2)
@@ -32,7 +33,7 @@ extern volatile Int16U CONTROL_DiagCounter;
 
 // EP
 extern Int16U CONTROL_ExtInfoData[];
-extern volatile Int16U CONTROL_DiagData[];
+extern volatile Int16U CONTROL_DiagData[VALUES_EXT_INFO_SIZE];
 
 // Functions
 void CONTROL_Init();
