@@ -15,6 +15,9 @@
 #include "ZwSCI.h"
 #include "BCCIMHighLevel.h"
 #include "FormatOutputJSON.h"
+#include "SaveToFlash.h"
+#include "Commutation.h"
+#include "ZwNFLASH.h"
 
 // Types
 //
@@ -161,6 +164,8 @@ static Boolean DEVPROFILE_Validate16(Int16U Address, Int16U Data)
 
 static Boolean DEVPROFILE_DispatchAction(Int16U ActionID, pInt16U UserError)
 {
+	static Int32U MemoryPointer = 0;
+	static Int32U MemoryEndPointer = 0;
 	switch(ActionID)
 	{
 		case ACT_SAVE_TO_ROM:
@@ -198,9 +203,41 @@ static Boolean DEVPROFILE_DispatchAction(Int16U ActionID, pInt16U UserError)
 		case ACT_JSON_TO_EP:
 			{
 				DEVPROFILE_ResetEPReadState();
-				DEVPROFILE_ResetScopes(0);
+				DEVPROFILE_ResetScopes();
 				for(CONTROL_ExtInfoCounter = 0; CONTROL_ExtInfoCounter < VALUES_EXT_INFO_SIZE;)
 					CONTROL_ExtInfoData[CONTROL_ExtInfoCounter++] = JSON_ReadSymbol();
+			}
+			break;
+
+		case ACT_SET_COUNTER:
+			CycleCounters[(Int16U)DataTable[REG_CNT_NUMBER]] = (Int32U)DataTable[REG_CNT_VALUE];
+			break;
+
+		case ACT_SAVE_COUNTERS:
+			STF_SaveCounterData();
+			break;
+
+		case ACT_ERASE_COUNTERS:
+			NFLASH_Unlock();
+			STF_EraseCounterDataSector();
+			break;
+
+		case ACT_FLASH_CNT_INIT_READ:
+			STF_ResetStateMachine();
+			MemoryPointer = FLASH_COUNTER_START_ADDR;
+			MemoryEndPointer = FLASH_COUNTER_END_ADDR;
+			break;
+
+		case ACT_FLASH_COUNTER_TO_EP:
+			{
+				DEVPROFILE_ResetEPReadState();
+				DEVPROFILE_ResetScopes();
+
+				for(CONTROL_DiagCounter = 0;
+						CONTROL_DiagCounter < VALUES_EXT_INFO_SIZE && MemoryPointer <= MemoryEndPointer;)
+				{
+					CONTROL_DiagData[CONTROL_DiagCounter++] = STF_ReadCounter();
+				}
 			}
 			break;
 
@@ -287,14 +324,14 @@ void DEVPROFILE_ResetEPReadState()
 }
 // ----------------------------------------
 
-void DEVPROFILE_ResetScopes(Int16U ResetPosition)
+void DEVPROFILE_ResetScopes()
 {
 	Int16U i;
 
 	for (i = 0; i < EP_COUNT; ++i)
 	{
-		*(RS232_EPState.EPs[i].pDataCounter) = ResetPosition;
-		*(CAN_EPState.EPs[i].pDataCounter) = ResetPosition;
+		*(RS232_EPState.EPs[i].pDataCounter) = 0;
+		*(CAN_EPState.EPs[i].pDataCounter) = 0;
 
 		MemZero16(RS232_EPState.EPs[i].Data, RS232_EPState.EPs[i].Size);
 		MemZero16(CAN_EPState.EPs[i].Data, CAN_EPState.EPs[i].Size);

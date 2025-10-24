@@ -28,9 +28,11 @@ extern volatile Int16U CONTROL_Values_CurrentCounter;
 extern volatile Int16U CONTROL_Values_TurnCounter;
 extern MeasurementSettings CachedMeasurementSettings;
 extern Int16U CONTROL_ExtInfoCounter;
+extern volatile Int16U CONTROL_DiagCounter;
 
 // EP
 extern Int16U CONTROL_ExtInfoData[];
+extern volatile Int16U CONTROL_DiagData[];
 
 // Functions
 void CONTROL_Init();
