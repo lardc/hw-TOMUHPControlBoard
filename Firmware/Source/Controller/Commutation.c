@@ -21,7 +21,7 @@
 
 // Variables
 uint8_t CommutationMask = 0;
-uint8_t CommutationPointer = 0;
+uint8_t CommutationPointer = 0; // Указатель будет соотвествовать позиции счетчика в таблице CyclyCounters
 Int32U CycleCounters[COMMUTATION_TABLE_SIZE] = {0};
 
 // Forward functions
