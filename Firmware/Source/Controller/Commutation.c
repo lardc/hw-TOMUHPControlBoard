@@ -16,6 +16,7 @@
 #define COMM_TOU_600			0
 #define COMM_TOU_1000			1
 #define COMM_TOU_1500			2
+#define COMM_TOU_SW				3
 
 #define COMM_POT_SW_MASK		0x10
 
@@ -56,6 +57,7 @@ void COMM_EnableSafetyInput(bool State)
 
 void COMM_OutputRegister_Write(uint16_t Data)
 {
+	CycleCounters[CommutationPointer]++;
 	GPIO_SetState(GPIO_SREG_CS, false);
 	SPI_WriteByte(SPI2, Data);
 	GPIO_SetState(GPIO_SREG_CS, true);
@@ -73,17 +75,20 @@ void COMM_TOSU(AnodeVoltageEnum AnodeVoltage)
 	switch (AnodeVoltage)
 	{
 		case TOU_600V:
-			CommutationMask = COMM_TOSU_MASK_600;
+			CommutationMask &=~ (COMM_TOSU_MASK_1000 | COMM_TOSU_MASK_1500);
+			CommutationMask |= COMM_TOSU_MASK_600;
 			CommutationPointer = COMM_TOU_600;
 			break;
 
 		case TOU_1000V:
-			CommutationMask = COMM_TOSU_MASK_1000;
+			CommutationMask &=~ (COMM_TOSU_MASK_600 | COMM_TOSU_MASK_1500);
+			CommutationMask |= COMM_TOSU_MASK_1000;
 			CommutationPointer = COMM_TOU_1000;
 			break;
 
 		case TOU_1500V:
-			CommutationMask = COMM_TOSU_MASK_1500;
+			CommutationMask &=~ (COMM_TOSU_MASK_600 | COMM_TOSU_MASK_1000);
+			CommutationMask |= COMM_TOSU_MASK_1500;
 			CommutationPointer = COMM_TOU_1500;
 			break;
 
@@ -98,7 +103,7 @@ void COMM_TOSU(AnodeVoltageEnum AnodeVoltage)
 
 void COMM_PotSwitch(bool State)
 {
-	CycleCounters[CommutationPointer]++;
+	CommutationPointer = COMM_TOU_SW;
 	State ? (CommutationMask |= COMM_POT_SW_MASK) : (CommutationMask &=~ COMM_POT_SW_MASK);
 	COMM_OutputRegister_Write(CommutationMask);
 }
