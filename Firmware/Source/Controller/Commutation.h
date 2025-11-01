@@ -5,7 +5,7 @@
 #include "Controller.h"
 
 // Definitions
-#define COMMUTATION_TABLE_SIZE	3	// Количество элементов коммутации
+#define COMMUTATION_TABLE_SIZE	4	// Количество элементов коммутации
 
 // Variables
 extern Int32U CycleCounters[COMMUTATION_TABLE_SIZE];

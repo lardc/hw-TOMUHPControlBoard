@@ -23,6 +23,8 @@
 // Variables
 uint8_t CommutationMask = 0;
 uint8_t CommutationPointer = 0; // Указатель будет соотвествовать позиции счетчика в таблице CyclyCounters
+uint8_t PreviousCommutationPointer = 0;
+bool ActiveSwitch = false;
 Int32U CycleCounters[COMMUTATION_TABLE_SIZE] = {0};
 
 // Forward functions
@@ -57,7 +59,12 @@ void COMM_EnableSafetyInput(bool State)
 
 void COMM_OutputRegister_Write(uint16_t Data)
 {
-	CycleCounters[CommutationPointer]++;
+	if((CommutationPointer == COMM_TOU_SW) && (ActiveSwitch == true))
+		CycleCounters[CommutationPointer]++;
+	else if (!(PreviousCommutationPointer == CommutationPointer))
+		CycleCounters[CommutationPointer]++;
+	PreviousCommutationPointer = CommutationPointer;
+
 	GPIO_SetState(GPIO_SREG_CS, false);
 	SPI_WriteByte(SPI2, Data);
 	GPIO_SetState(GPIO_SREG_CS, true);
@@ -104,7 +111,16 @@ void COMM_TOSU(AnodeVoltageEnum AnodeVoltage)
 void COMM_PotSwitch(bool State)
 {
 	CommutationPointer = COMM_TOU_SW;
-	State ? (CommutationMask |= COMM_POT_SW_MASK) : (CommutationMask &=~ COMM_POT_SW_MASK);
+	if(State)
+	{
+		CommutationMask |= COMM_POT_SW_MASK;
+		ActiveSwitch = true;
+	}
+	else
+	{
+		CommutationMask &= ~ COMM_POT_SW_MASK;
+		ActiveSwitch = false;
+	}
 	COMM_OutputRegister_Write(CommutationMask);
 }
 //-----------------------------

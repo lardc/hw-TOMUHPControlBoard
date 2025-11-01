@@ -74,10 +74,8 @@ MeasurementSettings CachedMeasurementSettings;
 volatile Int16U CONTROL_Values_Current[PULSE_ARR_MAX_LENGTH] = {0};
 volatile Int16U CONTROL_Values_TurnDelay[TIME_ARR_MAX_LENGTH] = {0};
 volatile Int16U CONTROL_Values_TurnOn[TIME_ARR_MAX_LENGTH] = {0};
-volatile Int16U CONTROL_DiagData[VALUES_EXT_INFO_SIZE];
 volatile Int16U CONTROL_Values_CurrentCounter = 0;
 volatile Int16U CONTROL_Values_TurnCounter = 0;
-volatile Int16U CONTROL_DiagCounter = 0;
 //
 Int16U CONTROL_ExtInfoData[VALUES_EXT_INFO_SIZE] = {0};
 Int16U CONTROL_ExtInfoCounter = 0;
@@ -107,12 +105,12 @@ void CONTROL_InitStoragePointers();
 void CONTROL_Init()
 {
 	// Переменные для конфигурации EndPoint
-	Int16U EPIndexes[EP_COUNT] = {EP_CURRENT, EP_TURN_DELAY, EP_TURN_ON, EP16_ExtInfoData, EP16_ExtInfoData};
+	Int16U EPIndexes[EP_COUNT] = {EP_CURRENT, EP_TURN_DELAY, EP_TURN_ON, EP16_ExtInfoData};
 	Int16U EPSized[EP_COUNT] = {PULSE_ARR_MAX_LENGTH, TIME_ARR_MAX_LENGTH, TIME_ARR_MAX_LENGTH, VALUES_EXT_INFO_SIZE, VALUES_EXT_INFO_SIZE};
 	pInt16U EPCounters[EP_COUNT] = {(pInt16U)&CONTROL_Values_CurrentCounter, (pInt16U)&CONTROL_Values_TurnCounter,
-									(pInt16U)&CONTROL_Values_TurnCounter, (pInt16U)&CONTROL_ExtInfoCounter, (pInt16U)&CONTROL_DiagCounter};
+									(pInt16U)&CONTROL_Values_TurnCounter, (pInt16U)&CONTROL_ExtInfoCounter};
 	pInt16U EPDatas[EP_COUNT] = {(pInt16U)CONTROL_Values_Current, (pInt16U)CONTROL_Values_TurnDelay,
-									(pInt16U)CONTROL_Values_TurnOn, (pInt16U)CONTROL_ExtInfoData, (pInt16U)CONTROL_DiagData};
+									(pInt16U)CONTROL_Values_TurnOn, (pInt16U)CONTROL_ExtInfoData};
 	
 	// Конфигурация сервиса работы Data-table и EPROM
 	EPROMServiceConfig EPROMService = {(FUNC_EPROM_WriteValues)&NFLASH_WriteDT, (FUNC_EPROM_ReadValues)&NFLASH_ReadDT};

@@ -18,6 +18,7 @@
 #include "SaveToFlash.h"
 #include "Commutation.h"
 #include "ZwNFLASH.h"
+#include "StorageDescription.h"
 
 // Types
 //
@@ -218,6 +219,12 @@ static Boolean DEVPROFILE_DispatchAction(Int16U ActionID, pInt16U UserError)
 			break;
 
 		case ACT_ERASE_COUNTERS:
+			// Обнуляем RAM-значения счётчиков и их кэш, чтобы последующее сохранение не вернуло старые значения
+			for(Int16U i = 0; i < CounterStorageSize; ++i)
+			{
+				*(pInt32U)CounterTablePointers[i].Address = 0;
+				CounterTablePointers[i].Value = 0;
+			}
 			NFLASH_Unlock();
 			STF_EraseCounterDataSector();
 			break;
@@ -233,10 +240,10 @@ static Boolean DEVPROFILE_DispatchAction(Int16U ActionID, pInt16U UserError)
 				DEVPROFILE_ResetEPReadState();
 				DEVPROFILE_ResetScopes();
 
-				for(CONTROL_DiagCounter = 0;
-						CONTROL_DiagCounter < VALUES_EXT_INFO_SIZE && MemoryPointer <= MemoryEndPointer;)
+				for(CONTROL_ExtInfoCounter = 0;	CONTROL_ExtInfoCounter < VALUES_EXT_INFO_SIZE && MemoryPointer <= MemoryEndPointer;)
 				{
-					CONTROL_DiagData[CONTROL_DiagCounter++] = STF_ReadCounter();
+					CONTROL_ExtInfoData[CONTROL_ExtInfoCounter++] = STF_ReadCounter();
+					MemoryPointer += 4;
 				}
 			}
 			break;
