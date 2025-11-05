@@ -4,6 +4,7 @@
 // Include
 #include "stdinc.h"
 #include "Measurement.h"
+#include "Global.h"
 
 // Defines
 #define EP_SIZE			(PULSE_ARR_MAX_LENGTH / 2)

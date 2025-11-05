@@ -4,6 +4,12 @@
 #include "stdinc.h"
 #include "Controller.h"
 
+// Definitions
+#define COMMUTATION_TABLE_SIZE	4	// Количество элементов коммутации
+
+// Variables
+extern Int32U CycleCounters[COMMUTATION_TABLE_SIZE];
+
 // Functions
 void COMM_InternalCommutation(bool State);
 
