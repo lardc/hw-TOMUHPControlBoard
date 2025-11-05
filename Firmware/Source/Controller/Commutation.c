@@ -96,6 +96,11 @@ void COMM_TOSU(AnodeVoltageEnum AnodeVoltage)
 			CommutationMask &=~ (COMM_TOSU_MASK_600 | COMM_TOSU_MASK_1000);
 			CommutationMask |= COMM_TOSU_MASK_1500;
 			break;
+
+		default:
+		case TOU_Off:
+			CommutationMask = 0;
+			break;
 	}
 
 	COMM_OutputRegister_Write();
