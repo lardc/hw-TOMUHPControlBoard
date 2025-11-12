@@ -185,7 +185,7 @@ void CONTROL_ResetHardware(bool KeepPower)
 
 	if(!DataTable[REG_MUTE_COMMUTATION])
 	{
-		COMM_TOSU(false);
+		COMM_TOSU(TOU_Off);
 		COMM_InternalCommutation(false);
 	}
 
